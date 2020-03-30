@@ -1,16 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-using bhb2core;
 using bhb2core.Accounting.Dto;
-using bhb2core.Accounting.Engines;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Managers;
 using bhb2core.Accounting.Models;
-using bhb2core.Utils.Logging;
-using bhb2core.Utils.Mapping;
 
-using NSubstitute;
+using bhb2coreTests.Accounting.TestUtils;
 
 using NUnit.Framework;
 
@@ -23,17 +18,7 @@ namespace bhb2coreTests.Accounting
     public async Task Given_SufficientFunds_When_TransactionProcessed_Then_AccountBalancesAreUpdatedCorrectly()
     {
       // Arrange.
-      Bhb2Core.Initialise(
-        out ILogger logger,
-        out IMapper mapper);
-
-      var accountingDataAccess = Substitute.For<IAccountingDataAccess>();
-      var transactionEngine = new TransactionEngine(accountingDataAccess, logger);
-
-      var testObject = new AccountingManager(
-        transactionEngine,
-        mapper,
-        logger);
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       var debitAccount = new Account
       {
@@ -49,14 +34,8 @@ namespace bhb2coreTests.Accounting
         Balance = 0m
       };
 
-      accountingDataAccess
-        .GetAccountsById(Arg.Any<string[]>())
-        .Returns(
-          new Dictionary<string, Account>
-          {
-            { debitAccount.Id, debitAccount },
-            { creditAccount.Id, creditAccount }
-          });
+      await accountingDataAccess.AddAccount(debitAccount);
+      await accountingDataAccess.AddAccount(creditAccount);
 
       var transaction = new TransactionDto
       {
@@ -72,17 +51,8 @@ namespace bhb2coreTests.Accounting
       await testObject.ProcessTransaction(transaction);
 
       // Assert.
-      await accountingDataAccess
-        .Received(1)
-        .UpdateAccountBalances(
-          Arg.Is<IReadOnlyDictionary<string, decimal>>(
-            x => x[debitAccount.Id] == expectedDebitAccountBalance));
-
-      await accountingDataAccess
-        .Received(1)
-        .UpdateAccountBalances(
-          Arg.Is<IReadOnlyDictionary<string, decimal>>(
-            x => x[creditAccount.Id] == expectedCreditAccountBalance));
+      Assert.AreEqual(expectedDebitAccountBalance, debitAccount.Balance);
+      Assert.AreEqual(expectedCreditAccountBalance, creditAccount.Balance);
     }
   }
 }

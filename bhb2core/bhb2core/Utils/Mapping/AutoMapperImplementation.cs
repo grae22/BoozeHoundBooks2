@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 
 using AutoMapper;
 
@@ -40,10 +39,6 @@ namespace bhb2core.Utils.Mapping
           $"Failed to map {nameof(TIn)} to {nameof(TOut)}.",
           ex);
 
-        Debug.Assert(
-          false,
-          "Mapper failed to perform mapping");
-
         throw;
       }
     }
@@ -52,8 +47,12 @@ namespace bhb2core.Utils.Mapping
     {
       _logger.LogInformation("Initialising mapper mappings...");
 
-      return new MapperConfiguration(cfg =>
-        cfg.CreateMap<TransactionDto, Transaction>());
+      return new MapperConfiguration(
+        cfg =>
+        {
+          cfg.CreateMap<TransactionDto, Transaction>();
+          cfg.CreateMap<Account, AccountDto>();
+        });
     }
   }
 }

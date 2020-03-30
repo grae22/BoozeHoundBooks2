@@ -1,9 +1,4 @@
-﻿using AutoMapper;
-
-using bhb2core.Accounting.Dto;
-using bhb2core.Accounting.Models;
-
-namespace bhb2core.Utils.Mapping
+﻿namespace bhb2core.Utils.Mapping
 {
   internal static class Mapper
   {
@@ -16,10 +11,7 @@ namespace bhb2core.Utils.Mapping
         return _mapper;
       }
 
-      var config = new MapperConfiguration(
-        cfg => cfg.CreateMap<TransactionDto, Transaction>());
-
-      _mapper = config.CreateMapper();
+      _mapper = new AutoMapperImplementation();
 
       return _mapper;
     }

@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-
-using Mapper = bhb2core.Utils.Mapping.Mapper;
+﻿using bhb2core.Utils.Mapping;
 
 namespace bhb2core
 {

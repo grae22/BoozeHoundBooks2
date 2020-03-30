@@ -2,11 +2,10 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-using AutoMapper;
-
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
+using bhb2core.Utils.Mapping;
 
 namespace bhb2core.Accounting
 {

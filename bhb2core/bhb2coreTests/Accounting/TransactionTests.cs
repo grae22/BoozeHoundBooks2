@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using AutoMapper;
-
 using bhb2core;
 using bhb2core.Accounting;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
+using bhb2core.Utils.Mapping;
 
 using NSubstitute;
 

@@ -3,6 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RepositoryUrl>https://github.com/grae22/BoozeHoundBooks2.git</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.1</Version>
+    <Authors>Graeme Bruschi</Authors>
+    <Product>Booze Hound Books 2</Product>
   </PropertyGroup>
 
   <ItemGroup>

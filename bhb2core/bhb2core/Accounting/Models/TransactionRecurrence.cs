@@ -1,6 +1,6 @@
 ﻿namespace bhb2core.Accounting.Models
 {
-  public struct TransactionRecurrence
+  internal struct TransactionRecurrence
   {
     public bool IsRecurring { get; set; }
     public bool IsAmountVariable { get; set; }

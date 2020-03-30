@@ -5,7 +5,7 @@ using bhb2core.Utils.Serialisation;
 
 namespace bhb2core.Accounting.Models
 {
-  public class Transaction : ToStringSerialiser
+  internal class Transaction : ToStringSerialiser
   {
     public string DebitAccountId { get; set; }
     public string CreditAccountId { get; set; }

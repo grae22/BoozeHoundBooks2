@@ -6,7 +6,7 @@ using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
 using bhb2core.Utils.Logging;
 
-namespace bhb2core.Accounting
+namespace bhb2core.Accounting.Engines
 {
   internal class TransactionEngine : ITransactionEngine
   {

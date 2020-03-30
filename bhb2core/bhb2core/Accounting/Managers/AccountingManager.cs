@@ -7,7 +7,7 @@ using bhb2core.Accounting.Models;
 using bhb2core.Utils.Logging;
 using bhb2core.Utils.Mapping;
 
-namespace bhb2core.Accounting
+namespace bhb2core.Accounting.Managers
 {
   // NOTE: Don't make this public - add a factory and other assemblies can use that.
   internal class AccountingManager

@@ -1,4 +1,4 @@
-﻿namespace bhb2core.Accounting
+﻿namespace bhb2core.Accounting.DataAccess
 {
   internal class AccountingDataAccess //: IAccountingDataAccess
   {

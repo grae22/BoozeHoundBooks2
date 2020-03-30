@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using bhb2core.Utils.Serialisation;
+
 namespace bhb2core.Accounting.Dto
 {
-  public class TransactionDto
+  public class TransactionDto : ToStringSerialiser
   {
     public string DebitAccountId { get; set; }
     public string CreditAccountId { get; set; }

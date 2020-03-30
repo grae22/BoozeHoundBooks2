@@ -1,6 +1,8 @@
-﻿namespace bhb2core.Accounting.Models
+﻿using bhb2core.Utils.Serialisation;
+
+namespace bhb2core.Accounting.Models
 {
-  internal class Account
+  internal class Account : ToStringSerialiser
   {
     public string Id { get; set; }
     public string Name { get; set; }

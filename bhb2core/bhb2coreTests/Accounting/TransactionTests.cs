@@ -6,6 +6,7 @@ using bhb2core.Accounting;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
+using bhb2core.Utils.Logging;
 using bhb2core.Utils.Mapping;
 
 using NSubstitute;
@@ -21,11 +22,17 @@ namespace bhb2coreTests.Accounting
     public async Task Given_SufficientFunds_When_TransactionProcessed_Then_AccountBalancesAreUpdatedCorrectly()
     {
       // Arrange.
-      Bhb2Core.Initialise(out IMapper mapper);
+      Bhb2Core.Initialise(
+        out ILogger logger,
+        out IMapper mapper);
 
       var accountingDataAccess = Substitute.For<IAccountingDataAccess>();
-      var transactionEngine = new TransactionEngine(accountingDataAccess);
-      var testObject = new AccountingManager(transactionEngine, mapper);
+      var transactionEngine = new TransactionEngine(accountingDataAccess, logger);
+
+      var testObject = new AccountingManager(
+        transactionEngine,
+        mapper,
+        logger);
 
       var debitAccount = new Account
       {

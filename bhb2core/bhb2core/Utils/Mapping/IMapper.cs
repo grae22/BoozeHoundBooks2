@@ -2,6 +2,7 @@
 {
   public interface IMapper
   {
+    void VerifyConfiguration();
     TOut Map<TIn, TOut>(TIn objectToMap);
   }
 }

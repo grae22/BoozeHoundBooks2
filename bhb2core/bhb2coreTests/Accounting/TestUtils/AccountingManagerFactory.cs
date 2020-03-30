@@ -13,7 +13,8 @@ namespace bhb2coreTests.Accounting.TestUtils
     {
       Bhb2Core.Initialise(
         out ILogger logger,
-        out IMapper mapper);
+        out IMapper mapper,
+        out IAccountingManager ignoredAccountingManager);
 
       accountingDataAccess = new MockAccountingDataAccess();
 

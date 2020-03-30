@@ -11,18 +11,18 @@ using bhb2core.Utils.Mapping;
 namespace bhb2core.Accounting.Managers
 {
   // NOTE: Don't make this public - add a factory and other assemblies can use that.
-  internal class AccountingManager
+  internal class AccountingManager : IAccountingManager
   {
     private readonly IAccountingEngine _accountingEngine;
     private readonly IMapper _mapper;
     private readonly ILogger _logger;
 
     public AccountingManager(
-      in IAccountingEngine transactionEngine,
+      in IAccountingEngine accountingEngine,
       in IMapper mapper,
       in ILogger logger)
     {
-      _accountingEngine = transactionEngine ?? throw new ArgumentNullException(nameof(transactionEngine));
+      _accountingEngine = accountingEngine ?? throw new ArgumentNullException(nameof(accountingEngine));
       _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
       _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }

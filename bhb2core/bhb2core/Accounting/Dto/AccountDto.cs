@@ -2,7 +2,7 @@
 
 namespace bhb2core.Accounting.Dto
 {
-  internal class AccountDto : ToStringSerialiser
+  public class AccountDto : ToStringSerialiser
   {
     public string Id { get; set; }
     public string Name { get; set; }

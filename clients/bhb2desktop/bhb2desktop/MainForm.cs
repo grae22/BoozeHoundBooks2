@@ -42,7 +42,7 @@ namespace bhb2desktop
         accountsList =>
         {
           ((List<AccountDto>)accountsList)
-            .ForEach(a => _accountsTree.Nodes.Add(a.Name));
+            .ForEach(a => _accountsTree.Nodes.Add($"{a.Name}  ( {a.Balance:N} )"));
         },
         accounts.ToList());
     }

@@ -3,6 +3,7 @@
 using AutoMapper;
 
 using bhb2core.Accounting.Dto;
+using bhb2core.Accounting.Exceptions;
 using bhb2core.Accounting.Models;
 using bhb2core.Utils.Logging;
 
@@ -35,11 +36,11 @@ namespace bhb2core.Utils.Mapping
       }
       catch (AutoMapperMappingException ex)
       {
-        _logger.LogError(
-          $"Failed to map {nameof(TIn)} to {nameof(TOut)}.",
-          ex);
+        var message = $"Failed to map {nameof(TIn)} to {nameof(TOut)}.";
 
-        throw;
+        _logger.LogError(message, ex);
+
+        throw new MappingException(message, ex);
       }
     }
 
@@ -52,6 +53,7 @@ namespace bhb2core.Utils.Mapping
         {
           cfg.CreateMap<TransactionDto, Transaction>();
           cfg.CreateMap<Account, AccountDto>();
+          cfg.CreateMap<AccountDto, Account>();
         });
     }
   }

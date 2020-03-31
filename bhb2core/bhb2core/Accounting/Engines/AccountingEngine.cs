@@ -54,13 +54,6 @@ namespace bhb2core.Accounting.Engines
       }
     }
 
-    public async Task<IEnumerable<Account>> GetAllAccounts()
-    {
-      _logger.LogVerbose("Request received for all accounts.");
-
-      return await _accountingDataAccess.GetAllAccounts();
-    }
-
     public async Task ProcessTransaction(Transaction transaction)
     {
       if (transaction == null)

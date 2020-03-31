@@ -2,6 +2,7 @@
 using bhb2core.Accounting.Engines;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Managers;
+using bhb2core.Accounting.Managers.AccountingManager;
 using bhb2core.Utils.Logging;
 using bhb2core.Utils.Mapping;
 
@@ -22,6 +23,7 @@ namespace bhb2core
 
       accountingManager = new AccountingManager(
         accountingEngine,
+        accountingDataAccess,
         mapper,
         logger);
 

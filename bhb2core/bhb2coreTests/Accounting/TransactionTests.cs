@@ -2,7 +2,7 @@
 
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
-using bhb2core.Accounting.Managers;
+using bhb2core.Accounting.Managers.AccountingManager;
 using bhb2core.Accounting.Models;
 
 using bhb2coreTests.Accounting.TestUtils;
@@ -18,7 +18,9 @@ namespace bhb2coreTests.Accounting
     public async Task Given_SufficientFunds_When_TransactionProcessed_Then_AccountBalancesAreUpdatedCorrectly()
     {
       // Arrange.
-      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+      AccountingManager testObject = AccountingManagerFactory.Create(
+        out IAccountingDataAccess accountingDataAccess,
+        useConcreteDataAccessMock: true);
 
       var debitAccount = new Account
       {

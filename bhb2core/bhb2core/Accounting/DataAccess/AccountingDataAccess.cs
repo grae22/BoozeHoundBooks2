@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using bhb2core.Accounting.Exceptions;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
 
@@ -28,6 +30,20 @@ namespace bhb2core.Accounting.DataAccess
 
     public async Task AddAccount(Account account)
     {
+      // TODO: Validate object properties.
+
+      bool accountAlreadyExists =
+        _accounts
+          .Exists(a =>
+            a.Id.Equals(
+              account.Id,
+              StringComparison.OrdinalIgnoreCase));
+
+      if (accountAlreadyExists)
+      {
+        throw new AccountAlreadyExistsException(account);
+      }
+
       _accounts.Add(account);
 
       await Task.Delay(0);

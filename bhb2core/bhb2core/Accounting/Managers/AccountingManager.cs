@@ -29,6 +29,8 @@ namespace bhb2core.Accounting.Managers
 
     public async Task Initialise()
     {
+      _logger.LogInformation("Initialising...");
+
       await _accountingEngine.CreateBaseAccountsIfMissing();
     }
 

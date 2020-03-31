@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using bhb2core;
@@ -13,24 +14,37 @@ namespace bhb2desktop
 {
   public partial class MainForm : Form
   {
+    private readonly SynchronizationContext _synchronizationContext;
+    private readonly ILogger _logger;
+    private readonly IAccountingManager _accountingManager;
+
     public MainForm()
     {
+      _synchronizationContext = SynchronizationContext.Current;
+
       InitializeComponent();
 
       Bhb2Core.Initialise(
-        out ILogger logger,
+        out _logger,
         out IMapper mapper,
-        out IAccountingManager accountingManager);
+        out _accountingManager);
 
-      IEnumerable<AccountDto> accounts =
-        accountingManager
-          .GetAllAccounts()
-          .GetAwaiter()
-          .GetResult();
+      Task.Run(async () => await PopulateAccountsTree());
+    }
 
-      accounts
-        .ToList()
-        .ForEach(a => Debug.WriteLine(a.Id));
+    private async Task PopulateAccountsTree()
+    {
+      _logger.LogVerbose("Populating accounts tree...");
+
+      IEnumerable<AccountDto> accounts = await _accountingManager.GetAllAccounts();
+
+      _synchronizationContext.Post(
+        accountsList =>
+        {
+          ((List<AccountDto>)accountsList)
+            .ForEach(a => _accountsTree.Nodes.Add(a.Name));
+        },
+        accounts.ToList());
     }
   }
 }

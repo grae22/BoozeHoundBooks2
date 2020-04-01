@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,10 +42,21 @@ namespace bhb2desktop
       _synchronizationContext.Post(
         accountsList =>
         {
+          _accountsTree.Nodes.Clear();
+
           ((List<AccountDto>)accountsList)
             .ForEach(a => _accountsTree.Nodes.Add($"{a.Name}  ( {a.Balance:N} )"));
         },
         accounts.ToList());
+    }
+
+    private void AddAccount_OnClick(object sender, EventArgs args)
+    {
+      using var dlg = new AccountPropertiesDialog(_accountingManager);
+
+      dlg.ShowDialog(this);
+
+      Task.Run(async () => await PopulateAccountsTree());
     }
   }
 }

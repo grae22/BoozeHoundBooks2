@@ -8,6 +8,10 @@ namespace bhb2desktop
     ///  Required designer variable.
     /// </summary>
     private System.ComponentModel.IContainer components = null;
+    private System.Windows.Forms.MenuStrip _menuStrip;
+    private System.Windows.Forms.ToolStripMenuItem _accountMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem _addAccountItem;
+    private System.Windows.Forms.Panel _mainPanel;
     private System.Windows.Forms.TreeView _accountsTree;
 
     /// <summary>
@@ -36,11 +40,46 @@ namespace bhb2desktop
       this.ClientSize = new System.Drawing.Size(800, 450);
       this.Text = "Booze Hound Books 2";
 
-      _accountsTree = new System.Windows.Forms.TreeView();
+      _menuStrip = new System.Windows.Forms.MenuStrip
+      {
+      };
 
+      _accountMenuItem = new System.Windows.Forms.ToolStripMenuItem
+      {
+        Text = "Accounts"
+      };
+
+      _addAccountItem = new System.Windows.Forms.ToolStripMenuItem
+      {
+        Text = "Add"
+      };
+
+      _addAccountItem.Click += AddAccount_OnClick;
+
+      _accountMenuItem.DropDownItems.Add(_addAccountItem);
+
+      _menuStrip.Items.Add(_accountMenuItem);
+      _menuStrip.Items.Add(_accountMenuItem);
+
+      _mainPanel = new System.Windows.Forms.Panel
+      {
+        AutoSize = true,
+        AutoSizeMode = AutoSizeMode.GrowAndShrink,
+        Dock = DockStyle.Fill,
+        Padding = new Padding(top: 30, bottom: 0, left: 0, right: 0)
+      };
+
+      _accountsTree = new System.Windows.Forms.TreeView
+      {
+        Dock = DockStyle.Fill
+      };
+      
       SuspendLayout();
 
-      Controls.Add(_accountsTree);
+      Controls.Add(_menuStrip);
+      Controls.Add(_mainPanel);
+
+      _mainPanel.Controls.Add(_accountsTree);
 
       ResumeLayout(true);
     }

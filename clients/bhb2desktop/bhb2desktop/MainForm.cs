@@ -45,7 +45,17 @@ namespace bhb2desktop
           _accountsTree.Nodes.Clear();
 
           ((List<AccountDto>)accountsList)
-            .ForEach(a => _accountsTree.Nodes.Add($"{a.Id}  ( {a.Balance:N} )"));
+            .ForEach(a =>
+            {
+              if (a.ParentAccountId == null)
+              {
+                _accountsTree.Nodes.Add($"{a.Name}  ( {a.Balance:N} )");
+              }
+              else
+              {
+                _accountsTree.Nodes.Add($"{a.ParentAccountId}.{a.Name}  ( {a.Balance:N} )");
+              }
+            });
         },
         accounts.ToList());
     }

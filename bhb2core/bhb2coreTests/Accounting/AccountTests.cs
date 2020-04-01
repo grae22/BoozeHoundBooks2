@@ -55,7 +55,12 @@ namespace bhb2coreTests.Accounting
       // Assert.
       foreach (var name in BaseAccountNames)
       {
-        Assert.NotNull(accounts.SingleOrDefault(a => a.Name.Equals(name)));
+        AccountDto account = accounts.SingleOrDefault(a => a.Name.Equals(name));
+
+        Assert.NotNull(account);
+        Assert.AreEqual(name.ToLower(), account.Id);
+        Assert.IsNull(account.ParentAccountId);
+        Assert.AreEqual(0m, account.Balance);
       }
     }
 
@@ -201,6 +206,65 @@ namespace bhb2coreTests.Accounting
         .Received(1)
         .AddAccount(Arg.Is<Account>(a =>
           a.Id.Equals(expectedId)));
+    }
+
+    [Test]
+    public async Task Given_NewAccount_When_Added_Then_ParentAccountIdIsCorrect()
+    {
+      // Arrange.
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      accountingDataAccess
+        .GetAccountsById(Arg.Any<string[]>())
+        .Returns(new Dictionary<string, Account>
+        {
+          { BaseAccountIds[0], new Account() }
+        });
+
+      var newAccount = new NewAccountDto
+      {
+        Name = "SomeAccount",
+        ParentAccountId = BaseAccountIds[0]
+      };
+
+      // Act.
+      await testObject.AddAccount(newAccount);
+
+      // Assert.
+      string expectedId = newAccount.ParentAccountId;
+
+      await accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.ParentAccountId.Equals(expectedId)));
+    }
+
+    [Test]
+    public async Task Given_NewAccount_When_Added_Then_BalanceIsZero()
+    {
+      // Arrange.
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      accountingDataAccess
+        .GetAccountsById(Arg.Any<string[]>())
+        .Returns(new Dictionary<string, Account>
+        {
+          { BaseAccountIds[0], new Account() }
+        });
+
+      var newAccount = new NewAccountDto
+      {
+        Name = "SomeAccount",
+        ParentAccountId = BaseAccountIds[0]
+      };
+
+      // Act.
+      await testObject.AddAccount(newAccount);
+
+      // Assert.
+      await accountingDataAccess
+        .Received()
+        .AddAccount(Arg.Is<Account>(a => a.Balance == 0m));
     }
 
     [TestCase("")]

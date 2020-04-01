@@ -89,6 +89,7 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
       {
         Id = accountId,
         Name = sanitisedAccountName,
+        ParentAccountId = newAccount.ParentAccountId,
         Balance = 0
       };
 

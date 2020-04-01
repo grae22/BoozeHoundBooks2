@@ -6,10 +6,12 @@ using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
 
 namespace bhb2core.Accounting.Managers.AccountingManager.Interfaces
 {
-  internal interface IAccountManager
+  public interface IAccountManager
   {
+    Task Initialise();
+
     Task<IEnumerable<AccountDto>> GetAllAccounts();
 
-    Task<AddAccountResult> AddAccount(AccountDto accountDto);
+    Task<AddAccountResult> AddAccount(NewAccountDto newAccountDto);
   }
 }

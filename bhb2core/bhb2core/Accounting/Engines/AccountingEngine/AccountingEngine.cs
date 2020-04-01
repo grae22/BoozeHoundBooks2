@@ -31,6 +31,11 @@ namespace bhb2core.Accounting.Engines.AccountingEngine
       await _accountEngine.CreateBaseAccountsIfMissing();
     }
 
+    public async Task AddAccount(NewAccount newAccount)
+    {
+      await _accountEngine.AddAccount(newAccount);
+    }
+
     public async Task ProcessTransaction(Transaction transaction)
     {
       await _transactionEngine.ProcessTransaction(transaction);

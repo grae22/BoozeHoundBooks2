@@ -44,10 +44,10 @@ namespace bhb2desktop
 
     private void OkButton_OnClick(object sender, EventArgs args)
     {
-      var account = new AccountDto
+      var account = new NewAccountDto
       {
-        Id = $"{_parentComboBox.Text}.{_nameTextBox.Text}",
-        Name = _nameTextBox.Text
+        Name = _nameTextBox.Text,
+        ParentAccountId = _parentComboBox.Text
       };
 
       AddAccountResult result = _accountingManager.AddAccount(account).Result;

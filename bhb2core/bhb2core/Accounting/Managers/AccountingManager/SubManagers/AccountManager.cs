@@ -15,18 +15,28 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 {
   internal class AccountManager : IAccountManager
   {
+    private readonly IAccountingEngine _accountingEngine;
     private readonly IAccountingDataAccess _accountingDataAccess;
     private readonly IMapper _mapper;
     private readonly ILogger _logger;
 
     public AccountManager(
+      in IAccountingEngine accountingEngine,
       in IAccountingDataAccess accountingDataAccess,
       in IMapper mapper,
       in ILogger logger)
     {
-      _accountingDataAccess = accountingDataAccess ?? throw new ArgumentNullException(nameof(_accountingDataAccess));
+      _accountingEngine = accountingEngine ?? throw new ArgumentNullException(nameof(accountingEngine));
+      _accountingDataAccess = accountingDataAccess ?? throw new ArgumentNullException(nameof(accountingDataAccess));
       _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
       _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    public async Task Initialise()
+    {
+      _logger.LogInformation("Initialising...");
+
+      await _accountingEngine.CreateBaseAccountsIfMissing();
     }
 
     public async Task<IEnumerable<AccountDto>> GetAllAccounts()
@@ -40,29 +50,27 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
       return accountDtos;
     }
 
-    public async Task<AddAccountResult> AddAccount(AccountDto accountDto)
+    public async Task<AddAccountResult> AddAccount(NewAccountDto newAccountDto)
     {
-      _logger.LogVerbose($"Add account request received, account details: {accountDto}");
+      _logger.LogVerbose($"Add account request received, account details: {newAccountDto}");
 
-      if (accountDto == null)
+      if (newAccountDto == null)
       {
-        return AddAccountResult.CreateFailure($"Argument \"{nameof(accountDto)}\" cannot be null.");
+        throw new ArgumentNullException(nameof(newAccountDto));
       }
 
-      Account account = _mapper.Map<AccountDto, Account>(accountDto);
+      NewAccount newAccount = _mapper.Map<NewAccountDto, NewAccount>(newAccountDto);
 
       try
       {
-        await _accountingDataAccess.AddAccount(account);
+        await _accountingEngine.AddAccount(newAccount);
       }
-      catch (AccountAlreadyExistsException ex)
+      catch (AccountException ex)
       {
-        _logger.LogError($"Failed to add account, already exists: \"{ex.Message}\".");
+        _logger.LogError($"Failed to add account: \"{ex.Message}\".");
 
         return AddAccountResult.CreateFailure(ex.Message);
       }
-
-      _logger.LogInformation($"Account added: {account}");
 
       return AddAccountResult.CreateSuccess();
     }

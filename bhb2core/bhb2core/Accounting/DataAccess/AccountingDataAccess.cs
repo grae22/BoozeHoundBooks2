@@ -30,8 +30,6 @@ namespace bhb2core.Accounting.DataAccess
 
     public async Task AddAccount(Account account)
     {
-      // TODO: Validate object properties.
-
       bool accountAlreadyExists =
         _accounts
           .Exists(a =>
@@ -41,7 +39,7 @@ namespace bhb2core.Accounting.DataAccess
 
       if (accountAlreadyExists)
       {
-        throw new AccountAlreadyExistsException(account);
+        throw new AccountException($"Account already exists with id \"{account.Id}\".");
       }
 
       _accounts.Add(account);

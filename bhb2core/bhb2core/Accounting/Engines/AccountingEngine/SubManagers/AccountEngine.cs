@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.Engines.AccountingEngine.Interfaces;
+using bhb2core.Accounting.Exceptions;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
 using bhb2core.Utils.Logging;
@@ -52,6 +53,37 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
           });
 
         _logger.LogInformation($"Added \"{id}\" base account.");
+      }
+    }
+
+    public async Task AddAccount(NewAccount newAccount)
+    {
+      _logger.LogVerbose($"Add account request received, account details: {newAccount}");
+
+      ValidateNewAccount(newAccount);
+
+      var account = new Account
+      {
+        Id = $"{newAccount.ParentAccountId}.{newAccount.Name}",
+        Name = newAccount.Name,
+        Balance = 0
+      };
+
+      await _accountingDataAccess.AddAccount(account);
+
+      _logger.LogInformation($"Account added: {account}");
+    }
+
+    private static void ValidateNewAccount(NewAccount newAccount)
+    {
+      if (string.IsNullOrWhiteSpace(newAccount.Name))
+      {
+        throw new AccountException($"Account name is invalid in {newAccount}");
+      }
+
+      if (string.IsNullOrWhiteSpace(newAccount.ParentAccountId))
+      {
+        throw new AccountException($"Parent account id is invalid in {newAccount}");
       }
     }
   }

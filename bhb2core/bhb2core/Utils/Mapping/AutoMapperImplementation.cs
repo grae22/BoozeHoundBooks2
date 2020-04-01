@@ -54,6 +54,7 @@ namespace bhb2core.Utils.Mapping
           cfg.CreateMap<TransactionDto, Transaction>();
           cfg.CreateMap<Account, AccountDto>();
           cfg.CreateMap<AccountDto, Account>();
+          cfg.CreateMap<NewAccountDto, NewAccount>();
         });
     }
   }

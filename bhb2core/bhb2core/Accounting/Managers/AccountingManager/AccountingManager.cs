@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.Dto;
@@ -15,9 +14,6 @@ namespace bhb2core.Accounting.Managers.AccountingManager
   // NOTE: Don't make this public - add a factory and other assemblies can use that.
   internal class AccountingManager : IAccountingManager
   {
-    private readonly IAccountingEngine _accountingEngine;
-    private readonly ILogger _logger;
-
     private readonly IAccountManager _accountManager;
     private readonly ITransactionManager _transactionManager;
 
@@ -27,25 +23,21 @@ namespace bhb2core.Accounting.Managers.AccountingManager
       in IMapper mapper,
       in ILogger logger)
     {
-      _accountingEngine = accountingEngine ?? throw new ArgumentNullException(nameof(accountingEngine));
-      _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
       _accountManager = new AccountManager(
+        accountingEngine,
         accountingDataAccess,
         mapper,
-        _logger);
+        logger);
 
       _transactionManager = new TransactionManager(
-        _accountingEngine,
+        accountingEngine,
         mapper,
-        _logger);
+        logger);
     }
 
     public async Task Initialise()
     {
-      _logger.LogInformation("Initialising...");
-
-      await _accountingEngine.CreateBaseAccountsIfMissing();
+      await _accountManager.Initialise();
     }
 
     public async Task<IEnumerable<AccountDto>> GetAllAccounts()
@@ -53,9 +45,9 @@ namespace bhb2core.Accounting.Managers.AccountingManager
       return await _accountManager.GetAllAccounts();
     }
 
-    public async Task<AddAccountResult> AddAccount(AccountDto accountDto)
+    public async Task<AddAccountResult> AddAccount(NewAccountDto newAccountDto)
     {
-      return await _accountManager.AddAccount(accountDto);
+      return await _accountManager.AddAccount(newAccountDto);
     }
 
     public async Task ProcessTransaction(TransactionDto transactionDto)

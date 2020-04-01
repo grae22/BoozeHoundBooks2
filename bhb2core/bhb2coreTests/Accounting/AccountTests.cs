@@ -86,14 +86,15 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      var newAccount = new AccountDto
+      var newAccount = new NewAccountDto
       {
-        Id = BaseAccountIds[0]
+        Name = "SomeAccount",
+        ParentAccountId = BaseAccountIds[0]
       };
 
       accountingDataAccess
         .AddAccount(Arg.Any<Account>())
-        .Throws(new AccountAlreadyExistsException(new Account()));
+        .Throws(new AccountException("Account already exists"));
 
       // Act.
       AddAccountResult result = await testObject.AddAccount(newAccount);

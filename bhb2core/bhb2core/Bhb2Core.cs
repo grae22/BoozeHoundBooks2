@@ -26,7 +26,7 @@ namespace bhb2core
         mapper,
         logger);
 
-      ((AccountingManager)accountingManager)
+      accountingManager
         .Initialise()
         .GetAwaiter()
         .GetResult();

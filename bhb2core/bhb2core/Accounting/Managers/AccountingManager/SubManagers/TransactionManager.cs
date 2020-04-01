@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
-using bhb2core.Accounting.Managers.SubManagers.Interfaces;
+using bhb2core.Accounting.Managers.AccountingManager.Interfaces;
 using bhb2core.Accounting.Models;
 using bhb2core.Utils.Logging;
 using bhb2core.Utils.Mapping;
 
-namespace bhb2core.Accounting.Managers.SubManagers
+namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 {
   internal class TransactionManager : ITransactionManager
   {

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
 
-namespace bhb2core.Accounting.Managers.SubManagers.Interfaces
+namespace bhb2core.Accounting.Managers.AccountingManager.Interfaces
 {
   internal interface IAccountManager
   {

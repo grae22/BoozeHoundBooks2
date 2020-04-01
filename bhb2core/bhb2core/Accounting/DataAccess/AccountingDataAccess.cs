@@ -39,7 +39,9 @@ namespace bhb2core.Accounting.DataAccess
 
       if (accountAlreadyExists)
       {
-        throw new AccountException($"Account already exists with id \"{account.Id}\".");
+        throw new AccountException(
+          $"Account already exists with id \"{account.Id}\".",
+          account.ToString());
       }
 
       _accounts.Add(account);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.Engines.AccountingEngine.Interfaces;
@@ -12,6 +13,8 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
 {
   internal class AccountEngine : IAccountEngine
   {
+    private const char AccountIdSeparator = '.';
+
     private static readonly string[] BaseAccountIds =
     {
       "Funds",
@@ -62,10 +65,21 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
 
       ValidateNewAccount(newAccount);
 
+      bool parentAccountExists = await DoesAccountExist(newAccount.ParentAccountId);
+
+      if (!parentAccountExists)
+      {
+        throw new AccountException(
+          $"Parent account id \"{newAccount.ParentAccountId}\" not found.",
+          newAccount.ToString());
+      }
+
+      string sanitisedAccountName = newAccount.Name.Trim();
+
       var account = new Account
       {
-        Id = $"{newAccount.ParentAccountId}.{newAccount.Name}",
-        Name = newAccount.Name,
+        Id = $"{newAccount.ParentAccountId}{AccountIdSeparator}{sanitisedAccountName}",
+        Name = sanitisedAccountName,
         Balance = 0
       };
 
@@ -78,13 +92,32 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
     {
       if (string.IsNullOrWhiteSpace(newAccount.Name))
       {
-        throw new AccountException($"Account name is invalid in {newAccount}");
+        throw new AccountException(
+          "Account name cannot be null, empty or whitespace.",
+          newAccount.ToString());
+      }
+
+      if (newAccount.Name.Contains(AccountIdSeparator))
+      {
+        throw new AccountException(
+          $"Account name cannot contain the character '{AccountIdSeparator}'.",
+          newAccount.ToString());
       }
 
       if (string.IsNullOrWhiteSpace(newAccount.ParentAccountId))
       {
-        throw new AccountException($"Parent account id is invalid in {newAccount}");
+        throw new AccountException(
+          "Parent account id is cannot be null, empty or whitespace.",
+          newAccount.ToString());
       }
+    }
+
+    private async Task<bool> DoesAccountExist(string accountId)
+    {
+      IReadOnlyDictionary<string, Account> accounts =
+        await _accountingDataAccess.GetAccountsById(new[] { accountId });
+
+      return accounts.Any();
     }
   }
 }

@@ -54,7 +54,7 @@ namespace bhb2desktop
 
       if (!result.IsSuccess)
       {
-        this.ShowErrorMessage($"An error occured: \"{result.FailureMessage}\".");
+        this.ShowErrorMessage($"Failed to add the account.{Environment.NewLine}{Environment.NewLine}{result.FailureMessage}");
         return;
       }
 

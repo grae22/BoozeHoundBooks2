@@ -67,7 +67,7 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
       }
       catch (AccountException ex)
       {
-        _logger.LogError($"Failed to add account: \"{ex.Message}\".");
+        _logger.LogError($"Failed to add account: \"{ex.Message}\". Details: \"{ex.Details}\".");
 
         return AddAccountResult.CreateFailure(ex.Message);
       }

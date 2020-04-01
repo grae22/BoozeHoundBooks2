@@ -15,7 +15,7 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
   {
     private const char AccountIdSeparator = '.';
 
-    private static readonly string[] BaseAccountIds =
+    private static readonly string[] BaseAccountNames =
     {
       "Funds",
       "Income",
@@ -37,13 +37,21 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
 
     public async Task CreateBaseAccountsIfMissing()
     {
-      IReadOnlyDictionary<string, Account> accountsById = await _accountingDataAccess.GetAccountsById(BaseAccountIds);
+      var baseAccountIds = new List<string>();
 
-      foreach (var id in BaseAccountIds)
+      BaseAccountNames
+        .ToList()
+        .ForEach(n => baseAccountIds.Add(BuildAccountId(n, null)));
+
+      IReadOnlyDictionary<string, Account> accountsById = await _accountingDataAccess.GetAccountsById(baseAccountIds);
+
+      foreach (var name in BaseAccountNames)
       {
+        string id = BuildAccountId(name, null);
+
         if (accountsById.ContainsKey(id))
         {
-          _logger.LogVerbose($"Found \"{id}\" base account.");
+          _logger.LogVerbose($"Found \"{name}\" base account.");
           continue;
         }
 
@@ -51,11 +59,11 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
           new Account
           {
             Id = id,
-            Name = id,
+            Name = name,
             Balance = 0m
           });
 
-        _logger.LogInformation($"Added \"{id}\" base account.");
+        _logger.LogInformation($"Added \"{name}\" base account.");
       }
     }
 
@@ -75,10 +83,11 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
       }
 
       string sanitisedAccountName = newAccount.Name.Trim();
+      string accountId = BuildAccountId(sanitisedAccountName, newAccount.ParentAccountId);
 
       var account = new Account
       {
-        Id = $"{newAccount.ParentAccountId}{AccountIdSeparator}{sanitisedAccountName}",
+        Id = accountId,
         Name = sanitisedAccountName,
         Balance = 0
       };
@@ -86,6 +95,30 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
       await _accountingDataAccess.AddAccount(account);
 
       _logger.LogInformation($"Account added: {account}");
+    }
+
+    private async Task<bool> DoesAccountExist(string accountId)
+    {
+      IReadOnlyDictionary<string, Account> accounts =
+        await _accountingDataAccess.GetAccountsById(new[] { accountId });
+
+      return accounts.Any();
+    }
+
+    private static string BuildAccountId(in string name, in string parentId)
+    {
+      string id;
+
+      if (parentId == null)
+      {
+        id = name.ToLower();
+      }
+      else
+      {
+        id = $"{parentId}{AccountIdSeparator}{name}".ToLower();
+      }
+
+      return id.ToLower();
     }
 
     private static void ValidateNewAccount(NewAccount newAccount)
@@ -110,14 +143,6 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
           "Parent account id is cannot be null, empty or whitespace.",
           newAccount.ToString());
       }
-    }
-
-    private async Task<bool> DoesAccountExist(string accountId)
-    {
-      IReadOnlyDictionary<string, Account> accounts =
-        await _accountingDataAccess.GetAccountsById(new[] { accountId });
-
-      return accounts.Any();
     }
   }
 }

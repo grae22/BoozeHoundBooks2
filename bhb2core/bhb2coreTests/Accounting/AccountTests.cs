@@ -23,13 +23,22 @@ namespace bhb2coreTests.Accounting
   {
     private const char AccountIdSeparator = '.';
 
-    private static readonly string[] BaseAccountIds =
+    private static readonly string[] BaseAccountNames =
     {
       "Funds",
       "Income",
       "Expense",
       "Debtor",
       "Creditor"
+    };
+
+    private static readonly string[] BaseAccountIds =
+    {
+      "funds",
+      "income",
+      "expense",
+      "debtor",
+      "creditor"
     };
 
     [Test]
@@ -44,9 +53,9 @@ namespace bhb2coreTests.Accounting
       IEnumerable<AccountDto> accounts = await testObject.GetAllAccounts();
 
       // Assert.
-      foreach (var id in BaseAccountIds)
+      foreach (var name in BaseAccountNames)
       {
-        Assert.NotNull(accounts.SingleOrDefault(a => a.Id.Equals(id)));
+        Assert.NotNull(accounts.SingleOrDefault(a => a.Name.Equals(name)));
       }
     }
 
@@ -59,13 +68,13 @@ namespace bhb2coreTests.Accounting
         performInitialisation: false,
         useConcreteDataAccessMock: true);
 
-      foreach (var id in BaseAccountIds)
+      foreach (var name in BaseAccountNames)
       {
         await accountingDataAccess.AddAccount(
           new Account
           {
-            Id = id,
-            Name = id,
+            Id = name.ToLower(),
+            Name = name,
             Balance = 0m
           });
       }
@@ -76,9 +85,9 @@ namespace bhb2coreTests.Accounting
       // Assert.
       IEnumerable<AccountDto> accounts = await testObject.GetAllAccounts();
 
-      foreach (var id in BaseAccountIds)
+      foreach (var name in BaseAccountNames)
       {
-        Assert.NotNull(accounts.SingleOrDefault(a => a.Id.Equals(id)));
+        Assert.NotNull(accounts.SingleOrDefault(a => a.Name.Equals(name)));
       }
     }
 
@@ -153,7 +162,7 @@ namespace bhb2coreTests.Accounting
       await testObject.AddAccount(newAccount);
 
       // Assert.
-      string expectedId = $"{newAccount.ParentAccountId}{AccountIdSeparator}{accountName.Trim()}";
+      string expectedId = $"{newAccount.ParentAccountId}{AccountIdSeparator}{accountName.Trim().ToLower()}";
       string expectedName = accountName.Trim();
 
       await accountingDataAccess
@@ -161,6 +170,37 @@ namespace bhb2coreTests.Accounting
         .AddAccount(Arg.Is<Account>(a =>
           a.Id.Equals(expectedId) &&
           a.Name.Equals(expectedName)));
+    }
+
+    [Test]
+    public async Task Given_NewAccount_When_Added_Then_AccountIdIsLowercase()
+    {
+      // Arrange.
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      accountingDataAccess
+        .GetAccountsById(Arg.Any<string[]>())
+        .Returns(new Dictionary<string, Account>
+        {
+          { BaseAccountIds[0], new Account() }
+        });
+
+      var newAccount = new NewAccountDto
+      {
+        Name = "SomeAccount",
+        ParentAccountId = BaseAccountIds[0]
+      };
+
+      // Act.
+      await testObject.AddAccount(newAccount);
+
+      // Assert.
+      string expectedId = $"{newAccount.ParentAccountId}{AccountIdSeparator}{newAccount.Name}".ToLower();
+
+      await accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.Id.Equals(expectedId)));
     }
 
     [TestCase("")]

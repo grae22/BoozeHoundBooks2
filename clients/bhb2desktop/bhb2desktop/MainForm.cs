@@ -7,7 +7,10 @@ using System.Windows.Forms;
 
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
+using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
 using bhb2core.Utils.Logging;
+
+using bhb2desktop.Extensions;
 
 namespace bhb2desktop
 {
@@ -79,6 +82,28 @@ namespace bhb2desktop
       using var dlg = new AccountPropertiesDialog(_accountingManager);
 
       dlg.ShowDialog(this);
+
+      if (dlg.DialogResult != DialogResult.OK)
+      {
+        return;
+      }
+
+      var account = new NewAccountDto
+      {
+        Name = dlg.Account.Name,
+        ParentAccountId = dlg.Account.ParentAccountId
+      };
+
+      AddAccountResult result = _accountingManager.AddAccount(account).Result;
+
+      if (!result.IsSuccess)
+      {
+        this.ShowErrorMessage($"Failed to add the account.{Environment.NewLine}{Environment.NewLine}{result.FailureMessage}");
+
+        dlg.ShowDialog();
+
+        return;
+      }
 
       Task.Run(async () => await PopulateAccountsTree());
     }

@@ -5,7 +5,6 @@ using System.Windows.Forms;
 
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
-using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
 
 using bhb2desktop.Extensions;
 using bhb2desktop.Utils;
@@ -14,6 +13,8 @@ namespace bhb2desktop
 {
   public partial class AccountPropertiesDialog : Form
   {
+    public AccountDto Account { get; private set; }
+
     private readonly IAccountingManager _accountingManager;
 
     public AccountPropertiesDialog(in IAccountingManager accountingManager)
@@ -42,6 +43,8 @@ namespace bhb2desktop
       {
         this.ShowErrorMessage("No accounts found, cannot populate parents.");
 
+        DialogResult = DialogResult.Cancel;
+
         Close();
       }
 
@@ -50,19 +53,11 @@ namespace bhb2desktop
 
     private void OkButton_OnClick(object sender, EventArgs args)
     {
-      var account = new NewAccountDto
+      Account = new AccountDto
       {
         Name = _nameTextBox.Text,
         ParentAccountId = _parentComboBox.Text.ToLower()
       };
-
-      AddAccountResult result = _accountingManager.AddAccount(account).Result;
-
-      if (!result.IsSuccess)
-      {
-        this.ShowErrorMessage($"Failed to add the account.{Environment.NewLine}{Environment.NewLine}{result.FailureMessage}");
-        return;
-      }
 
       Close();
     }

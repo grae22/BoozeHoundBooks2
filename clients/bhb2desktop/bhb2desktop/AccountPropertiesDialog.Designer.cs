@@ -51,6 +51,7 @@ namespace bhb2desktop
       AutoSizeMode = AutoSizeMode.GrowAndShrink;
       ControlBox = false;
       StartPosition = FormStartPosition.CenterParent;
+      ShowInTaskbar = false;
 
       _mainPanel = new TableLayoutPanel
       {

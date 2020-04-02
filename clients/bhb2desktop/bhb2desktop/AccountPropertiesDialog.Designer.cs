@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace bhb2desktop
@@ -8,16 +9,16 @@ namespace bhb2desktop
     /// <summary>
     /// Required designer variable.
     /// </summary>
-    private System.ComponentModel.IContainer components = null;
-    private System.Windows.Forms.TableLayoutPanel _mainPanel;
-    private System.Windows.Forms.Label _nameLabel;
-    private System.Windows.Forms.TextBox _nameTextBox;
-    private System.Windows.Forms.Label _parentLabel;
-    private System.Windows.Forms.ComboBox _parentComboBox;
-    private System.Windows.Forms.FlowLayoutPanel _buttonsPanel;
-    private System.Windows.Forms.Button _okButton;
-    private System.Windows.Forms.Button _cancelButton;
-    private System.Windows.Forms.Panel _dummyPanel;
+    private IContainer _components = null;
+    private TableLayoutPanel _mainPanel;
+    private Label _nameLabel;
+    private TextBox _nameTextBox;
+    private Label _parentLabel;
+    private ComboBox _parentComboBox;
+    private FlowLayoutPanel _buttonsPanel;
+    private Button _okButton;
+    private Button _cancelButton;
+    private Panel _dummyPanel;
 
     /// <summary>
     /// Clean up any resources being used.
@@ -25,9 +26,9 @@ namespace bhb2desktop
     /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
     protected override void Dispose(bool disposing)
     {
-      if (disposing && (components != null))
+      if (disposing && (_components != null))
       {
-        components.Dispose();
+        _components.Dispose();
       }
       base.Dispose(disposing);
     }
@@ -40,14 +41,16 @@ namespace bhb2desktop
     /// </summary>
     private void InitializeComponent()
     {
-      this.components = new System.ComponentModel.Container();
-      this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(400, 400);
-      this.Text = "Account";
-      this.FormBorderStyle = FormBorderStyle.FixedDialog;
-      this.AutoSize = true;
-      this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-      this.ControlBox = false;
+      _components = new System.ComponentModel.Container();
+
+      AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+      ClientSize = new System.Drawing.Size(400, 400);
+      Text = "Account";
+      FormBorderStyle = FormBorderStyle.FixedDialog;
+      AutoSize = true;
+      AutoSizeMode = AutoSizeMode.GrowAndShrink;
+      ControlBox = false;
+      StartPosition = FormStartPosition.CenterParent;
 
       _mainPanel = new TableLayoutPanel
       {

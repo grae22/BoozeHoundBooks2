@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.ComponentModel;
+using System.Windows.Forms;
 
 namespace bhb2desktop
 {
@@ -7,12 +8,12 @@ namespace bhb2desktop
     /// <summary>
     ///  Required designer variable.
     /// </summary>
-    private System.ComponentModel.IContainer components = null;
-    private System.Windows.Forms.MenuStrip _menuStrip;
-    private System.Windows.Forms.ToolStripMenuItem _accountMenuItem;
-    private System.Windows.Forms.ToolStripMenuItem _addAccountItem;
-    private System.Windows.Forms.Panel _mainPanel;
-    private System.Windows.Forms.TreeView _accountsTree;
+    private IContainer _components = null;
+    private MenuStrip _menuStrip;
+    private ToolStripMenuItem _accountMenuItem;
+    private ToolStripMenuItem _addAccountItem;
+    private Panel _mainPanel;
+    private TreeView _accountsTree;
 
     /// <summary>
     ///  Clean up any resources being used.
@@ -20,9 +21,9 @@ namespace bhb2desktop
     /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
     protected override void Dispose(bool disposing)
     {
-      if (disposing && (components != null))
+      if (disposing && (_components != null))
       {
-        components.Dispose();
+        _components.Dispose();
       }
       base.Dispose(disposing);
     }
@@ -35,10 +36,11 @@ namespace bhb2desktop
     /// </summary>
     private void InitializeComponent()
     {
-      this.components = new System.ComponentModel.Container();
-      this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(800, 450);
-      this.Text = "Booze Hound Books 2";
+      _components = new System.ComponentModel.Container();
+
+      AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+      ClientSize = new System.Drawing.Size(800, 450);
+      Text = "Booze Hound Books 2";
 
       _menuStrip = new System.Windows.Forms.MenuStrip
       {

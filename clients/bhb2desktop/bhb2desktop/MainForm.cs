@@ -5,11 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using bhb2core;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Utils.Logging;
-using bhb2core.Utils.Mapping;
 
 namespace bhb2desktop
 {
@@ -19,16 +17,15 @@ namespace bhb2desktop
     private readonly ILogger _logger;
     private readonly IAccountingManager _accountingManager;
 
-    public MainForm()
+    public MainForm(
+      IAccountingManager accountingManager,
+      ILogger logger)
     {
+      _accountingManager = accountingManager ?? throw new ArgumentNullException(nameof(accountingManager));
+      _logger = logger ?? throw new ArgumentNullException(nameof(logger));
       _synchronizationContext = SynchronizationContext.Current;
 
       InitializeComponent();
-
-      Bhb2Core.Initialise(
-        out _logger,
-        out IMapper mapper,
-        out _accountingManager);
 
       Task.Run(async () => await PopulateAccountsTree());
     }

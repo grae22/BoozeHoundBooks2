@@ -40,22 +40,39 @@ namespace bhb2desktop
       IEnumerable<AccountDto> accounts = await _accountingManager.GetAllAccounts();
 
       _synchronizationContext.Post(
-        accountsList =>
+        accountsListAsObject =>
         {
+          var accountsList = (List<AccountDto>)accountsListAsObject;
+
           _accountsTree.Nodes.Clear();
 
-          ((List<AccountDto>)accountsList)
-            .ForEach(a =>
+          var nodesByAccountId = new Dictionary<string, TreeNode>();
+
+          while (nodesByAccountId.Count < accountsList.Count)
+          {
+            foreach (var account in accountsList)
             {
-              if (a.ParentAccountId == null)
+              if (account.ParentAccountId == null)
               {
-                _accountsTree.Nodes.Add($"{a.Name}  ( {a.Balance:N} )");
+                TreeNode newBaseNode = _accountsTree.Nodes.Add($"{account.Name}  ( {account.Balance:N} )");
+
+                nodesByAccountId.Add(account.Id, newBaseNode);
+
+                continue;
               }
-              else
+
+              if (!nodesByAccountId.TryGetValue(account.ParentAccountId, out TreeNode parentNode))
               {
-                _accountsTree.Nodes.Add($"{a.ParentAccountId}.{a.Name}  ( {a.Balance:N} )");
+                continue;
               }
-            });
+
+              TreeNode newNode = parentNode.Nodes.Add($"{account.Name}  ( {account.Balance:N} )");
+
+              nodesByAccountId.Add(account.Id, newNode);
+            }
+          }
+
+          _accountsTree.ExpandAll();
         },
         accounts.ToList());
     }

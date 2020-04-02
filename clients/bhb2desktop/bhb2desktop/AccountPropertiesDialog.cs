@@ -8,6 +8,7 @@ using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
 
 using bhb2desktop.Extensions;
+using bhb2desktop.Utils;
 
 namespace bhb2desktop
 {
@@ -30,7 +31,12 @@ namespace bhb2desktop
 
       accounts
         .ToList()
-        .ForEach(a => _parentComboBox.Items.Add(a.Id));
+        .ForEach(a =>
+          _parentComboBox.Items.Add(
+            AccountUtils.GetFullyQualifiedAccountName(
+              a.Id,
+              accounts,
+              '.')));
 
       if (_parentComboBox.Items.Count == 0)
       {
@@ -47,7 +53,7 @@ namespace bhb2desktop
       var account = new NewAccountDto
       {
         Name = _nameTextBox.Text,
-        ParentAccountId = _parentComboBox.Text
+        ParentAccountId = _parentComboBox.Text.ToLower()
       };
 
       AddAccountResult result = _accountingManager.AddAccount(account).Result;

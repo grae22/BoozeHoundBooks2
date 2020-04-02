@@ -76,7 +76,8 @@ namespace bhb2desktop
 
       _parentComboBox = new ComboBox
       {
-        DropDownStyle = ComboBoxStyle.DropDownList
+        DropDownStyle = ComboBoxStyle.DropDownList,
+        Sorted = true
       };
 
       _buttonsPanel = new FlowLayoutPanel

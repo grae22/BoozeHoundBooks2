@@ -12,6 +12,10 @@ namespace bhb2core.Accounting.Managers.AccountingManager.Interfaces
 
     Task<IEnumerable<AccountDto>> GetAllAccounts();
 
+    Task<IEnumerable<AccountDto>> GetTransactionDebitAccounts();
+
+    Task<IEnumerable<AccountDto>> GetTransactionCreditAccounts();
+
     Task<AddAccountResult> AddAccount(NewAccountDto newAccountDto);
   }
 }

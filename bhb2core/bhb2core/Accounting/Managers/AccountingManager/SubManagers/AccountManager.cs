@@ -50,6 +50,16 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
       return accountDtos;
     }
 
+    public async Task<IEnumerable<AccountDto>> GetTransactionDebitAccounts()
+    {
+      throw new NotImplementedException();
+    }
+
+    public async Task<IEnumerable<AccountDto>> GetTransactionCreditAccounts()
+    {
+      throw new NotImplementedException();
+    }
+
     public async Task<AddAccountResult> AddAccount(NewAccountDto newAccountDto)
     {
       _logger.LogVerbose($"Add account request received, account details: {newAccountDto}");

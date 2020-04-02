@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.Dto;
@@ -43,6 +44,16 @@ namespace bhb2core.Accounting.Managers.AccountingManager
     public async Task<IEnumerable<AccountDto>> GetAllAccounts()
     {
       return await _accountManager.GetAllAccounts();
+    }
+
+    public async Task<IEnumerable<AccountDto>> GetTransactionDebitAccounts()
+    {
+      throw new NotImplementedException();
+    }
+
+    public async Task<IEnumerable<AccountDto>> GetTransactionCreditAccounts()
+    {
+      throw new NotImplementedException();
     }
 
     public async Task<AddAccountResult> AddAccount(NewAccountDto newAccountDto)

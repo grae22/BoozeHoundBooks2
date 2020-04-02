@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace bhb2desktop
@@ -11,7 +12,8 @@ namespace bhb2desktop
     private IContainer _components = null;
     private MenuStrip _menuStrip;
     private ToolStripMenuItem _accountMenuItem;
-    private ToolStripMenuItem _addAccountItem;
+    private ToolStripMenuItem _addAccountMenuItem;
+    private ToolStripMenuItem _newTransactionMenuItem;
     private Panel _mainPanel;
     private TreeView _accountsTree;
 
@@ -36,34 +38,42 @@ namespace bhb2desktop
     /// </summary>
     private void InitializeComponent()
     {
-      _components = new System.ComponentModel.Container();
+      _components = new Container();
 
-      AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      ClientSize = new System.Drawing.Size(800, 450);
+      AutoScaleMode = AutoScaleMode.Font;
+      ClientSize = new Size(800, 450);
       Text = "Booze Hound Books 2";
 
-      _menuStrip = new System.Windows.Forms.MenuStrip
+      _menuStrip = new MenuStrip
       {
       };
 
-      _accountMenuItem = new System.Windows.Forms.ToolStripMenuItem
+      _accountMenuItem = new ToolStripMenuItem
       {
         Text = "Accounts"
       };
 
-      _addAccountItem = new System.Windows.Forms.ToolStripMenuItem
+      _addAccountMenuItem = new ToolStripMenuItem
       {
         Text = "Add"
       };
 
-      _addAccountItem.Click += AddAccount_OnClick;
+      _addAccountMenuItem.Click += AddAccount_OnClick;
 
-      _accountMenuItem.DropDownItems.Add(_addAccountItem);
+      _accountMenuItem.DropDownItems.Add(_addAccountMenuItem);
+
+      _newTransactionMenuItem = new ToolStripMenuItem
+      {
+        Text = "New Transaction",
+        Alignment = ToolStripItemAlignment.Right
+      };
+
+      _newTransactionMenuItem.Click += NewTransaction_OnClick;
 
       _menuStrip.Items.Add(_accountMenuItem);
-      _menuStrip.Items.Add(_accountMenuItem);
+      _menuStrip.Items.Add(_newTransactionMenuItem);
 
-      _mainPanel = new System.Windows.Forms.Panel
+      _mainPanel = new Panel
       {
         AutoSize = true,
         AutoSizeMode = AutoSizeMode.GrowAndShrink,
@@ -71,7 +81,7 @@ namespace bhb2desktop
         Padding = new Padding(top: 30, bottom: 0, left: 0, right: 0)
       };
 
-      _accountsTree = new System.Windows.Forms.TreeView
+      _accountsTree = new TreeView
       {
         Dock = DockStyle.Fill
       };

@@ -107,5 +107,12 @@ namespace bhb2desktop
 
       Task.Run(async () => await PopulateAccountsTree());
     }
+
+    private void NewTransaction_OnClick(object sender, EventArgs args)
+    {
+      using var dlg = new TransactionPropertiesDialog();
+
+      dlg.ShowDialog();
+    }
   }
 }

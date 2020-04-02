@@ -26,14 +26,24 @@ namespace bhb2core.Accounting.Engines.AccountingEngine
         logger);
     }
 
-    public async Task CreateBaseAccountsIfMissing()
+    public string BuildAccountId(in string name, in string parentId)
     {
-      await _accountEngine.CreateBaseAccountsIfMissing();
+      return _accountEngine.BuildAccountId(name, parentId);
+    }
+
+    public bool ValidateNewAccount(in NewAccount newAccount, out string error)
+    {
+      return _accountEngine.ValidateNewAccount(newAccount, out error);
     }
 
     public async Task AddAccount(NewAccount newAccount)
     {
       await _accountEngine.AddAccount(newAccount);
+    }
+
+    public async Task<bool> DoesAccountExist(string accountId)
+    {
+      return await _accountEngine.DoesAccountExist(accountId);
     }
 
     public async Task ProcessTransaction(Transaction transaction)

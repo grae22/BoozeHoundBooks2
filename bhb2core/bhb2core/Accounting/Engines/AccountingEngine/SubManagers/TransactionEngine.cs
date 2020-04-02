@@ -22,6 +22,7 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
       _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+    // TODO: Split method up - move orchestration to manager.
     public async Task ProcessTransaction(Transaction transaction)
     {
       if (transaction == null)

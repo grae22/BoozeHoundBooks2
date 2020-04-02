@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.Dto;
@@ -15,6 +16,15 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 {
   internal class AccountManager : IAccountManager
   {
+    private static readonly string[] BaseAccountNames =
+    {
+      "Funds",
+      "Income",
+      "Expense",
+      "Debtor",
+      "Creditor"
+    };
+
     private readonly IAccountingEngine _accountingEngine;
     private readonly IAccountingDataAccess _accountingDataAccess;
     private readonly IMapper _mapper;
@@ -36,7 +46,7 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
     {
       _logger.LogInformation("Initialising...");
 
-      await _accountingEngine.CreateBaseAccountsIfMissing();
+      await CreateBaseAccountsIfMissing();
     }
 
     public async Task<IEnumerable<AccountDto>> GetAllAccounts()
@@ -71,6 +81,26 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 
       NewAccount newAccount = _mapper.Map<NewAccountDto, NewAccount>(newAccountDto);
 
+      bool isNewAccountValid = _accountingEngine.ValidateNewAccount(
+        newAccount,
+        out string validationError);
+
+      if (!isNewAccountValid)
+      {
+        _logger.LogError($"New account validation failed: \"{validationError}\" : {newAccount}");
+
+        return AddAccountResult.CreateFailure(validationError);
+      }
+
+      bool parentAccountExists = await _accountingEngine.DoesAccountExist(newAccount.ParentAccountId);
+
+      if (!parentAccountExists)
+      {
+        _logger.LogError($"Parent account id not found for new account: {newAccount}");
+
+        return AddAccountResult.CreateFailure("Parent account not found.");
+      }
+
       try
       {
         await _accountingEngine.AddAccount(newAccount);
@@ -83,6 +113,29 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
       }
 
       return AddAccountResult.CreateSuccess();
+    }
+
+    private async Task CreateBaseAccountsIfMissing()
+    {
+      foreach (var name in BaseAccountNames)
+      {
+        string id = _accountingEngine.BuildAccountId(name, null);
+
+        if (await _accountingEngine.DoesAccountExist(id))
+        {
+          _logger.LogVerbose($"Found \"{name}\" base account.");
+          continue;
+        }
+
+        await _accountingEngine.AddAccount(
+          new NewAccount
+          {
+            Name = name,
+            ParentAccountId = null
+          });
+
+        _logger.LogInformation($"Added \"{name}\" base account.");
+      }
     }
   }
 }

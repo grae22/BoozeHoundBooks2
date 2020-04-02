@@ -6,8 +6,12 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.Interfaces
 {
   internal interface IAccountEngine
   {
-    Task CreateBaseAccountsIfMissing();
+    string BuildAccountId(in string name, in string parentId);
+
+    bool ValidateNewAccount(in NewAccount newAccount, out string error);
 
     Task AddAccount(NewAccount newAccount);
+
+    Task<bool> DoesAccountExist(string accountId);
   }
 }

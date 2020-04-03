@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
+using bhb2core.Accounting.ActionResults;
 using bhb2core.Accounting.Engines.AccountingEngine.Interfaces;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
@@ -66,32 +65,47 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
       return true;
     }
 
-    public async Task AddAccount(NewAccount newAccount)
+    public async Task<AddAccountResult> AddAccount(NewAccount newAccount)
     {
       _logger.LogVerbose($"Add account request received, account details: {newAccount}");
 
       string sanitisedAccountName = newAccount.Name.Trim();
       string accountId = BuildAccountId(sanitisedAccountName, newAccount.ParentAccountId);
 
+      GetAccountResult getAccountResult = await _accountingDataAccess.GetAccountById(newAccount.ParentAccountId);
+
+      if (!getAccountResult.IsSuccess)
+      {
+        return AddAccountResult.CreateFailure($"Failed to retrieve parent account: \"{getAccountResult.FailureMessage}");
+      }
+
+      Account parentAccount = getAccountResult.Result;
+
       var account = new Account
       {
         Id = accountId,
         Name = sanitisedAccountName,
         ParentAccountId = newAccount.ParentAccountId,
-        Balance = 0
+        Balance = 0,
+        IsFunds = parentAccount.IsFunds,
+        IsIncome = parentAccount.IsIncome,
+        IsExpense = parentAccount.IsExpense,
+        IsDebtor = parentAccount.IsDebtor,
+        IsCreditor = parentAccount.IsCreditor
       };
 
       await _accountingDataAccess.AddAccount(account);
 
       _logger.LogInformation($"Account added: {account}");
+
+      return AddAccountResult.CreateSuccess();
     }
 
     public async Task<bool> DoesAccountExist(string accountId)
     {
-      IReadOnlyDictionary<string, Account> accounts =
-        await _accountingDataAccess.GetAccountsById(new[] { accountId });
+      GetAccountResult result = await _accountingDataAccess.GetAccountById(accountId);
 
-      return accounts.Any();
+      return result.IsSuccess;
     }
   }
 }

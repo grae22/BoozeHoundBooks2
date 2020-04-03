@@ -59,6 +59,8 @@ namespace bhb2desktop
         ParentAccountId = _parentComboBox.Text.ToLower()
       };
 
+      DialogResult = DialogResult.OK;
+
       Close();
     }
   }

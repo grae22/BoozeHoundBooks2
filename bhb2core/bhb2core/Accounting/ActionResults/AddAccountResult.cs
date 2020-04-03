@@ -1,10 +1,10 @@
-﻿namespace bhb2core.Accounting.Managers.AccountingManager.ActionResults
+﻿namespace bhb2core.Accounting.ActionResults
 {
   public struct AddAccountResult
   {
     public static AddAccountResult CreateSuccess()
     {
-      return new AddAccountResult(true, string.Empty);
+      return new AddAccountResult(true, null);
     }
 
     public static AddAccountResult CreateFailure(in string failureMessage)

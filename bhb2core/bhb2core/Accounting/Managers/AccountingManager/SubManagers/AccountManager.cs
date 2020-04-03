@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
+using bhb2core.Accounting.ActionResults;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Exceptions;
 using bhb2core.Accounting.Interfaces;
-using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
 using bhb2core.Accounting.Managers.AccountingManager.Interfaces;
 using bhb2core.Accounting.Models;
 using bhb2core.Utils.Logging;
@@ -136,7 +135,7 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 
       try
       {
-        await _accountingEngine.AddAccount(newAccount);
+        return await _accountingEngine.AddAccount(newAccount);
       }
       catch (AccountException ex)
       {
@@ -144,10 +143,6 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 
         return AddAccountResult.CreateFailure(ex.Message);
       }
-
-      _logger.LogInformation($"Added account: {newAccount}");
-
-      return AddAccountResult.CreateSuccess();
     }
 
     private async Task CreateBaseAccountsIfMissing()

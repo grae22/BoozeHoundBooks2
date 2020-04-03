@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using bhb2core.Accounting.ActionResults;
 using bhb2core.Accounting.Models;
 
 namespace bhb2core.Accounting.Interfaces
@@ -15,6 +16,8 @@ namespace bhb2core.Accounting.Interfaces
       bool isExpense = false,
       bool isDebtor = false,
       bool isCreditor = false);
+
+    Task<GetAccountResult> GetAccountById(string accountId);
 
     Task<IReadOnlyDictionary<string, Account>> GetAccountsById(IEnumerable<string> accountIds);
 

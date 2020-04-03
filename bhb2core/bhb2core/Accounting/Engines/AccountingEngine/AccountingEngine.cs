@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 
+using bhb2core.Accounting.ActionResults;
 using bhb2core.Accounting.Engines.AccountingEngine.Interfaces;
 using bhb2core.Accounting.Engines.AccountingEngine.SubManagers;
 using bhb2core.Accounting.Interfaces;
@@ -36,9 +37,9 @@ namespace bhb2core.Accounting.Engines.AccountingEngine
       return _accountEngine.ValidateNewAccount(newAccount, out error);
     }
 
-    public async Task AddAccount(NewAccount newAccount)
+    public async Task<AddAccountResult> AddAccount(NewAccount newAccount)
     {
-      await _accountEngine.AddAccount(newAccount);
+      return await _accountEngine.AddAccount(newAccount);
     }
 
     public async Task<bool> DoesAccountExist(string accountId)

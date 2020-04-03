@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using bhb2core.Accounting.ActionResults;
 using bhb2core.Accounting.Exceptions;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
@@ -29,45 +30,44 @@ namespace bhb2core.Accounting.DataAccess
 
       if (isFunds)
       {
-        accounts
-          .AddRange(
-            _accounts
-              .Where(a => a.IsFunds));
+        accounts.AddRange(_accounts.Where(a => a.IsFunds));
       }
 
       if (isIncome)
       {
-        accounts
-          .AddRange(
-            _accounts
-              .Where(a => a.IsIncome));
+        accounts.AddRange(_accounts.Where(a => a.IsIncome));
       }
 
       if (isExpense)
       {
-        accounts
-          .AddRange(
-            _accounts
-              .Where(a => a.IsExpense));
+        accounts.AddRange(_accounts.Where(a => a.IsExpense));
       }
 
       if (isDebtor)
       {
-        accounts
-          .AddRange(
-            _accounts
-              .Where(a => a.IsDebtor));
+        accounts.AddRange(_accounts.Where(a => a.IsDebtor));
       }
 
       if (isCreditor)
       {
-        accounts
-          .AddRange(
-            _accounts
-              .Where(a => a.IsCreditor));
+        accounts.AddRange(_accounts.Where(a => a.IsCreditor));
       }
 
       return await Task.FromResult(accounts);
+    }
+
+    public async Task<GetAccountResult> GetAccountById(string accountId)
+    {
+      Account account =
+        await Task.FromResult(
+          _accounts.FirstOrDefault(a => a.Id.Equals(accountId)));
+
+      if (account == null)
+      {
+        return GetAccountResult.CreateFailure($"Account not found with id \"{accountId}\".");
+      }
+
+      return GetAccountResult.CreateSuccess(account);
     }
 
     public async Task<IReadOnlyDictionary<string, Account>> GetAccountsById(IEnumerable<string> accountIds)

@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 
+using bhb2core.Accounting.ActionResults;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Exceptions;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Managers.AccountingManager;
-using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
 using bhb2core.Accounting.Models;
 
 using bhb2coreTests.Accounting.TestUtils;
@@ -174,16 +174,14 @@ namespace bhb2coreTests.Accounting
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       accountingDataAccess
-        .GetAccountsById(Arg.Any<string[]>())
-        .Returns(new Dictionary<string, Account>
-        {
-          { BaseAccountIds[0], new Account() }
-        });
+        .GetAccountById(FundsAccountId)
+        .Returns(
+          GetAccountResult.CreateSuccess(new Account()));
 
       var newAccount = new NewAccountDto
       {
         Name = accountName,
-        ParentAccountId = BaseAccountIds[0]
+        ParentAccountId = FundsAccountId
       };
 
       // Act.
@@ -207,16 +205,14 @@ namespace bhb2coreTests.Accounting
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       accountingDataAccess
-        .GetAccountsById(Arg.Any<string[]>())
-        .Returns(new Dictionary<string, Account>
-        {
-          { BaseAccountIds[0], new Account() }
-        });
+        .GetAccountById(FundsAccountId)
+        .Returns(
+          GetAccountResult.CreateSuccess(new Account()));
 
       var newAccount = new NewAccountDto
       {
         Name = "SomeAccount",
-        ParentAccountId = BaseAccountIds[0]
+        ParentAccountId = FundsAccountId
       };
 
       // Act.
@@ -238,11 +234,9 @@ namespace bhb2coreTests.Accounting
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       accountingDataAccess
-        .GetAccountsById(Arg.Any<string[]>())
-        .Returns(new Dictionary<string, Account>
-        {
-          { BaseAccountIds[0], new Account() }
-        });
+        .GetAccountById(FundsAccountId)
+        .Returns(
+          GetAccountResult.CreateSuccess(new Account()));
 
       var newAccount = new NewAccountDto
       {
@@ -288,6 +282,146 @@ namespace bhb2coreTests.Accounting
       await accountingDataAccess
         .Received()
         .AddAccount(Arg.Is<Account>(a => a.Balance == 0m));
+    }
+
+    [Test]
+    public async Task Given_NewFundsAccount_When_Added_Then_AccountTypeIsFunds()
+    {
+      // Arrange.
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      accountingDataAccess
+        .GetAccountById(FundsAccountId)
+        .Returns(
+          GetAccountResult.CreateSuccess(new Account { IsFunds = true }));
+
+      var newAccount = new NewAccountDto
+      {
+        Name = "SomeAccount",
+        ParentAccountId = FundsAccountId
+      };
+
+      // Act.
+      await testObject.AddAccount(newAccount);
+
+      // Assert.
+      await accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.Name.Equals(newAccount.Name) &&
+          a.IsFunds));
+    }
+
+    [Test]
+    public async Task Given_NewIncomeAccount_When_Added_Then_AccountTypeIsIncome()
+    {
+      // Arrange.
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      accountingDataAccess
+        .GetAccountById(IncomeAccountId)
+        .Returns(
+          GetAccountResult.CreateSuccess(new Account { IsIncome = true }));
+
+      var newAccount = new NewAccountDto
+      {
+        Name = "SomeAccount",
+        ParentAccountId = IncomeAccountId
+      };
+
+      // Act.
+      await testObject.AddAccount(newAccount);
+
+      // Assert.
+      await accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a => 
+          a.Name.Equals(newAccount.Name) &&
+          a.IsIncome));
+    }
+
+    [Test]
+    public async Task Given_NewExpenseAccount_When_Added_Then_AccountTypeIsExpense()
+    {
+      // Arrange.
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      accountingDataAccess
+        .GetAccountById(ExpenseAccountId)
+        .Returns(
+          GetAccountResult.CreateSuccess(new Account { IsExpense = true }));
+
+      var newAccount = new NewAccountDto
+      {
+        Name = "SomeAccount",
+        ParentAccountId = ExpenseAccountId
+      };
+
+      // Act.
+      await testObject.AddAccount(newAccount);
+
+      // Assert.
+      await accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.Name.Equals(newAccount.Name) &&
+          a.IsExpense));
+    }
+
+    [Test]
+    public async Task Given_NewDebtorAccount_When_Added_Then_AccountTypeIsDebtor()
+    {
+      // Arrange.
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      accountingDataAccess
+        .GetAccountById(DebtorAccountId)
+        .Returns(
+          GetAccountResult.CreateSuccess(new Account { IsDebtor = true }));
+
+      var newAccount = new NewAccountDto
+      {
+        Name = "SomeAccount",
+        ParentAccountId = DebtorAccountId
+      };
+
+      // Act.
+      await testObject.AddAccount(newAccount);
+
+      // Assert.
+      await accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.Name.Equals(newAccount.Name) &&
+          a.IsDebtor));
+    }
+
+    [Test]
+    public async Task Given_NewCreditorAccount_When_Added_Then_AccountTypeIsCreditor()
+    {
+      // Arrange.
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      accountingDataAccess
+        .GetAccountById(CreditorAccountId)
+        .Returns(
+          GetAccountResult.CreateSuccess(new Account { IsCreditor = true }));
+
+      var newAccount = new NewAccountDto
+      {
+        Name = "SomeAccount",
+        ParentAccountId = CreditorAccountId
+      };
+
+      // Act.
+      await testObject.AddAccount(newAccount);
+
+      // Assert.
+      await accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.Name.Equals(newAccount.Name) &&
+          a.IsCreditor));
     }
 
     [TestCase("")]

@@ -13,6 +13,8 @@ namespace bhb2desktop
 {
   public partial class TransactionPropertiesDialog : Form
   {
+    public TransactionDto Transaction { get; private set; }
+
     private readonly IAccountingManager _accountingManager;
 
     public TransactionPropertiesDialog(IAccountingManager accountingManager)
@@ -73,6 +75,21 @@ namespace bhb2desktop
       }
 
       _creditAccountComboBox.SelectedIndex = 0;
+    }
+
+    private void OkButton_OnClick(object sender, EventArgs args)
+    {
+      Transaction = new TransactionDto
+      {
+        DebitAccountId = _debitAccountComboBox.Text.ToLower(),
+        CreditAccountId = _creditAccountComboBox.Text.ToLower(),
+        DateAndTime = _datePicker.Value,
+        Amount = decimal.Parse(_amountTextBox.Text)
+      };
+
+      DialogResult = DialogResult.OK;
+
+      Close();
     }
   }
 }

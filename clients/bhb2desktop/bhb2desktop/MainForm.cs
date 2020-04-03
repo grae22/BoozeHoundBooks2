@@ -5,9 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using bhb2core.Accounting.ActionResults;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
-using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
 using bhb2core.Utils.Logging;
 
 using bhb2desktop.Extensions;
@@ -113,6 +113,18 @@ namespace bhb2desktop
       using var dlg = new TransactionPropertiesDialog(_accountingManager);
 
       dlg.ShowDialog();
+
+      if (dlg.DialogResult != DialogResult.OK)
+      {
+        return;
+      }
+
+      Task.Run(async () =>
+      {
+        await _accountingManager.ProcessTransaction(dlg.Transaction);
+
+        await PopulateAccountsTree();
+      });
     }
   }
 }

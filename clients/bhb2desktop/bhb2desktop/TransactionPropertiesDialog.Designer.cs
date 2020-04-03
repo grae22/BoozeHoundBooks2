@@ -128,7 +128,7 @@ namespace bhb2desktop
         Text = "OK"
       };
 
-      //_okButton.Click += OkButton_OnClick;
+      _okButton.Click += OkButton_OnClick;
 
       _cancelButton = new Button
       {

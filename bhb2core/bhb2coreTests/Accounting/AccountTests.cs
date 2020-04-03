@@ -22,27 +22,48 @@ namespace bhb2coreTests.Accounting
   public class AccountTests
   {
     private const char AccountIdSeparator = '.';
+    private const string FundsAccountId = "funds";
+    private const string IncomeAccountId = "income";
+    private const string ExpenseAccountId = "expense";
+    private const string DebtorAccountId = "debtor";
+    private const string CreditorAccountId = "creditor";
+    private const string FundsAccountName = "Funds";
+    private const string IncomeAccountName = "Income";
+    private const string ExpenseAccountName = "Expense";
+    private const string DebtorAccountName = "Debtor";
+    private const string CreditorAccountName = "Creditor";
 
     private static readonly string[] BaseAccountNames =
     {
-      "Funds",
-      "Income",
-      "Expense",
-      "Debtor",
-      "Creditor"
+      FundsAccountName,
+      IncomeAccountName,
+      ExpenseAccountName,
+      DebtorAccountName,
+      CreditorAccountName
     };
 
     private static readonly string[] BaseAccountIds =
     {
-      "funds",
-      "income",
-      "expense",
-      "debtor",
-      "creditor"
+      FundsAccountId,
+      IncomeAccountId,
+      ExpenseAccountId,
+      DebtorAccountId,
+      CreditorAccountId
     };
 
-    [Test]
-    public async Task Given_NoAccountsAndAccountingManagerInitialised_When_AllAccountsRetrieved_Then_BaseAccountsAreReturned()
+    [TestCase(FundsAccountId, FundsAccountName, true, false, false, false, false)]
+    [TestCase(IncomeAccountId, IncomeAccountName, false, true, false, false, false)]
+    [TestCase(ExpenseAccountId, ExpenseAccountName, false, false, true, false, false)]
+    [TestCase(DebtorAccountId, DebtorAccountName, false, false, false, true, false)]
+    [TestCase(CreditorAccountId, CreditorAccountName, false, false, false, false, true)]
+    public async Task Given_NoAccountsAndAccountingManagerInitialised_When_AllAccountsRetrieved_Then_BaseAccountsAreReturned(
+      string id,
+      string name,
+      bool isFunds,
+      bool isIncome,
+      bool isExpense,
+      bool isDebtor,
+      bool isCreditor)
     {
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(
@@ -53,15 +74,17 @@ namespace bhb2coreTests.Accounting
       IEnumerable<AccountDto> accounts = await testObject.GetAllAccounts();
 
       // Assert.
-      foreach (var name in BaseAccountNames)
-      {
-        AccountDto account = accounts.SingleOrDefault(a => a.Name.Equals(name));
+      AccountDto account = accounts.SingleOrDefault(a => a.Id.Equals(id));
 
-        Assert.NotNull(account);
-        Assert.AreEqual(name.ToLower(), account.Id);
-        Assert.IsNull(account.ParentAccountId);
-        Assert.AreEqual(0m, account.Balance);
-      }
+      Assert.NotNull(account);
+      Assert.AreEqual(name, account.Name);
+      Assert.IsNull(account.ParentAccountId);
+      Assert.AreEqual(0m, account.Balance);
+      Assert.AreEqual(isFunds, account.IsFunds);
+      Assert.AreEqual(isIncome, account.IsIncome);
+      Assert.AreEqual(isExpense, account.IsExpense);
+      Assert.AreEqual(isDebtor, account.IsDebtor);
+      Assert.AreEqual(isCreditor, account.IsCreditor);
     }
 
     [Test]
@@ -305,6 +328,70 @@ namespace bhb2coreTests.Accounting
 
       // Assert.
       Assert.IsFalse(result.IsSuccess);
+    }
+
+    [Test]
+    public async Task Given_BaseAccountsExist_When_RetrievingTransactionDebitAccounts_Then_CorrectAccountsAreReturned()
+    {
+      // Arrange.
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      accountingDataAccess
+        .GetAccounts(
+          isFunds: true,
+          isIncome: true,
+          isDebtor: true,
+          isCreditor: true)
+        .Returns(new[]
+        {
+          new Account { Id = FundsAccountId },
+          new Account { Id = IncomeAccountId },
+          new Account { Id = DebtorAccountId },
+          new Account { Id = CreditorAccountId },
+        });
+
+      // Act.
+      IEnumerable<AccountDto> accounts = await testObject.GetTransactionDebitAccounts();
+
+      // Assert.
+      accounts.Single(a => a.Id.Equals(FundsAccountId));
+      accounts.Single(a => a.Id.Equals(IncomeAccountId));
+      accounts.Single(a => a.Id.Equals(DebtorAccountId));
+      accounts.Single(a => a.Id.Equals(CreditorAccountId));
+
+      Assert.Pass();
+    }
+
+    [Test]
+    public async Task Given_BaseAccountsExist_When_RetrievingTransactionCreditAccounts_Then_CorrectAccountsAreReturned()
+    {
+      // Arrange.
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      accountingDataAccess
+        .GetAccounts(
+          isFunds: true,
+          isExpense: true,
+          isDebtor: true,
+          isCreditor: true)
+        .Returns(new[]
+        {
+          new Account { Id = FundsAccountId },
+          new Account { Id = ExpenseAccountId },
+          new Account { Id = DebtorAccountId },
+          new Account { Id = CreditorAccountId },
+        });
+
+      // Act.
+      IEnumerable<AccountDto> accounts = await testObject.GetTransactionCreditAccounts();
+
+      // Assert.
+      accounts.Single(a => a.Id.Equals(FundsAccountId));
+      accounts.Single(a => a.Id.Equals(ExpenseAccountId));
+      accounts.Single(a => a.Id.Equals(DebtorAccountId));
+      accounts.Single(a => a.Id.Equals(CreditorAccountId));
+
+      Assert.Pass();
     }
   }
 }

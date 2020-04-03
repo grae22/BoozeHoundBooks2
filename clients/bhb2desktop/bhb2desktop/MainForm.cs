@@ -110,7 +110,7 @@ namespace bhb2desktop
 
     private void NewTransaction_OnClick(object sender, EventArgs args)
     {
-      using var dlg = new TransactionPropertiesDialog();
+      using var dlg = new TransactionPropertiesDialog(_accountingManager);
 
       dlg.ShowDialog();
     }

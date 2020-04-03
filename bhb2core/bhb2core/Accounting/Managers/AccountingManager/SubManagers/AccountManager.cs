@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.Dto;
@@ -11,18 +11,25 @@ using bhb2core.Accounting.Managers.AccountingManager.Interfaces;
 using bhb2core.Accounting.Models;
 using bhb2core.Utils.Logging;
 using bhb2core.Utils.Mapping;
+using bhb2core.Utils.Serialisation;
 
 namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 {
   internal class AccountManager : IAccountManager
   {
+    private const string FundsAccountName = "Funds";
+    private const string IncomeAccountName = "Income";
+    private const string ExpenseAccountName = "Expense";
+    private const string DebtorAccountName = "Debtor";
+    private const string CreditorAccountName = "Creditor";
+
     private static readonly string[] BaseAccountNames =
     {
-      "Funds",
-      "Income",
-      "Expense",
-      "Debtor",
-      "Creditor"
+      FundsAccountName,
+      IncomeAccountName,
+      ExpenseAccountName,
+      DebtorAccountName,
+      CreditorAccountName
     };
 
     private readonly IAccountingEngine _accountingEngine;
@@ -57,17 +64,43 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 
       IEnumerable<AccountDto> accountDtos = _mapper.Map<IEnumerable<Account>, IEnumerable<AccountDto>>(accounts);
 
+      _logger.LogVerbose($"Returning accounts: {Serialiser.Serialise(accountDtos)}");
+
       return accountDtos;
     }
 
     public async Task<IEnumerable<AccountDto>> GetTransactionDebitAccounts()
     {
-      throw new NotImplementedException();
+      _logger.LogVerbose("Request received for transaction debit accounts.");
+
+      IEnumerable<Account> accounts = await _accountingDataAccess.GetAccounts(
+        isFunds: true,
+        isIncome: true,
+        isDebtor: true,
+        isCreditor: true);
+
+      IEnumerable<AccountDto> accountDtos = _mapper.Map<IEnumerable<Account>, IEnumerable<AccountDto>>(accounts);
+
+      _logger.LogVerbose($"Returning transaction debit accounts: {Serialiser.Serialise(accountDtos)}");
+
+      return accountDtos;
     }
 
     public async Task<IEnumerable<AccountDto>> GetTransactionCreditAccounts()
     {
-      throw new NotImplementedException();
+      _logger.LogVerbose("Request received for transaction credit accounts.");
+
+      IEnumerable<Account> accounts = await _accountingDataAccess.GetAccounts(
+        isFunds: true,
+        isExpense: true,
+        isDebtor: true,
+        isCreditor: true);
+
+      IEnumerable<AccountDto> accountDtos = _mapper.Map<IEnumerable<Account>, IEnumerable<AccountDto>>(accounts);
+
+      _logger.LogVerbose($"Returning transaction credit accounts: {Serialiser.Serialise(accountDtos)}");
+
+      return accountDtos;
     }
 
     public async Task<AddAccountResult> AddAccount(NewAccountDto newAccountDto)
@@ -112,11 +145,17 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
         return AddAccountResult.CreateFailure(ex.Message);
       }
 
+      _logger.LogInformation($"Added account: {newAccount}");
+
       return AddAccountResult.CreateSuccess();
     }
 
     private async Task CreateBaseAccountsIfMissing()
     {
+      _logger.LogInformation("Creating base accounts if missing...");
+
+      var missingAccounts = new List<string>();
+
       foreach (var name in BaseAccountNames)
       {
         string id = _accountingEngine.BuildAccountId(name, null);
@@ -127,15 +166,61 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
           continue;
         }
 
-        await _accountingEngine.AddAccount(
-          new NewAccount
-          {
-            Name = name,
-            ParentAccountId = null
-          });
+        missingAccounts.Add(name);
 
-        _logger.LogInformation($"Added \"{name}\" base account.");
+        _logger.LogInformation($"\"{name}\" base account not found.");
       }
+
+      if (missingAccounts.Contains(FundsAccountName))
+      {
+        await CreateBaseAccount(FundsAccountName, isFunds: true);
+      }
+
+      if (missingAccounts.Contains(IncomeAccountName))
+      {
+        await CreateBaseAccount(IncomeAccountName, isIncome: true);
+      }
+
+      if (missingAccounts.Contains(ExpenseAccountName))
+      {
+        await CreateBaseAccount(ExpenseAccountName, isExpense: true);
+      }
+
+      if (missingAccounts.Contains(DebtorAccountName))
+      {
+        await CreateBaseAccount(DebtorAccountName, isDebtor: true);
+      }
+
+      if (missingAccounts.Contains(CreditorAccountName))
+      {
+        await CreateBaseAccount(CreditorAccountName, isCreditor: true);
+      }
+    }
+
+    private async Task CreateBaseAccount(
+      string name,
+      bool isFunds = false,
+      bool isIncome = false,
+      bool isExpense = false,
+      bool isDebtor = false,
+      bool isCreditor = false)
+    {
+      var account = new Account
+      {
+        Id = _accountingEngine.BuildAccountId(name, null),
+        Name = name,
+        ParentAccountId = null,
+        Balance = 0m,
+        IsFunds = isFunds,
+        IsIncome = isIncome,
+        IsExpense = isExpense,
+        IsDebtor = isDebtor,
+        IsCreditor = isCreditor
+      };
+
+      await _accountingDataAccess.AddAccount(account);
+
+      _logger.LogInformation($"Added \"{name}\" base account: {account}");
     }
   }
 }

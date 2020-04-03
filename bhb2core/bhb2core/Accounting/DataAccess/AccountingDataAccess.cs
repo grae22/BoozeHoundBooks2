@@ -18,6 +18,58 @@ namespace bhb2core.Accounting.DataAccess
       return await Task.FromResult(_accounts);
     }
 
+    public async Task<IEnumerable<Account>> GetAccounts(
+      bool isFunds = false,
+      bool isIncome = false,
+      bool isExpense = false,
+      bool isDebtor = false,
+      bool isCreditor = false)
+    {
+      var accounts = new List<Account>();
+
+      if (isFunds)
+      {
+        accounts
+          .AddRange(
+            _accounts
+              .Where(a => a.IsFunds));
+      }
+
+      if (isIncome)
+      {
+        accounts
+          .AddRange(
+            _accounts
+              .Where(a => a.IsIncome));
+      }
+
+      if (isExpense)
+      {
+        accounts
+          .AddRange(
+            _accounts
+              .Where(a => a.IsExpense));
+      }
+
+      if (isDebtor)
+      {
+        accounts
+          .AddRange(
+            _accounts
+              .Where(a => a.IsDebtor));
+      }
+
+      if (isCreditor)
+      {
+        accounts
+          .AddRange(
+            _accounts
+              .Where(a => a.IsCreditor));
+      }
+
+      return await Task.FromResult(accounts);
+    }
+
     public async Task<IReadOnlyDictionary<string, Account>> GetAccountsById(IEnumerable<string> accountIds)
     {
       Dictionary<string, Account> accounts =

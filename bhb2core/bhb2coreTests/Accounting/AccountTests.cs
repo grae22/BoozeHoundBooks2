@@ -176,7 +176,7 @@ namespace bhb2coreTests.Accounting
       accountingDataAccess
         .GetAccountById(FundsAccountId)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account()));
+          GetAccountResult.CreateSuccess(new Account { Id = FundsAccountId }));
 
       var newAccount = new NewAccountDto
       {
@@ -207,7 +207,7 @@ namespace bhb2coreTests.Accounting
       accountingDataAccess
         .GetAccountById(FundsAccountId)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account()));
+          GetAccountResult.CreateSuccess(new Account { Id = FundsAccountId }));
 
       var newAccount = new NewAccountDto
       {
@@ -236,7 +236,7 @@ namespace bhb2coreTests.Accounting
       accountingDataAccess
         .GetAccountById(FundsAccountId)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account()));
+          GetAccountResult.CreateSuccess(new Account { Id = FundsAccountId }));
 
       var newAccount = new NewAccountDto
       {

@@ -111,7 +111,20 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
         throw new ArgumentNullException(nameof(newAccountDto));
       }
 
-      NewAccount newAccount = _mapper.Map<NewAccountDto, NewAccount>(newAccountDto);
+      GetAccountResult getParentAccountResult = await _accountingDataAccess.GetAccountById(newAccountDto.ParentAccountId);
+
+      if (!getParentAccountResult.IsSuccess)
+      {
+        _logger.LogError($"Parent account not found for new account: {newAccountDto}");
+
+        return AddAccountResult.CreateFailure("Parent account not found.");
+      }
+
+      var newAccount = new NewAccount
+      {
+        Name = newAccountDto.Name,
+        ParentAccount = getParentAccountResult.Result
+      };
 
       bool isNewAccountValid = _accountingEngine.ValidateNewAccount(
         newAccount,
@@ -122,15 +135,6 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
         _logger.LogError($"New account validation failed: \"{validationError}\" : {newAccount}");
 
         return AddAccountResult.CreateFailure(validationError);
-      }
-
-      bool parentAccountExists = await _accountingEngine.DoesAccountExist(newAccount.ParentAccountId);
-
-      if (!parentAccountExists)
-      {
-        _logger.LogError($"Parent account id not found for new account: {newAccount}");
-
-        return AddAccountResult.CreateFailure("Parent account not found.");
       }
 
       try

@@ -56,9 +56,9 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
         return false;
       }
 
-      if (string.IsNullOrWhiteSpace(newAccount.ParentAccountId))
+      if (newAccount.ParentAccount == null)
       {
-        error = "Parent account id is cannot be null, empty or whitespace.";
+        error = "Parent account cannot be null.";
         return false;
       }
 
@@ -70,28 +70,19 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
       _logger.LogVerbose($"Add account request received, account details: {newAccount}");
 
       string sanitisedAccountName = newAccount.Name.Trim();
-      string accountId = BuildAccountId(sanitisedAccountName, newAccount.ParentAccountId);
-
-      GetAccountResult getAccountResult = await _accountingDataAccess.GetAccountById(newAccount.ParentAccountId);
-
-      if (!getAccountResult.IsSuccess)
-      {
-        return AddAccountResult.CreateFailure($"Failed to retrieve parent account: \"{getAccountResult.FailureMessage}");
-      }
-
-      Account parentAccount = getAccountResult.Result;
+      string accountId = BuildAccountId(sanitisedAccountName, newAccount.ParentAccount.Id);
 
       var account = new Account
       {
         Id = accountId,
         Name = sanitisedAccountName,
-        ParentAccountId = newAccount.ParentAccountId,
+        ParentAccountId = newAccount.ParentAccount.Id,
         Balance = 0,
-        IsFunds = parentAccount.IsFunds,
-        IsIncome = parentAccount.IsIncome,
-        IsExpense = parentAccount.IsExpense,
-        IsDebtor = parentAccount.IsDebtor,
-        IsCreditor = parentAccount.IsCreditor
+        IsFunds = newAccount.ParentAccount.IsFunds,
+        IsIncome = newAccount.ParentAccount.IsIncome,
+        IsExpense = newAccount.ParentAccount.IsExpense,
+        IsDebtor = newAccount.ParentAccount.IsDebtor,
+        IsCreditor = newAccount.ParentAccount.IsCreditor
       };
 
       await _accountingDataAccess.AddAccount(account);

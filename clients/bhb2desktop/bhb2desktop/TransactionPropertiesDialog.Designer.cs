@@ -142,6 +142,8 @@ namespace bhb2desktop
         AutoSizeMode = AutoSizeMode.GrowAndShrink
       };
 
+      CancelButton = _cancelButton;
+
       SuspendLayout();
 
       this.Controls.Add(_mainPanel);

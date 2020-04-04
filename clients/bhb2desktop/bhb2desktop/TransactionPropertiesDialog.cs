@@ -72,7 +72,10 @@ namespace bhb2desktop
         .ForEach(
           a =>
           {
-            if (!accountsWithoutDebitPermission.Contains(a))
+            bool isNotDebitAccount = !a.QualifiedName.Equals(debitAccount.QualifiedName, StringComparison.Ordinal);
+            bool hasPermissionToDebit = !accountsWithoutDebitPermission.Contains(a);
+
+            if (isNotDebitAccount && hasPermissionToDebit)
             {
               _creditAccountComboBox.Items.Add(a.QualifiedName);
             }

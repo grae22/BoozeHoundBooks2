@@ -67,11 +67,11 @@ namespace bhb2coreTests.Accounting
       Assert.AreEqual(name, account.Name);
       Assert.IsNull(account.ParentAccountQualifiedName);
       Assert.AreEqual(0m, account.Balance);
-      Assert.AreEqual(isFunds, account.IsFunds);
-      Assert.AreEqual(isIncome, account.IsIncome);
-      Assert.AreEqual(isExpense, account.IsExpense);
-      Assert.AreEqual(isDebtor, account.IsDebtor);
-      Assert.AreEqual(isCreditor, account.IsCreditor);
+      Assert.AreEqual(isFunds, account.AccountType.IsFunds);
+      Assert.AreEqual(isIncome, account.AccountType.IsIncome);
+      Assert.AreEqual(isExpense, account.AccountType.IsExpense);
+      Assert.AreEqual(isDebtor, account.AccountType.IsDebtor);
+      Assert.AreEqual(isCreditor, account.AccountType.IsCreditor);
     }
 
     [Test]
@@ -280,7 +280,11 @@ namespace bhb2coreTests.Accounting
       accountingDataAccess
         .GetAccount(FundsAccountName)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account { IsFunds = true }));
+          GetAccountResult.CreateSuccess(
+            new Account
+            {
+              AccountType = new AccountType { IsFunds = true }
+            }));
 
       var newAccount = new NewAccountDto
       {
@@ -296,7 +300,7 @@ namespace bhb2coreTests.Accounting
         .Received(1)
         .AddAccount(Arg.Is<Account>(a =>
           a.Name.Equals(newAccount.Name) &&
-          a.IsFunds));
+          a.AccountType.IsFunds));
     }
 
     [Test]
@@ -308,7 +312,11 @@ namespace bhb2coreTests.Accounting
       accountingDataAccess
         .GetAccount(IncomeAccountName)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account { IsIncome = true }));
+          GetAccountResult.CreateSuccess(
+            new Account
+            {
+              AccountType = new AccountType { IsIncome = true }
+            }));
 
       var newAccount = new NewAccountDto
       {
@@ -324,7 +332,7 @@ namespace bhb2coreTests.Accounting
         .Received(1)
         .AddAccount(Arg.Is<Account>(a => 
           a.Name.Equals(newAccount.Name) &&
-          a.IsIncome));
+          a.AccountType.IsIncome));
     }
 
     [Test]
@@ -336,7 +344,11 @@ namespace bhb2coreTests.Accounting
       accountingDataAccess
         .GetAccount(ExpenseAccountName)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account { IsExpense = true }));
+          GetAccountResult.CreateSuccess(
+            new Account
+            {
+              AccountType = new AccountType { IsExpense = true }
+            }));
 
       var newAccount = new NewAccountDto
       {
@@ -352,7 +364,7 @@ namespace bhb2coreTests.Accounting
         .Received(1)
         .AddAccount(Arg.Is<Account>(a =>
           a.Name.Equals(newAccount.Name) &&
-          a.IsExpense));
+          a.AccountType.IsExpense));
     }
 
     [Test]
@@ -364,7 +376,11 @@ namespace bhb2coreTests.Accounting
       accountingDataAccess
         .GetAccount(DebtorAccountName)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account { IsDebtor = true }));
+          GetAccountResult.CreateSuccess(
+            new Account
+            {
+              AccountType = new AccountType { IsDebtor = true }
+            }));
 
       var newAccount = new NewAccountDto
       {
@@ -380,7 +396,7 @@ namespace bhb2coreTests.Accounting
         .Received(1)
         .AddAccount(Arg.Is<Account>(a =>
           a.Name.Equals(newAccount.Name) &&
-          a.IsDebtor));
+          a.AccountType.IsDebtor));
     }
 
     [Test]
@@ -392,7 +408,11 @@ namespace bhb2coreTests.Accounting
       accountingDataAccess
         .GetAccount(CreditorAccountName)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account { IsCreditor = true }));
+          GetAccountResult.CreateSuccess(
+            new Account
+            {
+              AccountType = new AccountType { IsCreditor = true }
+            }));
 
       var newAccount = new NewAccountDto
       {
@@ -408,7 +428,7 @@ namespace bhb2coreTests.Accounting
         .Received(1)
         .AddAccount(Arg.Is<Account>(a =>
           a.Name.Equals(newAccount.Name) &&
-          a.IsCreditor));
+          a.AccountType.IsCreditor));
     }
 
     [TestCase("")]

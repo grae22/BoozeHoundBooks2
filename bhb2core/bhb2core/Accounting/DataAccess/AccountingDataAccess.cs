@@ -30,27 +30,27 @@ namespace bhb2core.Accounting.DataAccess
 
       if (isFunds)
       {
-        accounts.AddRange(_accounts.Where(a => a.IsFunds));
+        accounts.AddRange(_accounts.Where(a => a.AccountType.IsFunds));
       }
 
       if (isIncome)
       {
-        accounts.AddRange(_accounts.Where(a => a.IsIncome));
+        accounts.AddRange(_accounts.Where(a => a.AccountType.IsIncome));
       }
 
       if (isExpense)
       {
-        accounts.AddRange(_accounts.Where(a => a.IsExpense));
+        accounts.AddRange(_accounts.Where(a => a.AccountType.IsExpense));
       }
 
       if (isDebtor)
       {
-        accounts.AddRange(_accounts.Where(a => a.IsDebtor));
+        accounts.AddRange(_accounts.Where(a => a.AccountType.IsDebtor));
       }
 
       if (isCreditor)
       {
-        accounts.AddRange(_accounts.Where(a => a.IsCreditor));
+        accounts.AddRange(_accounts.Where(a => a.AccountType.IsCreditor));
       }
 
       return await Task.FromResult(accounts);

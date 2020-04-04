@@ -218,11 +218,14 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
         Name = name,
         ParentAccountQualifiedName = null,
         Balance = 0m,
-        IsFunds = isFunds,
-        IsIncome = isIncome,
-        IsExpense = isExpense,
-        IsDebtor = isDebtor,
-        IsCreditor = isCreditor
+        AccountType = new AccountType
+        {
+          IsFunds = isFunds,
+          IsIncome = isIncome,
+          IsExpense = isExpense,
+          IsDebtor = isDebtor,
+          IsCreditor = isCreditor
+        }
       };
 
       await _accountingDataAccess.AddAccount(account);

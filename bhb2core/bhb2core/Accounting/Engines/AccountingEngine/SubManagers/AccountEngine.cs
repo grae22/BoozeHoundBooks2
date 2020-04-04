@@ -78,11 +78,7 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
         Name = sanitisedAccountName,
         ParentAccountQualifiedName = newAccount.ParentAccount.QualifiedName,
         Balance = 0,
-        IsFunds = newAccount.ParentAccount.IsFunds,
-        IsIncome = newAccount.ParentAccount.IsIncome,
-        IsExpense = newAccount.ParentAccount.IsExpense,
-        IsDebtor = newAccount.ParentAccount.IsDebtor,
-        IsCreditor = newAccount.ParentAccount.IsCreditor
+        AccountType = newAccount.ParentAccount.AccountType
       };
 
       await _accountingDataAccess.AddAccount(account);

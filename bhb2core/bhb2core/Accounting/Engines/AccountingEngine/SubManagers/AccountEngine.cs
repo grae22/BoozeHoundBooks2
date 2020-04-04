@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.ActionResults;
@@ -12,7 +13,22 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
 {
   internal class AccountEngine : IAccountEngine
   {
+    private const string FundsAccountName = "Funds";
+    private const string IncomeAccountName = "Income";
+    private const string ExpenseAccountName = "Expense";
+    private const string DebtorAccountName = "Debtor";
+    private const string CreditorAccountName = "Creditor";
+
     private const char AccountQualifiedNameSeparator = '.';
+
+    private static readonly string[] BaseAccountNames =
+    {
+      FundsAccountName,
+      IncomeAccountName,
+      ExpenseAccountName,
+      DebtorAccountName,
+      CreditorAccountName
+    };
 
     private readonly IAccountingDataAccess _accountingDataAccess;
     private readonly ILogger _logger;
@@ -23,6 +39,101 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
     {
       _accountingDataAccess = accountingDataAccess ?? throw new ArgumentNullException(nameof(accountingDataAccess));
       _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    public async Task CreateBaseAccountsIfMissing()
+    {
+      _logger.LogInformation("Creating base accounts if missing...");
+
+      var missingAccounts = new List<string>();
+
+      foreach (var name in BaseAccountNames)
+      {
+        if (await DoesAccountExist(name))
+        {
+          _logger.LogVerbose($"Found \"{name}\" base account.");
+          continue;
+        }
+
+        missingAccounts.Add(name);
+
+        _logger.LogInformation($"\"{name}\" base account not found.");
+      }
+
+      if (missingAccounts.Contains(FundsAccountName))
+      {
+        await CreateBaseAccount(
+          FundsAccountName,
+          new[]
+          {
+            AccountType.CreateFunds(),
+            AccountType.CreateExpense(),
+            AccountType.CreateDebtor(),
+            AccountType.CreateCreditor()
+          },
+          new[]
+          {
+            AccountType.CreateFunds(),
+            AccountType.CreateIncome(),
+            AccountType.CreateDebtor(),
+            AccountType.CreateCreditor()
+          },
+          isFunds: true);
+      }
+
+      if (missingAccounts.Contains(IncomeAccountName))
+      {
+        await CreateBaseAccount(
+          IncomeAccountName,
+          new[]
+          {
+            AccountType.CreateFunds()
+          },
+          new AccountType[] { },
+          isIncome: true);
+      }
+
+      if (missingAccounts.Contains(ExpenseAccountName))
+      {
+        await CreateBaseAccount(
+          ExpenseAccountName,
+          new AccountType[] { },
+          new[]
+          {
+            AccountType.CreateFunds()
+          },
+          isExpense: true);
+      }
+
+      if (missingAccounts.Contains(DebtorAccountName))
+      {
+        await CreateBaseAccount(
+          DebtorAccountName,
+          new[]
+          {
+            AccountType.CreateFunds()
+          },
+          new[]
+          {
+            AccountType.CreateFunds()
+          },
+          isDebtor: true);
+      }
+
+      if (missingAccounts.Contains(CreditorAccountName))
+      {
+        await CreateBaseAccount(
+          CreditorAccountName,
+          new[]
+          {
+            AccountType.CreateFunds(),
+          },
+          new[]
+          {
+            AccountType.CreateFunds(),
+          },
+          isCreditor: true);
+      }
     }
 
     public string BuildAccountQualifiedName(in string name, in string parentQualifiedName)
@@ -96,6 +207,39 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
       GetAccountResult result = await _accountingDataAccess.GetAccount(accountQualifiedName);
 
       return result.IsSuccess;
+    }
+
+    private async Task CreateBaseAccount(
+      string name,
+      IEnumerable<AccountType> accountTypesWithDebitPermission,
+      IEnumerable<AccountType> accountTypesWithCreditPermission,
+      bool isFunds = false,
+      bool isIncome = false,
+      bool isExpense = false,
+      bool isDebtor = false,
+      bool isCreditor = false)
+    {
+      var account = new Account
+      {
+        AccountType = new AccountType
+        {
+          IsFunds = isFunds,
+          IsIncome = isIncome,
+          IsExpense = isExpense,
+          IsDebtor = isDebtor,
+          IsCreditor = isCreditor
+        },
+        QualifiedName = name,
+        Name = name,
+        ParentAccountQualifiedName = null,
+        Balance = 0m,
+        AccountTypesWithDebitPermission = accountTypesWithDebitPermission,
+        AccountTypesWithCreditPermission = accountTypesWithCreditPermission
+      };
+
+      await _accountingDataAccess.AddAccount(account);
+
+      _logger.LogInformation($"Added \"{name}\" base account: {account}");
     }
   }
 }

@@ -27,6 +27,11 @@ namespace bhb2core.Accounting.Engines.AccountingEngine
         logger);
     }
 
+    public async Task CreateBaseAccountsIfMissing()
+    {
+      await _accountEngine.CreateBaseAccountsIfMissing();
+    }
+
     public string BuildAccountQualifiedName(in string name, in string parentQualifiedName)
     {
       return _accountEngine.BuildAccountQualifiedName(name, parentQualifiedName);

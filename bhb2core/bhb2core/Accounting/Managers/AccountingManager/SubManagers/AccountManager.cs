@@ -17,21 +17,6 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 {
   internal class AccountManager : IAccountManager
   {
-    private const string FundsAccountName = "Funds";
-    private const string IncomeAccountName = "Income";
-    private const string ExpenseAccountName = "Expense";
-    private const string DebtorAccountName = "Debtor";
-    private const string CreditorAccountName = "Creditor";
-
-    private static readonly string[] BaseAccountNames =
-    {
-      FundsAccountName,
-      IncomeAccountName,
-      ExpenseAccountName,
-      DebtorAccountName,
-      CreditorAccountName
-    };
-
     private readonly IAccountingEngine _accountingEngine;
     private readonly IAccountingDataAccess _accountingDataAccess;
     private readonly IMapper _mapper;
@@ -53,7 +38,7 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
     {
       _logger.LogInformation("Initialising...");
 
-      await CreateBaseAccountsIfMissing();
+      await _accountingEngine.CreateBaseAccountsIfMissing();
     }
 
     public async Task<IEnumerable<AccountDto>> GetAllAccounts()
@@ -157,134 +142,6 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 
         return AddAccountResult.CreateFailure(ex.Message);
       }
-    }
-
-    private async Task CreateBaseAccountsIfMissing()
-    {
-      _logger.LogInformation("Creating base accounts if missing...");
-
-      var missingAccounts = new List<string>();
-
-      foreach (var name in BaseAccountNames)
-      {
-        if (await _accountingEngine.DoesAccountExist(name))
-        {
-          _logger.LogVerbose($"Found \"{name}\" base account.");
-          continue;
-        }
-
-        missingAccounts.Add(name);
-
-        _logger.LogInformation($"\"{name}\" base account not found.");
-      }
-
-      if (missingAccounts.Contains(FundsAccountName))
-      {
-        await CreateBaseAccount(
-          FundsAccountName,
-          new[]
-          {
-            AccountType.CreateFunds(),
-            AccountType.CreateExpense(),
-            AccountType.CreateDebtor(),
-            AccountType.CreateCreditor()
-          },
-          new[]
-          {
-            AccountType.CreateFunds(),
-            AccountType.CreateIncome(),
-            AccountType.CreateDebtor(),
-            AccountType.CreateCreditor()
-          },
-          isFunds: true);
-      }
-
-      if (missingAccounts.Contains(IncomeAccountName))
-      {
-        await CreateBaseAccount(
-          IncomeAccountName,
-          new[]
-          {
-            AccountType.CreateFunds()
-          },
-          new AccountType[] {},
-          isIncome: true);
-      }
-
-      if (missingAccounts.Contains(ExpenseAccountName))
-      {
-        await CreateBaseAccount(
-          ExpenseAccountName,
-          new AccountType[] {},
-          new[]
-          {
-            AccountType.CreateFunds()
-          },
-          isExpense: true);
-      }
-
-      if (missingAccounts.Contains(DebtorAccountName))
-      {
-        await CreateBaseAccount(
-          DebtorAccountName,
-          new[]
-          {
-            AccountType.CreateFunds()
-          },
-          new[]
-          {
-            AccountType.CreateFunds()
-          },
-          isDebtor: true);
-      }
-
-      if (missingAccounts.Contains(CreditorAccountName))
-      {
-        await CreateBaseAccount(
-          CreditorAccountName,
-          new[]
-          {
-            AccountType.CreateFunds(),
-          },
-          new[]
-          {
-            AccountType.CreateFunds(),
-          },
-          isCreditor: true);
-      }
-    }
-
-    private async Task CreateBaseAccount(
-      string name,
-      IEnumerable<AccountType> accountTypesWithDebitPermission,
-      IEnumerable<AccountType> accountTypesWithCreditPermission,
-      bool isFunds = false,
-      bool isIncome = false,
-      bool isExpense = false,
-      bool isDebtor = false,
-      bool isCreditor = false)
-    {
-      var account = new Account
-      {
-        AccountType = new AccountType
-        {
-          IsFunds = isFunds,
-          IsIncome = isIncome,
-          IsExpense = isExpense,
-          IsDebtor = isDebtor,
-          IsCreditor = isCreditor
-        },
-        QualifiedName = name,
-        Name = name,
-        ParentAccountQualifiedName = null,
-        Balance = 0m,
-        AccountTypesWithDebitPermission = accountTypesWithDebitPermission,
-        AccountTypesWithCreditPermission = accountTypesWithCreditPermission
-      };
-
-      await _accountingDataAccess.AddAccount(account);
-
-      _logger.LogInformation($"Added \"{name}\" base account: {account}");
     }
 
     private static void RemoveAccountsWithChildren(in List<Account> accounts)

@@ -14,11 +14,18 @@ namespace bhb2desktop
   {
     public TransactionDto Transaction { get; private set; }
 
-    private readonly IAccountingManager _accountingManager;
+    private readonly IEnumerable<AccountDto> _debitAccounts;
+    private readonly IEnumerable<AccountDto> _creditAccounts;
 
     public TransactionPropertiesDialog(IAccountingManager accountingManager)
     {
-      _accountingManager = accountingManager ?? throw new ArgumentNullException(nameof(accountingManager));
+      if (accountingManager == null)
+      {
+        throw new ArgumentNullException(nameof(accountingManager));
+      }
+
+      _debitAccounts = accountingManager.GetTransactionDebitAccounts().Result;
+      _creditAccounts = accountingManager.GetTransactionCreditAccounts().Result;
 
       InitializeComponent();
 
@@ -28,9 +35,9 @@ namespace bhb2desktop
 
     private void PopulateDebitAccountComboBox()
     {
-      IEnumerable<AccountDto> accounts = _accountingManager.GetTransactionDebitAccounts().Result;
+      _debitAccountComboBox.Items.Clear();
 
-      accounts
+      _debitAccounts
         .ToList()
         .ForEach(a =>
           _debitAccountComboBox.Items.Add(a.QualifiedName));
@@ -49,12 +56,27 @@ namespace bhb2desktop
 
     private void PopulateCreditAccountComboBox()
     {
-      IEnumerable<AccountDto> accounts = _accountingManager.GetTransactionCreditAccounts().Result;
+      _creditAccountComboBox.Items.Clear();
 
-      accounts
-        .ToList()
-        .ForEach(a =>
-          _creditAccountComboBox.Items.Add(a.QualifiedName));
+      AccountDto debitAccount =
+        _debitAccounts
+          .First(a =>
+            a.QualifiedName.Equals(_debitAccountComboBox.Text, StringComparison.Ordinal));
+
+      IEnumerable<AccountDto> accountsWithoutDebitPermission =
+        _creditAccounts
+          .ToList()
+          .Where(a => !debitAccount.AccountTypesWithDebitPermission.Contains(a.AccountType));
+
+      _creditAccounts.ToList()
+        .ForEach(
+          a =>
+          {
+            if (!accountsWithoutDebitPermission.Contains(a))
+            {
+              _creditAccountComboBox.Items.Add(a.QualifiedName);
+            }
+          });
 
       if (_creditAccountComboBox.Items.Count == 0)
       {
@@ -66,6 +88,11 @@ namespace bhb2desktop
       }
 
       _creditAccountComboBox.SelectedIndex = 0;
+    }
+
+    private void DebitAccount_OnSelectedChangeCommitted(object sender, EventArgs args)
+    {
+      PopulateCreditAccountComboBox();
     }
 
     private void OkButton_OnClick(object sender, EventArgs args)

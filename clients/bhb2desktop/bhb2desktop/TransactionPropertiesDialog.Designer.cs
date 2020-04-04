@@ -78,6 +78,8 @@ namespace bhb2desktop
         Sorted = true
       };
 
+      _debitAccountComboBox.SelectionChangeCommitted += DebitAccount_OnSelectedChangeCommitted;
+
       _creditAccountLabel = new Label
       {
         Text = "Credit",

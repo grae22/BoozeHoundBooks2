@@ -180,32 +180,84 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 
       if (missingAccounts.Contains(FundsAccountName))
       {
-        await CreateBaseAccount(FundsAccountName, isFunds: true);
+        await CreateBaseAccount(
+          FundsAccountName,
+          new[]
+          {
+            AccountType.CreateFunds(),
+            AccountType.CreateExpense(),
+            AccountType.CreateDebtor(),
+            AccountType.CreateCreditor()
+          },
+          new[]
+          {
+            AccountType.CreateFunds(),
+            AccountType.CreateIncome(),
+            AccountType.CreateDebtor(),
+            AccountType.CreateCreditor()
+          },
+          isFunds: true);
       }
 
       if (missingAccounts.Contains(IncomeAccountName))
       {
-        await CreateBaseAccount(IncomeAccountName, isIncome: true);
+        await CreateBaseAccount(
+          IncomeAccountName,
+          new[]
+          {
+            AccountType.CreateFunds()
+          },
+          new AccountType[] {},
+          isIncome: true);
       }
 
       if (missingAccounts.Contains(ExpenseAccountName))
       {
-        await CreateBaseAccount(ExpenseAccountName, isExpense: true);
+        await CreateBaseAccount(
+          ExpenseAccountName,
+          new AccountType[] {},
+          new[]
+          {
+            AccountType.CreateFunds()
+          },
+          isExpense: true);
       }
 
       if (missingAccounts.Contains(DebtorAccountName))
       {
-        await CreateBaseAccount(DebtorAccountName, isDebtor: true);
+        await CreateBaseAccount(
+          DebtorAccountName,
+          new[]
+          {
+            AccountType.CreateFunds()
+          },
+          new[]
+          {
+            AccountType.CreateFunds()
+          },
+          isDebtor: true);
       }
 
       if (missingAccounts.Contains(CreditorAccountName))
       {
-        await CreateBaseAccount(CreditorAccountName, isCreditor: true);
+        await CreateBaseAccount(
+          CreditorAccountName,
+          new[]
+          {
+            AccountType.CreateFunds(),
+          },
+          new[]
+          {
+            AccountType.CreateFunds(),
+          },
+          isCreditor: true);
       }
     }
 
     private async Task CreateBaseAccount(
       string name,
+      IEnumerable<AccountType> accountTypesWithDebitPermission,
+      IEnumerable<AccountType> accountTypesWithCreditPermission,
       bool isFunds = false,
       bool isIncome = false,
       bool isExpense = false,
@@ -214,10 +266,6 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
     {
       var account = new Account
       {
-        QualifiedName = name,
-        Name = name,
-        ParentAccountQualifiedName = null,
-        Balance = 0m,
         AccountType = new AccountType
         {
           IsFunds = isFunds,
@@ -225,7 +273,13 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
           IsExpense = isExpense,
           IsDebtor = isDebtor,
           IsCreditor = isCreditor
-        }
+        },
+        QualifiedName = name,
+        Name = name,
+        ParentAccountQualifiedName = null,
+        Balance = 0m,
+        AccountTypesWithDebitPermission = accountTypesWithDebitPermission,
+        AccountTypesWithCreditPermission = accountTypesWithCreditPermission
       };
 
       await _accountingDataAccess.AddAccount(account);
@@ -233,7 +287,7 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
       _logger.LogInformation($"Added \"{name}\" base account: {account}");
     }
 
-    private void RemoveAccountsWithChildren(in List<Account> accounts)
+    private static void RemoveAccountsWithChildren(in List<Account> accounts)
     {
       var accountsToRemove = new List<Account>();
 

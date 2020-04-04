@@ -5,6 +5,7 @@ using bhb2core.Accounting.ActionResults;
 using bhb2core.Accounting.Engines.AccountingEngine.Interfaces;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
+using bhb2core.Utils.Extensions;
 using bhb2core.Utils.Logging;
 
 namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
@@ -74,11 +75,13 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
 
       var account = new Account
       {
+        AccountType = newAccount.ParentAccount.AccountType,
         QualifiedName = accountQualifiedName,
         Name = sanitisedAccountName,
         ParentAccountQualifiedName = newAccount.ParentAccount.QualifiedName,
-        Balance = 0,
-        AccountType = newAccount.ParentAccount.AccountType
+        AccountTypesWithDebitPermission = newAccount.ParentAccount.AccountTypesWithDebitPermission.Clone(),
+        AccountTypesWithCreditPermission = newAccount.ParentAccount.AccountTypesWithCreditPermission.Clone(),
+        Balance = 0
       };
 
       await _accountingDataAccess.AddAccount(account);

@@ -75,6 +75,191 @@ namespace bhb2coreTests.Accounting
     }
 
     [Test]
+    public void Given_NoBaseAccounts_When_Initialised_Then_FundsAccountCreated()
+    {
+      // Arrange.
+      // Act.
+      AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      // Assert.
+      accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.AccountType.IsFunds &&
+          a.QualifiedName.Equals(FundsAccountName) &&
+          a.Name.Equals(FundsAccountName) &&
+          a.Balance == 0m));
+
+      accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.QualifiedName.Equals(FundsAccountName) &&
+          a.AccountTypesWithDebitPermission.Contains(AccountType.CreateFunds()) &&
+          a.AccountTypesWithDebitPermission.Contains(AccountType.CreateExpense()) &&
+          a.AccountTypesWithDebitPermission.Contains(AccountType.CreateDebtor()) &&
+          a.AccountTypesWithDebitPermission.Contains(AccountType.CreateCreditor()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateIncome())));
+
+      accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.QualifiedName.Equals(FundsAccountName) &&
+          a.AccountTypesWithCreditPermission.Contains(AccountType.CreateFunds()) &&
+          a.AccountTypesWithCreditPermission.Contains(AccountType.CreateIncome()) &&
+          a.AccountTypesWithCreditPermission.Contains(AccountType.CreateDebtor()) &&
+          a.AccountTypesWithCreditPermission.Contains(AccountType.CreateCreditor()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateExpense())));
+    }
+
+    [Test]
+    public void Given_NoBaseAccounts_When_Initialised_Then_IncomeAccountCreated()
+    {
+      // Arrange.
+      // Act.
+      AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      // Assert.
+      accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.AccountType.IsIncome &&
+          a.QualifiedName.Equals(IncomeAccountName) &&
+          a.Name.Equals(IncomeAccountName) &&
+          a.Balance == 0m));
+
+      accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.QualifiedName.Equals(IncomeAccountName) &&
+          a.AccountTypesWithDebitPermission.Contains(AccountType.CreateFunds()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateIncome()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateExpense()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateDebtor()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateCreditor())));
+
+      accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.QualifiedName.Equals(IncomeAccountName) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateFunds()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateIncome()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateExpense()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateDebtor()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateCreditor())));
+    }
+
+    [Test]
+    public void Given_NoBaseAccounts_When_Initialised_Then_ExpenseAccountCreated()
+    {
+      // Arrange.
+      // Act.
+      AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      // Assert.
+      accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.AccountType.IsExpense &&
+          a.QualifiedName.Equals(ExpenseAccountName) &&
+          a.Name.Equals(ExpenseAccountName) &&
+          a.Balance == 0m));
+
+      accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.QualifiedName.Equals(ExpenseAccountName) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateFunds()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateIncome()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateExpense()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateDebtor()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateCreditor())));
+
+      accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.QualifiedName.Equals(ExpenseAccountName) &&
+          a.AccountTypesWithCreditPermission.Contains(AccountType.CreateFunds()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateIncome()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateExpense()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateDebtor()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateCreditor())));
+    }
+
+    [Test]
+    public void Given_NoBaseAccounts_When_Initialised_Then_DebtorAccountCreated()
+    {
+      // Arrange.
+      // Act.
+      AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      // Assert.
+      accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.AccountType.IsDebtor &&
+          a.QualifiedName.Equals(DebtorAccountName) &&
+          a.Name.Equals(DebtorAccountName) &&
+          a.Balance == 0m));
+
+      accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.QualifiedName.Equals(DebtorAccountName) &&
+          a.AccountTypesWithDebitPermission.Contains(AccountType.CreateFunds()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateIncome()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateExpense()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateDebtor()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateCreditor())));
+
+      accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.QualifiedName.Equals(DebtorAccountName) &&
+          a.AccountTypesWithCreditPermission.Contains(AccountType.CreateFunds()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateIncome()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateExpense()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateDebtor()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateCreditor())));
+    }
+
+    [Test]
+    public void Given_NoBaseAccounts_When_Initialised_Then_CreditorAccountCreated()
+    {
+      // Arrange.
+      // Act.
+      AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      // Assert.
+      accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.AccountType.IsCreditor &&
+          a.QualifiedName.Equals(CreditorAccountName) &&
+          a.Name.Equals(CreditorAccountName) &&
+          a.Balance == 0m));
+
+      accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.QualifiedName.Equals(CreditorAccountName) &&
+          a.AccountTypesWithDebitPermission.Contains(AccountType.CreateFunds()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateIncome()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateExpense()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateDebtor()) &&
+          !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateCreditor())));
+
+      accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.QualifiedName.Equals(CreditorAccountName) &&
+          a.AccountTypesWithCreditPermission.Contains(AccountType.CreateFunds()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateIncome()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateExpense()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateDebtor()) &&
+          !a.AccountTypesWithCreditPermission.Contains(AccountType.CreateCreditor())));
+    }
+
+    [Test]
     public async Task Given_BaseAccountsAlreadyExist_When_AccountingManagerInitialised_Then_BaseAccountsAreNotDuplicated()
     {
       // Arrange.
@@ -160,10 +345,7 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      accountingDataAccess
-        .GetAccount(FundsAccountName)
-        .Returns(
-          GetAccountResult.CreateSuccess(new Account { QualifiedName = FundsAccountName }));
+      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
       var newAccount = new NewAccountDto
       {
@@ -191,10 +373,7 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      accountingDataAccess
-        .GetAccount(FundsAccountName)
-        .Returns(
-          GetAccountResult.CreateSuccess(new Account { QualifiedName = FundsAccountName }));
+      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
       var newAccount = new NewAccountDto
       {
@@ -220,10 +399,7 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      accountingDataAccess
-        .GetAccount(FundsAccountName)
-        .Returns(
-          GetAccountResult.CreateSuccess(new Account { QualifiedName = FundsAccountName }));
+      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
       var newAccount = new NewAccountDto
       {
@@ -277,14 +453,7 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      accountingDataAccess
-        .GetAccount(FundsAccountName)
-        .Returns(
-          GetAccountResult.CreateSuccess(
-            new Account
-            {
-              AccountType = new AccountType { IsFunds = true }
-            }));
+      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
       var newAccount = new NewAccountDto
       {
@@ -309,14 +478,7 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      accountingDataAccess
-        .GetAccount(IncomeAccountName)
-        .Returns(
-          GetAccountResult.CreateSuccess(
-            new Account
-            {
-              AccountType = new AccountType { IsIncome = true }
-            }));
+      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
       var newAccount = new NewAccountDto
       {
@@ -341,14 +503,7 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      accountingDataAccess
-        .GetAccount(ExpenseAccountName)
-        .Returns(
-          GetAccountResult.CreateSuccess(
-            new Account
-            {
-              AccountType = new AccountType { IsExpense = true }
-            }));
+      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
       var newAccount = new NewAccountDto
       {
@@ -373,14 +528,7 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      accountingDataAccess
-        .GetAccount(DebtorAccountName)
-        .Returns(
-          GetAccountResult.CreateSuccess(
-            new Account
-            {
-              AccountType = new AccountType { IsDebtor = true }
-            }));
+      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
       var newAccount = new NewAccountDto
       {
@@ -405,14 +553,7 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      accountingDataAccess
-        .GetAccount(CreditorAccountName)
-        .Returns(
-          GetAccountResult.CreateSuccess(
-            new Account
-            {
-              AccountType = new AccountType { IsCreditor = true }
-            }));
+      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
       var newAccount = new NewAccountDto
       {
@@ -429,6 +570,74 @@ namespace bhb2coreTests.Accounting
         .AddAccount(Arg.Is<Account>(a =>
           a.Name.Equals(newAccount.Name) &&
           a.AccountType.IsCreditor));
+    }
+
+    [Test]
+    public async Task Given_NewAccount_When_Added_Then_DebitWhitelistAccountTypesAreSameAsParents()
+    {
+      // Arrange.
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
+
+      var newAccount = new NewAccountDto
+      {
+        Name = "SomeAccount",
+        ParentAccountQualifiedName = FundsAccountName
+      };
+
+      // Act.
+      await testObject.AddAccount(newAccount);
+
+      // Assert.
+      await accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.Name.Equals(newAccount.Name) &&
+          a.AccountTypesWithDebitPermission.Contains(AccountType.CreateFunds()) &&
+          a.AccountTypesWithDebitPermission.Contains(AccountType.CreateExpense()) &&
+          a.AccountTypesWithDebitPermission.Contains(AccountType.CreateDebtor()) &&
+          a.AccountTypesWithDebitPermission.Contains(AccountType.CreateCreditor())));
+
+      await accountingDataAccess
+        .Received(0)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.Name.Equals(newAccount.Name) &&
+          a.AccountTypesWithDebitPermission.Contains(AccountType.CreateIncome())));
+    }
+
+    [Test]
+    public async Task Given_NewAccount_When_Added_Then_CreditWhitelistAccountTypesAreSameAsParents()
+    {
+      // Arrange.
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
+
+      var newAccount = new NewAccountDto
+      {
+        Name = "SomeAccount",
+        ParentAccountQualifiedName = FundsAccountName
+      };
+
+      // Act.
+      await testObject.AddAccount(newAccount);
+
+      // Assert.
+      await accountingDataAccess
+        .Received(1)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.Name.Equals(newAccount.Name) &&
+          a.AccountTypesWithCreditPermission.Contains(AccountType.CreateFunds()) &&
+          a.AccountTypesWithCreditPermission.Contains(AccountType.CreateIncome()) &&
+          a.AccountTypesWithCreditPermission.Contains(AccountType.CreateDebtor()) &&
+          a.AccountTypesWithCreditPermission.Contains(AccountType.CreateCreditor())));
+
+      await accountingDataAccess
+        .Received(0)
+        .AddAccount(Arg.Is<Account>(a =>
+          a.Name.Equals(newAccount.Name) &&
+          a.AccountTypesWithCreditPermission.Contains(AccountType.CreateExpense())));
     }
 
     [TestCase("")]
@@ -473,7 +682,7 @@ namespace bhb2coreTests.Accounting
     }
 
     [Test]
-    public async Task Given_BaseAccountsExist_When_RetrievingTransactionDebitAccounts_Then_CorrectAccountsAreReturned()
+    public async Task Given_AccountsExist_When_RetrievingTransactionDebitAccounts_Then_CorrectAccountsAreReturned()
     {
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
@@ -510,7 +719,7 @@ namespace bhb2coreTests.Accounting
     }
 
     [Test]
-    public async Task Given_BaseAccountsExist_When_RetrievingTransactionCreditAccounts_Then_CorrectAccountsAreReturned()
+    public async Task Given_AccountsExist_When_RetrievingTransactionCreditAccounts_Then_CorrectAccountsAreReturned()
     {
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
@@ -543,6 +752,104 @@ namespace bhb2coreTests.Accounting
       accounts.Single(a => a.QualifiedName.Equals(someNonBaseAccount));
 
       Assert.Pass();
+    }
+
+    private static void ConfigureDataAccessWithBaseAccounts(in IAccountingDataAccess dataAccess)
+    {
+      dataAccess
+        .GetAccount(FundsAccountName)
+        .Returns(
+          GetAccountResult.CreateSuccess(new Account
+          {
+            AccountType = AccountType.CreateFunds(),
+            QualifiedName = FundsAccountName,
+            Name = FundsAccountName,
+            ParentAccountQualifiedName = null,
+            AccountTypesWithDebitPermission = new[]
+            {
+              AccountType.CreateFunds(),
+              AccountType.CreateExpense(),
+              AccountType.CreateDebtor(),
+              AccountType.CreateCreditor()
+            },
+            AccountTypesWithCreditPermission = new[]
+            {
+              AccountType.CreateFunds(),
+              AccountType.CreateIncome(),
+              AccountType.CreateDebtor(),
+              AccountType.CreateCreditor()
+            }
+          }));
+
+      dataAccess
+        .GetAccount(IncomeAccountName)
+        .Returns(
+          GetAccountResult.CreateSuccess(new Account
+          {
+            AccountType = AccountType.CreateIncome(),
+            QualifiedName = IncomeAccountName,
+            Name = IncomeAccountName,
+            ParentAccountQualifiedName = null,
+            AccountTypesWithDebitPermission = new[]
+            {
+              AccountType.CreateFunds()
+            },
+            AccountTypesWithCreditPermission = new AccountType[] {}
+          }));
+
+      dataAccess
+        .GetAccount(ExpenseAccountName)
+        .Returns(
+          GetAccountResult.CreateSuccess(new Account
+          {
+            AccountType = AccountType.CreateExpense(),
+            QualifiedName = ExpenseAccountName,
+            Name = ExpenseAccountName,
+            ParentAccountQualifiedName = null,
+            AccountTypesWithDebitPermission = new AccountType[] {},
+            AccountTypesWithCreditPermission = new[]
+            {
+              AccountType.CreateFunds()
+            }
+          }));
+
+      dataAccess
+        .GetAccount(DebtorAccountName)
+        .Returns(
+          GetAccountResult.CreateSuccess(new Account
+          {
+            AccountType = AccountType.CreateDebtor(),
+            QualifiedName = DebtorAccountName,
+            Name = DebtorAccountName,
+            ParentAccountQualifiedName = null,
+            AccountTypesWithDebitPermission = new[]
+            {
+              AccountType.CreateFunds()
+            },
+            AccountTypesWithCreditPermission = new[]
+            {
+              AccountType.CreateFunds()
+            }
+          }));
+
+      dataAccess
+        .GetAccount(CreditorAccountName)
+        .Returns(
+          GetAccountResult.CreateSuccess(new Account
+          {
+            AccountType = AccountType.CreateCreditor(),
+            QualifiedName = CreditorAccountName,
+            Name = CreditorAccountName,
+            ParentAccountQualifiedName = null,
+            AccountTypesWithDebitPermission = new[]
+            {
+              AccountType.CreateFunds()
+            },
+            AccountTypesWithCreditPermission = new[]
+            {
+              AccountType.CreateFunds()
+            }
+          }));
     }
   }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,12 +22,7 @@ namespace bhb2coreTests.Accounting
   [TestFixture]
   public class AccountTests
   {
-    private const char AccountIdSeparator = '.';
-    private const string FundsAccountId = "funds";
-    private const string IncomeAccountId = "income";
-    private const string ExpenseAccountId = "expense";
-    private const string DebtorAccountId = "debtor";
-    private const string CreditorAccountId = "creditor";
+    private const char AccountQualifiedNameSeparator = '.';
     private const string FundsAccountName = "Funds";
     private const string IncomeAccountName = "Income";
     private const string ExpenseAccountName = "Expense";
@@ -42,22 +38,13 @@ namespace bhb2coreTests.Accounting
       CreditorAccountName
     };
 
-    private static readonly string[] BaseAccountIds =
-    {
-      FundsAccountId,
-      IncomeAccountId,
-      ExpenseAccountId,
-      DebtorAccountId,
-      CreditorAccountId
-    };
-
-    [TestCase(FundsAccountId, FundsAccountName, true, false, false, false, false)]
-    [TestCase(IncomeAccountId, IncomeAccountName, false, true, false, false, false)]
-    [TestCase(ExpenseAccountId, ExpenseAccountName, false, false, true, false, false)]
-    [TestCase(DebtorAccountId, DebtorAccountName, false, false, false, true, false)]
-    [TestCase(CreditorAccountId, CreditorAccountName, false, false, false, false, true)]
+    [TestCase(FundsAccountName, FundsAccountName, true, false, false, false, false)]
+    [TestCase(IncomeAccountName, IncomeAccountName, false, true, false, false, false)]
+    [TestCase(ExpenseAccountName, ExpenseAccountName, false, false, true, false, false)]
+    [TestCase(DebtorAccountName, DebtorAccountName, false, false, false, true, false)]
+    [TestCase(CreditorAccountName, CreditorAccountName, false, false, false, false, true)]
     public async Task Given_NoAccountsAndAccountingManagerInitialised_When_AllAccountsRetrieved_Then_BaseAccountsAreReturned(
-      string id,
+      string qualifiedName,
       string name,
       bool isFunds,
       bool isIncome,
@@ -74,11 +61,11 @@ namespace bhb2coreTests.Accounting
       IEnumerable<AccountDto> accounts = await testObject.GetAllAccounts();
 
       // Assert.
-      AccountDto account = accounts.SingleOrDefault(a => a.Id.Equals(id));
+      AccountDto account = accounts.SingleOrDefault(a => a.QualifiedName.Equals(qualifiedName));
 
       Assert.NotNull(account);
       Assert.AreEqual(name, account.Name);
-      Assert.IsNull(account.ParentAccountId);
+      Assert.IsNull(account.ParentAccountQualifiedName);
       Assert.AreEqual(0m, account.Balance);
       Assert.AreEqual(isFunds, account.IsFunds);
       Assert.AreEqual(isIncome, account.IsIncome);
@@ -88,7 +75,7 @@ namespace bhb2coreTests.Accounting
     }
 
     [Test]
-    public async Task Given_BaseAccountsAlreadyExist_When_AccountingManagerIntialised_Then_BaseAccountsAreNotDuplicated()
+    public async Task Given_BaseAccountsAlreadyExist_When_AccountingManagerInitialised_Then_BaseAccountsAreNotDuplicated()
     {
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(
@@ -101,7 +88,7 @@ namespace bhb2coreTests.Accounting
         await accountingDataAccess.AddAccount(
           new Account
           {
-            Id = name.ToLower(),
+            QualifiedName = name,
             Name = name,
             Balance = 0m
           });
@@ -120,7 +107,7 @@ namespace bhb2coreTests.Accounting
     }
 
     [Test]
-    public async Task Given_ExistingAccount_When_AddAccountCalledWithSameAccountId_Then_ReturnsFailure()
+    public async Task Given_ExistingAccount_When_AddAccountCalledWithSameAccountDetails_Then_ReturnsFailure()
     {
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
@@ -128,7 +115,7 @@ namespace bhb2coreTests.Accounting
       var newAccount = new NewAccountDto
       {
         Name = "SomeAccount",
-        ParentAccountId = BaseAccountIds[0]
+        ParentAccountQualifiedName = BaseAccountNames[0]
       };
 
       accountingDataAccess
@@ -154,7 +141,7 @@ namespace bhb2coreTests.Accounting
       var newAccount = new NewAccountDto
       {
         Name = accountName,
-        ParentAccountId = BaseAccountIds[0]
+        ParentAccountQualifiedName = BaseAccountNames[0]
       };
 
       // Act.
@@ -174,86 +161,86 @@ namespace bhb2coreTests.Accounting
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       accountingDataAccess
-        .GetAccountById(FundsAccountId)
+        .GetAccount(FundsAccountName)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account { Id = FundsAccountId }));
+          GetAccountResult.CreateSuccess(new Account { QualifiedName = FundsAccountName }));
 
       var newAccount = new NewAccountDto
       {
         Name = accountName,
-        ParentAccountId = FundsAccountId
+        ParentAccountQualifiedName = FundsAccountName
       };
 
       // Act.
       await testObject.AddAccount(newAccount);
 
       // Assert.
-      string expectedId = $"{newAccount.ParentAccountId}{AccountIdSeparator}{accountName.Trim().ToLower()}";
+      string expectedQualifiedName = $"{newAccount.ParentAccountQualifiedName}{AccountQualifiedNameSeparator}{accountName.Trim()}";
       string expectedName = accountName.Trim();
 
       await accountingDataAccess
         .Received(1)
         .AddAccount(Arg.Is<Account>(a =>
-          a.Id.Equals(expectedId) &&
+          a.QualifiedName.Equals(expectedQualifiedName) &&
           a.Name.Equals(expectedName)));
     }
 
     [Test]
-    public async Task Given_NewAccount_When_Added_Then_AccountIdIsLowercase()
+    public async Task Given_NewAccount_When_Added_Then_AccountQualifiedNameIsCorrect()
     {
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       accountingDataAccess
-        .GetAccountById(FundsAccountId)
+        .GetAccount(FundsAccountName)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account { Id = FundsAccountId }));
+          GetAccountResult.CreateSuccess(new Account { QualifiedName = FundsAccountName }));
 
       var newAccount = new NewAccountDto
       {
         Name = "SomeAccount",
-        ParentAccountId = FundsAccountId
+        ParentAccountQualifiedName = FundsAccountName
       };
 
       // Act.
       await testObject.AddAccount(newAccount);
 
       // Assert.
-      string expectedId = $"{newAccount.ParentAccountId}{AccountIdSeparator}{newAccount.Name}".ToLower();
+      string expectedQualifiedName = $"{newAccount.ParentAccountQualifiedName}{AccountQualifiedNameSeparator}{newAccount.Name}";
 
       await accountingDataAccess
         .Received(1)
         .AddAccount(Arg.Is<Account>(a =>
-          a.Id.Equals(expectedId)));
+          a.QualifiedName.Equals(expectedQualifiedName, StringComparison.Ordinal)));
     }
 
     [Test]
-    public async Task Given_NewAccount_When_Added_Then_ParentAccountIdIsCorrect()
+    public async Task Given_NewAccount_When_Added_Then_ParentAccountQualifiedNameIsCorrect()
     {
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       accountingDataAccess
-        .GetAccountById(FundsAccountId)
+        .GetAccount(FundsAccountName)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account { Id = FundsAccountId }));
+          GetAccountResult.CreateSuccess(new Account { QualifiedName = FundsAccountName }));
 
       var newAccount = new NewAccountDto
       {
         Name = "SomeAccount",
-        ParentAccountId = BaseAccountIds[0]
+        ParentAccountQualifiedName = BaseAccountNames[0]
       };
 
       // Act.
       await testObject.AddAccount(newAccount);
 
       // Assert.
-      string expectedId = newAccount.ParentAccountId;
+      string expectedQualifiedName = newAccount.ParentAccountQualifiedName;
 
       await accountingDataAccess
         .Received(1)
         .AddAccount(Arg.Is<Account>(a =>
-          a.ParentAccountId.Equals(expectedId)));
+          a.ParentAccountQualifiedName.Equals(expectedQualifiedName)));
     }
 
     [Test]
@@ -263,16 +250,16 @@ namespace bhb2coreTests.Accounting
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       accountingDataAccess
-        .GetAccountsById(Arg.Any<string[]>())
+        .GetAccounts(Arg.Any<string[]>())
         .Returns(new Dictionary<string, Account>
         {
-          { BaseAccountIds[0], new Account() }
+          { BaseAccountNames[0], new Account() }
         });
 
       var newAccount = new NewAccountDto
       {
         Name = "SomeAccount",
-        ParentAccountId = BaseAccountIds[0]
+        ParentAccountQualifiedName = BaseAccountNames[0]
       };
 
       // Act.
@@ -291,14 +278,14 @@ namespace bhb2coreTests.Accounting
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       accountingDataAccess
-        .GetAccountById(FundsAccountId)
+        .GetAccount(FundsAccountName)
         .Returns(
           GetAccountResult.CreateSuccess(new Account { IsFunds = true }));
 
       var newAccount = new NewAccountDto
       {
         Name = "SomeAccount",
-        ParentAccountId = FundsAccountId
+        ParentAccountQualifiedName = FundsAccountName
       };
 
       // Act.
@@ -319,14 +306,14 @@ namespace bhb2coreTests.Accounting
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       accountingDataAccess
-        .GetAccountById(IncomeAccountId)
+        .GetAccount(IncomeAccountName)
         .Returns(
           GetAccountResult.CreateSuccess(new Account { IsIncome = true }));
 
       var newAccount = new NewAccountDto
       {
         Name = "SomeAccount",
-        ParentAccountId = IncomeAccountId
+        ParentAccountQualifiedName = IncomeAccountName
       };
 
       // Act.
@@ -347,14 +334,14 @@ namespace bhb2coreTests.Accounting
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       accountingDataAccess
-        .GetAccountById(ExpenseAccountId)
+        .GetAccount(ExpenseAccountName)
         .Returns(
           GetAccountResult.CreateSuccess(new Account { IsExpense = true }));
 
       var newAccount = new NewAccountDto
       {
         Name = "SomeAccount",
-        ParentAccountId = ExpenseAccountId
+        ParentAccountQualifiedName = ExpenseAccountName
       };
 
       // Act.
@@ -375,14 +362,14 @@ namespace bhb2coreTests.Accounting
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       accountingDataAccess
-        .GetAccountById(DebtorAccountId)
+        .GetAccount(DebtorAccountName)
         .Returns(
           GetAccountResult.CreateSuccess(new Account { IsDebtor = true }));
 
       var newAccount = new NewAccountDto
       {
         Name = "SomeAccount",
-        ParentAccountId = DebtorAccountId
+        ParentAccountQualifiedName = DebtorAccountName
       };
 
       // Act.
@@ -403,14 +390,14 @@ namespace bhb2coreTests.Accounting
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       accountingDataAccess
-        .GetAccountById(CreditorAccountId)
+        .GetAccount(CreditorAccountName)
         .Returns(
           GetAccountResult.CreateSuccess(new Account { IsCreditor = true }));
 
       var newAccount = new NewAccountDto
       {
         Name = "SomeAccount",
-        ParentAccountId = CreditorAccountId
+        ParentAccountQualifiedName = CreditorAccountName
       };
 
       // Act.
@@ -427,7 +414,8 @@ namespace bhb2coreTests.Accounting
     [TestCase("")]
     [TestCase("   ")]
     [TestCase(null)]
-    public async Task Given_NewAccount_When_AddAccountCalledWithInvalidParentId_Then_ReturnsFailure(string parentId)
+    public async Task Given_NewAccount_When_AddAccountCalledWithInvalidParentQualifiedName_Then_ReturnsFailure(
+      string parentQualifiedName)
     {
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
@@ -435,7 +423,7 @@ namespace bhb2coreTests.Accounting
       var newAccount = new NewAccountDto
       {
         Name = "SomeName",
-        ParentAccountId = parentId
+        ParentAccountQualifiedName = parentQualifiedName
       };
 
       // Act.
@@ -446,7 +434,7 @@ namespace bhb2coreTests.Accounting
     }
 
     [Test]
-    public async Task Given_NewAccount_When_ParentIdDoesNotExist_Then_ReturnsFailure()
+    public async Task Given_NewAccount_When_ParentAccountDoesNotExist_Then_ReturnsFailure()
     {
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
@@ -454,7 +442,7 @@ namespace bhb2coreTests.Accounting
       var newAccount = new NewAccountDto
       {
         Name = "SomeName",
-        ParentAccountId = "SomeInvalidParentId"
+        ParentAccountQualifiedName = "SomeInvalidParent"
       };
 
       // Act.
@@ -470,7 +458,7 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      string someNonBaseAccount = $"{FundsAccountId}{AccountIdSeparator}SomeAccount";
+      string someNonBaseAccount = $"{FundsAccountName}{AccountQualifiedNameSeparator}SomeAccount";
 
       accountingDataAccess
         .GetAccounts(
@@ -480,23 +468,23 @@ namespace bhb2coreTests.Accounting
           isCreditor: true)
         .Returns(new[]
         {
-          new Account { Id = FundsAccountId },
-          new Account { Id = IncomeAccountId },
-          new Account { Id = DebtorAccountId },
-          new Account { Id = CreditorAccountId },
-          new Account { Id = someNonBaseAccount, ParentAccountId = FundsAccountId }
+          new Account { QualifiedName = FundsAccountName },
+          new Account { QualifiedName = IncomeAccountName },
+          new Account { QualifiedName = DebtorAccountName },
+          new Account { QualifiedName = CreditorAccountName },
+          new Account { QualifiedName = someNonBaseAccount, ParentAccountQualifiedName = FundsAccountName }
         });
 
       // Act.
       IEnumerable<AccountDto> accounts = await testObject.GetTransactionDebitAccounts();
 
       // Assert.
-      Assert.IsNull(accounts.SingleOrDefault(a => a.Id.Equals(FundsAccountId)));
+      Assert.IsNull(accounts.SingleOrDefault(a => a.QualifiedName.Equals(FundsAccountName)));
 
-      accounts.Single(a => a.Id.Equals(IncomeAccountId));
-      accounts.Single(a => a.Id.Equals(DebtorAccountId));
-      accounts.Single(a => a.Id.Equals(CreditorAccountId));
-      accounts.Single(a => a.Id.Equals(someNonBaseAccount));
+      accounts.Single(a => a.QualifiedName.Equals(IncomeAccountName));
+      accounts.Single(a => a.QualifiedName.Equals(DebtorAccountName));
+      accounts.Single(a => a.QualifiedName.Equals(CreditorAccountName));
+      accounts.Single(a => a.QualifiedName.Equals(someNonBaseAccount));
 
       Assert.Pass();
     }
@@ -507,7 +495,7 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      string someNonBaseAccount = $"{FundsAccountId}{AccountIdSeparator}SomeAccount";
+      string someNonBaseAccount = $"{FundsAccountName}{AccountQualifiedNameSeparator}SomeAccount";
 
       accountingDataAccess
         .GetAccounts(
@@ -517,22 +505,22 @@ namespace bhb2coreTests.Accounting
           isCreditor: true)
         .Returns(new[]
         {
-          new Account { Id = FundsAccountId },
-          new Account { Id = ExpenseAccountId },
-          new Account { Id = DebtorAccountId },
-          new Account { Id = CreditorAccountId },
-          new Account { Id = someNonBaseAccount, ParentAccountId = FundsAccountId }
+          new Account { QualifiedName = FundsAccountName },
+          new Account { QualifiedName = ExpenseAccountName },
+          new Account { QualifiedName = DebtorAccountName },
+          new Account { QualifiedName = CreditorAccountName },
+          new Account { QualifiedName = someNonBaseAccount, ParentAccountQualifiedName = FundsAccountName }
         });
 
       // Act.
       IEnumerable<AccountDto> accounts = await testObject.GetTransactionCreditAccounts();
 
       // Assert.
-      Assert.IsNull(accounts.SingleOrDefault(a => a.Id.Equals(FundsAccountId)));
-      accounts.Single(a => a.Id.Equals(ExpenseAccountId));
-      accounts.Single(a => a.Id.Equals(DebtorAccountId));
-      accounts.Single(a => a.Id.Equals(CreditorAccountId));
-      accounts.Single(a => a.Id.Equals(someNonBaseAccount));
+      Assert.IsNull(accounts.SingleOrDefault(a => a.QualifiedName.Equals(FundsAccountName)));
+      accounts.Single(a => a.QualifiedName.Equals(ExpenseAccountName));
+      accounts.Single(a => a.QualifiedName.Equals(DebtorAccountName));
+      accounts.Single(a => a.QualifiedName.Equals(CreditorAccountName));
+      accounts.Single(a => a.QualifiedName.Equals(someNonBaseAccount));
 
       Assert.Pass();
     }

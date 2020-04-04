@@ -24,14 +24,14 @@ namespace bhb2coreTests.Accounting
 
       var debitAccount = new Account
       {
-        Id = "Funds.Cash",
+        QualifiedName = "Funds.Cash",
         Name = "Cash",
         Balance = 150m
       };
 
       var creditAccount = new Account
       {
-        Id = "Expense.Vehicle.Petrol",
+        QualifiedName = "Expense.Vehicle.Petrol",
         Name = "Petrol",
         Balance = 0m
       };
@@ -41,8 +41,8 @@ namespace bhb2coreTests.Accounting
 
       var transaction = new TransactionDto
       {
-        DebitAccountId = debitAccount.Id,
-        CreditAccountId = creditAccount.Id,
+        DebitAccountQualifiedName = debitAccount.QualifiedName,
+        CreditAccountQualifiedName = creditAccount.QualifiedName,
         Amount = 123.45m
       };
 

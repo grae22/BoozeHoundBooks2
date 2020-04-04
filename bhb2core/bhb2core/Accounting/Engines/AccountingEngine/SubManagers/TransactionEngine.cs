@@ -32,21 +32,21 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
 
       _logger.LogVerbose($"Transaction received: {transaction}.");
 
-      IReadOnlyDictionary<string, Account> accounts = await _accountingDataAccess.GetAccountsById(
+      IReadOnlyDictionary<string, Account> accounts = await _accountingDataAccess.GetAccounts(
         new[]
         {
-          transaction.DebitAccountId,
-          transaction.CreditAccountId
+          transaction.DebitAccountQualifiedName,
+          transaction.CreditAccountQualifiedName
         });
 
-      decimal newDebitAccountBalance = accounts[transaction.DebitAccountId].Balance - transaction.Amount;
-      decimal newCreditAccountBalance = accounts[transaction.CreditAccountId].Balance + transaction.Amount;
+      decimal newDebitAccountBalance = accounts[transaction.DebitAccountQualifiedName].Balance - transaction.Amount;
+      decimal newCreditAccountBalance = accounts[transaction.CreditAccountQualifiedName].Balance + transaction.Amount;
 
       await _accountingDataAccess.UpdateAccountBalances(
         new Dictionary<string, decimal>
         {
-          { transaction.DebitAccountId, newDebitAccountBalance },
-          { transaction.CreditAccountId, newCreditAccountBalance }
+          { transaction.DebitAccountQualifiedName, newDebitAccountBalance },
+          { transaction.CreditAccountQualifiedName, newCreditAccountBalance }
         });
     }
   }

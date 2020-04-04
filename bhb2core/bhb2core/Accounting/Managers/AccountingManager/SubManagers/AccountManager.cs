@@ -120,7 +120,8 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
         throw new ArgumentNullException(nameof(newAccountDto));
       }
 
-      GetAccountResult getParentAccountResult = await _accountingDataAccess.GetAccountById(newAccountDto.ParentAccountId);
+      GetAccountResult getParentAccountResult =
+        await _accountingDataAccess.GetAccount(newAccountDto.ParentAccountQualifiedName);
 
       if (!getParentAccountResult.IsSuccess)
       {
@@ -166,9 +167,7 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 
       foreach (var name in BaseAccountNames)
       {
-        string id = _accountingEngine.BuildAccountId(name, null);
-
-        if (await _accountingEngine.DoesAccountExist(id))
+        if (await _accountingEngine.DoesAccountExist(name))
         {
           _logger.LogVerbose($"Found \"{name}\" base account.");
           continue;
@@ -215,9 +214,9 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
     {
       var account = new Account
       {
-        Id = _accountingEngine.BuildAccountId(name, null),
+        QualifiedName = name,
         Name = name,
-        ParentAccountId = null,
+        ParentAccountQualifiedName = null,
         Balance = 0m,
         IsFunds = isFunds,
         IsIncome = isIncome,
@@ -239,8 +238,8 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
       {
         bool accountIsParentToOtherAccounts =
           accounts.Any(a =>
-            a.ParentAccountId != null &&
-            a.ParentAccountId.Equals(account.Id));
+            a.HasParent &&
+            a.ParentAccountQualifiedName.Equals(account.QualifiedName));
 
         if (accountIsParentToOtherAccounts)
         {

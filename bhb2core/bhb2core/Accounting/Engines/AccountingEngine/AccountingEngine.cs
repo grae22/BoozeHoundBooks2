@@ -27,9 +27,9 @@ namespace bhb2core.Accounting.Engines.AccountingEngine
         logger);
     }
 
-    public string BuildAccountId(in string name, in string parentId)
+    public string BuildAccountQualifiedName(in string name, in string parentQualifiedName)
     {
-      return _accountEngine.BuildAccountId(name, parentId);
+      return _accountEngine.BuildAccountQualifiedName(name, parentQualifiedName);
     }
 
     public bool ValidateNewAccount(in NewAccount newAccount, out string error)
@@ -42,9 +42,9 @@ namespace bhb2core.Accounting.Engines.AccountingEngine
       return await _accountEngine.AddAccount(newAccount);
     }
 
-    public async Task<bool> DoesAccountExist(string accountId)
+    public async Task<bool> DoesAccountExist(string accountQualifiedName)
     {
-      return await _accountEngine.DoesAccountExist(accountId);
+      return await _accountEngine.DoesAccountExist(accountQualifiedName);
     }
 
     public async Task ProcessTransaction(Transaction transaction)

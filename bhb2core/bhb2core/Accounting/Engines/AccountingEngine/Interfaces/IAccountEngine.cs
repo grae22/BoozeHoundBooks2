@@ -7,12 +7,12 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.Interfaces
 {
   internal interface IAccountEngine
   {
-    string BuildAccountId(in string name, in string parentId);
+    string BuildAccountQualifiedName(in string name, in string parentQualifiedName);
 
     bool ValidateNewAccount(in NewAccount newAccount, out string error);
 
     Task<AddAccountResult> AddAccount(NewAccount newAccount);
 
-    Task<bool> DoesAccountExist(string accountId);
+    Task<bool> DoesAccountExist(string accountQualifiedName);
   }
 }

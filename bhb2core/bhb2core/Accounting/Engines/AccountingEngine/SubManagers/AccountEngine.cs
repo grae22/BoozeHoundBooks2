@@ -11,7 +11,7 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
 {
   internal class AccountEngine : IAccountEngine
   {
-    private const char AccountIdSeparator = '.';
+    private const char AccountQualifiedNameSeparator = '.';
 
     private readonly IAccountingDataAccess _accountingDataAccess;
     private readonly ILogger _logger;
@@ -24,20 +24,20 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
       _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public string BuildAccountId(in string name, in string parentId)
+    public string BuildAccountQualifiedName(in string name, in string parentQualifiedName)
     {
-      string id;
+      string qualifiedName;
 
-      if (parentId == null)
+      if (parentQualifiedName == null)
       {
-        id = name.ToLower();
+        qualifiedName = name;
       }
       else
       {
-        id = $"{parentId}{AccountIdSeparator}{name}".ToLower();
+        qualifiedName = $"{parentQualifiedName}{AccountQualifiedNameSeparator}{name}";
       }
 
-      return id.ToLower();
+      return qualifiedName;
     }
 
     public bool ValidateNewAccount(in NewAccount newAccount, out string error)
@@ -50,9 +50,9 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
         return false;
       }
 
-      if (newAccount.Name.Contains(AccountIdSeparator))
+      if (newAccount.Name.Contains(AccountQualifiedNameSeparator))
       {
-        error = $"Account name cannot contain the character '{AccountIdSeparator}'.";
+        error = $"Account name cannot contain the character '{AccountQualifiedNameSeparator}'.";
         return false;
       }
 
@@ -70,13 +70,13 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
       _logger.LogVerbose($"Add account request received, account details: {newAccount}");
 
       string sanitisedAccountName = newAccount.Name.Trim();
-      string accountId = BuildAccountId(sanitisedAccountName, newAccount.ParentAccount.Id);
+      string accountQualifiedName = BuildAccountQualifiedName(sanitisedAccountName, newAccount.ParentAccount.QualifiedName);
 
       var account = new Account
       {
-        Id = accountId,
+        QualifiedName = accountQualifiedName,
         Name = sanitisedAccountName,
-        ParentAccountId = newAccount.ParentAccount.Id,
+        ParentAccountQualifiedName = newAccount.ParentAccount.QualifiedName,
         Balance = 0,
         IsFunds = newAccount.ParentAccount.IsFunds,
         IsIncome = newAccount.ParentAccount.IsIncome,
@@ -92,9 +92,9 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
       return AddAccountResult.CreateSuccess();
     }
 
-    public async Task<bool> DoesAccountExist(string accountId)
+    public async Task<bool> DoesAccountExist(string accountQualifiedName)
     {
-      GetAccountResult result = await _accountingDataAccess.GetAccountById(accountId);
+      GetAccountResult result = await _accountingDataAccess.GetAccount(accountQualifiedName);
 
       return result.IsSuccess;
     }

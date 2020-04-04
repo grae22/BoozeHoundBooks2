@@ -52,23 +52,24 @@ namespace bhb2desktop
           {
             foreach (var account in accountsList)
             {
-              if (account.ParentAccountId == null)
+              if (!account.HasParent)
               {
                 TreeNode newBaseNode = _accountsTree.Nodes.Add($"{account.Name}  ( {account.Balance:N} )");
 
-                nodesByAccountId.Add(account.Id, newBaseNode);
+                nodesByAccountId.Add(account.QualifiedName, newBaseNode);
 
                 continue;
               }
 
-              if (!nodesByAccountId.TryGetValue(account.ParentAccountId, out TreeNode parentNode))
+              if (!nodesByAccountId.TryGetValue(account.ParentAccountQualifiedName, out TreeNode parentNode))
               {
+                _logger.LogError($"Failed to find parent account \"{account.ParentAccountQualifiedName}\".");
                 continue;
               }
 
               TreeNode newNode = parentNode.Nodes.Add($"{account.Name}  ( {account.Balance:N} )");
 
-              nodesByAccountId.Add(account.Id, newNode);
+              nodesByAccountId.Add(account.QualifiedName, newNode);
             }
           }
 
@@ -91,7 +92,7 @@ namespace bhb2desktop
       var account = new NewAccountDto
       {
         Name = dlg.Account.Name,
-        ParentAccountId = dlg.Account.ParentAccountId
+        ParentAccountQualifiedName = dlg.Account.ParentAccountQualifiedName
       };
 
       AddAccountResult result = _accountingManager.AddAccount(account).Result;

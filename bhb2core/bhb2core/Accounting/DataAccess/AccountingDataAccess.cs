@@ -56,26 +56,27 @@ namespace bhb2core.Accounting.DataAccess
       return await Task.FromResult(accounts);
     }
 
-    public async Task<GetAccountResult> GetAccountById(string accountId)
+    public async Task<GetAccountResult> GetAccount(string accountQualifiedName)
     {
       Account account =
         await Task.FromResult(
-          _accounts.FirstOrDefault(a => a.Id.Equals(accountId)));
+          _accounts.FirstOrDefault(a => a.QualifiedName.Equals(accountQualifiedName)));
 
       if (account == null)
       {
-        return GetAccountResult.CreateFailure($"Account not found with id \"{accountId}\".");
+        return GetAccountResult.CreateFailure($"Account not found \"{accountQualifiedName}\".");
       }
 
       return GetAccountResult.CreateSuccess(account);
     }
 
-    public async Task<IReadOnlyDictionary<string, Account>> GetAccountsById(IEnumerable<string> accountIds)
+    public async Task<IReadOnlyDictionary<string, Account>> GetAccounts(
+      IEnumerable<string> accountQualifiedNames)
     {
       Dictionary<string, Account> accounts =
         _accounts
-          .Where(a => accountIds.Contains(a.Id))
-          .ToDictionary(a => a.Id);
+          .Where(a => accountQualifiedNames.Contains(a.QualifiedName))
+          .ToDictionary(a => a.QualifiedName);
 
       return await Task.FromResult(accounts);
     }
@@ -85,14 +86,14 @@ namespace bhb2core.Accounting.DataAccess
       bool accountAlreadyExists =
         _accounts
           .Exists(a =>
-            a.Id.Equals(
-              account.Id,
+            a.QualifiedName.Equals(
+              account.QualifiedName,
               StringComparison.OrdinalIgnoreCase));
 
       if (accountAlreadyExists)
       {
         throw new AccountException(
-          $"Account already exists with id \"{account.Id}\".",
+          $"Account already exists \"{account.QualifiedName}\".",
           account.ToString());
       }
 
@@ -101,13 +102,14 @@ namespace bhb2core.Accounting.DataAccess
       await Task.Delay(0);
     }
 
-    public async Task UpdateAccountBalances(IReadOnlyDictionary<string, decimal> balancesByAccountId)
+    public async Task UpdateAccountBalances(
+      IReadOnlyDictionary<string, decimal> balancesByAccountQualifiedName)
     {
-      foreach (var accountIdAndBalance in balancesByAccountId)
+      foreach (var accountNameAndBalance in balancesByAccountQualifiedName)
       {
         _accounts
-          .Single(a => a.Id.Equals(accountIdAndBalance.Key))
-          .Balance = accountIdAndBalance.Value;
+          .Single(a => a.QualifiedName.Equals(accountNameAndBalance.Key))
+          .Balance = accountNameAndBalance.Value;
       }
 
       await Task.Delay(0);

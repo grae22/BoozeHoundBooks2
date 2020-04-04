@@ -7,7 +7,6 @@ using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
 
 using bhb2desktop.Extensions;
-using bhb2desktop.Utils;
 
 namespace bhb2desktop
 {
@@ -34,11 +33,7 @@ namespace bhb2desktop
       accounts
         .ToList()
         .ForEach(a =>
-          _debitAccountComboBox.Items.Add(
-            AccountUtils.GetFullyQualifiedAccountName(
-              a.Id,
-              accounts,
-              '.')));
+          _debitAccountComboBox.Items.Add(a.QualifiedName));
 
       if (_debitAccountComboBox.Items.Count == 0)
       {
@@ -59,11 +54,7 @@ namespace bhb2desktop
       accounts
         .ToList()
         .ForEach(a =>
-          _creditAccountComboBox.Items.Add(
-            AccountUtils.GetFullyQualifiedAccountName(
-              a.Id,
-              accounts,
-              '.')));
+          _creditAccountComboBox.Items.Add(a.QualifiedName));
 
       if (_creditAccountComboBox.Items.Count == 0)
       {
@@ -81,9 +72,9 @@ namespace bhb2desktop
     {
       Transaction = new TransactionDto
       {
-        DebitAccountId = _debitAccountComboBox.Text.ToLower(),
-        CreditAccountId = _creditAccountComboBox.Text.ToLower(),
-        DateAndTime = _datePicker.Value,
+        DebitAccountQualifiedName = _debitAccountComboBox.Text,
+        CreditAccountQualifiedName = _creditAccountComboBox.Text,
+        Date = _datePicker.Value,
         Amount = decimal.Parse(_amountTextBox.Text)
       };
 

@@ -15,24 +15,23 @@ namespace bhb2coreTests.Accounting
   public class TransactionTests
   {
     [Test]
+    [Ignore("WIP")]
     public async Task Given_SufficientFunds_When_TransactionProcessed_Then_AccountBalancesAreUpdatedCorrectly()
     {
       // Arrange.
-      AccountingManager testObject = AccountingManagerFactory.Create(
-        out IAccountingDataAccess accountingDataAccess,
-        useConcreteDataAccessMock: true);
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       var debitAccount = new Account
       {
-        QualifiedName = "Funds.Cash",
-        Name = "Cash",
+        QualifiedName = "Funds",
+        Name = "Funds",
         Balance = 150m
       };
 
       var creditAccount = new Account
       {
-        QualifiedName = "Expense.Vehicle.Petrol",
-        Name = "Petrol",
+        QualifiedName = "Expense",
+        Name = "Expense",
         Balance = 0m
       };
 

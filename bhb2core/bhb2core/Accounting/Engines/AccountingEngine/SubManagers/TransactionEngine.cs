@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.Engines.AccountingEngine.Interfaces;
@@ -25,12 +26,12 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
     // TODO: Split method up - move orchestration to manager.
     public async Task ProcessTransaction(Transaction transaction)
     {
+      _logger.LogVerbose($"Transaction received: {transaction}.");
+
       if (transaction == null)
       {
         throw new ArgumentNullException(nameof(transaction));
       }
-
-      _logger.LogVerbose($"Transaction received: {transaction}.");
 
       IReadOnlyDictionary<string, Account> accounts = await _accountingDataAccess.GetAccounts(
         new[]
@@ -39,8 +40,23 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
           transaction.CreditAccountQualifiedName
         });
 
-      decimal newDebitAccountBalance = accounts[transaction.DebitAccountQualifiedName].Balance - transaction.Amount;
-      decimal newCreditAccountBalance = accounts[transaction.CreditAccountQualifiedName].Balance + transaction.Amount;
+      Account debitAccount = accounts[transaction.DebitAccountQualifiedName];
+      Account creditAccount = accounts[transaction.CreditAccountQualifiedName];
+
+      if (!debitAccount.AccountTypesWithDebitPermission.Contains(creditAccount.AccountType))
+      {
+        _logger.LogError($"Funds cannot be moved from \"{debitAccount.QualifiedName}\" to \"{creditAccount.QualifiedName}\".");
+        return;
+      }
+
+      if (!creditAccount.AccountTypesWithCreditPermission.Contains(debitAccount.AccountType))
+      {
+        _logger.LogError($"Funds cannot be moved to \"{creditAccount.QualifiedName}\" from \"{debitAccount.QualifiedName}\".");
+        return;
+      }
+
+      decimal newDebitAccountBalance = debitAccount.Balance - transaction.Amount;
+      decimal newCreditAccountBalance = creditAccount.Balance + transaction.Amount;
 
       await _accountingDataAccess.UpdateAccountBalances(
         new Dictionary<string, decimal>

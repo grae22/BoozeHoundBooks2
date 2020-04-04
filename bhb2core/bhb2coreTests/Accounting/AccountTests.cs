@@ -38,42 +38,6 @@ namespace bhb2coreTests.Accounting
       CreditorAccountName
     };
 
-    [TestCase(FundsAccountName, FundsAccountName, true, false, false, false, false)]
-    [TestCase(IncomeAccountName, IncomeAccountName, false, true, false, false, false)]
-    [TestCase(ExpenseAccountName, ExpenseAccountName, false, false, true, false, false)]
-    [TestCase(DebtorAccountName, DebtorAccountName, false, false, false, true, false)]
-    [TestCase(CreditorAccountName, CreditorAccountName, false, false, false, false, true)]
-    public async Task Given_NoAccountsAndAccountingManagerInitialised_When_AllAccountsRetrieved_Then_BaseAccountsAreReturned(
-      string qualifiedName,
-      string name,
-      bool isFunds,
-      bool isIncome,
-      bool isExpense,
-      bool isDebtor,
-      bool isCreditor)
-    {
-      // Arrange.
-      AccountingManager testObject = AccountingManagerFactory.Create(
-        out IAccountingDataAccess accountingDataAccess,
-        useConcreteDataAccessMock: true);
-
-      // Act.
-      IEnumerable<AccountDto> accounts = await testObject.GetAllAccounts();
-
-      // Assert.
-      AccountDto account = accounts.SingleOrDefault(a => a.QualifiedName.Equals(qualifiedName));
-
-      Assert.NotNull(account);
-      Assert.AreEqual(name, account.Name);
-      Assert.IsNull(account.ParentAccountQualifiedName);
-      Assert.AreEqual(0m, account.Balance);
-      Assert.AreEqual(isFunds, account.AccountType.IsFunds);
-      Assert.AreEqual(isIncome, account.AccountType.IsIncome);
-      Assert.AreEqual(isExpense, account.AccountType.IsExpense);
-      Assert.AreEqual(isDebtor, account.AccountType.IsDebtor);
-      Assert.AreEqual(isCreditor, account.AccountType.IsCreditor);
-    }
-
     [Test]
     public void Given_NoBaseAccounts_When_Initialised_Then_FundsAccountCreated()
     {
@@ -263,31 +227,17 @@ namespace bhb2coreTests.Accounting
     public async Task Given_BaseAccountsAlreadyExist_When_AccountingManagerInitialised_Then_BaseAccountsAreNotDuplicated()
     {
       // Arrange.
-      AccountingManager testObject = AccountingManagerFactory.Create(
-        out IAccountingDataAccess accountingDataAccess,
-        performInitialisation: false,
-        useConcreteDataAccessMock: true);
-
-      foreach (var name in BaseAccountNames)
-      {
-        await accountingDataAccess.AddAccount(
-          new Account
-          {
-            QualifiedName = name,
-            Name = name,
-            Balance = 0m
-          });
-      }
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       // Act.
       await testObject.Initialise();
 
       // Assert.
-      IEnumerable<AccountDto> accounts = await testObject.GetAllAccounts();
-
       foreach (var name in BaseAccountNames)
       {
-        Assert.NotNull(accounts.SingleOrDefault(a => a.Name.Equals(name)));
+        await accountingDataAccess
+          .Received(1)
+          .AddAccount(Arg.Is<Account>(a => a.Name.Equals(name)));
       }
     }
 
@@ -345,7 +295,7 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
+      //AccountingManagerFactory.ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
       var newAccount = new NewAccountDto
       {
@@ -373,8 +323,6 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
-
       var newAccount = new NewAccountDto
       {
         Name = "SomeAccount",
@@ -398,8 +346,6 @@ namespace bhb2coreTests.Accounting
     {
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
-
-      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
       var newAccount = new NewAccountDto
       {
@@ -453,8 +399,6 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
-
       var newAccount = new NewAccountDto
       {
         Name = "SomeAccount",
@@ -477,8 +421,6 @@ namespace bhb2coreTests.Accounting
     {
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
-
-      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
       var newAccount = new NewAccountDto
       {
@@ -503,8 +445,6 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
-
       var newAccount = new NewAccountDto
       {
         Name = "SomeAccount",
@@ -527,8 +467,6 @@ namespace bhb2coreTests.Accounting
     {
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
-
-      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
       var newAccount = new NewAccountDto
       {
@@ -553,8 +491,6 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
-
       var newAccount = new NewAccountDto
       {
         Name = "SomeAccount",
@@ -577,8 +513,6 @@ namespace bhb2coreTests.Accounting
     {
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
-
-      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
       var newAccount = new NewAccountDto
       {
@@ -611,8 +545,6 @@ namespace bhb2coreTests.Accounting
     {
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
-
-      ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
       var newAccount = new NewAccountDto
       {
@@ -752,104 +684,6 @@ namespace bhb2coreTests.Accounting
       accounts.Single(a => a.QualifiedName.Equals(someNonBaseAccount));
 
       Assert.Pass();
-    }
-
-    private static void ConfigureDataAccessWithBaseAccounts(in IAccountingDataAccess dataAccess)
-    {
-      dataAccess
-        .GetAccount(FundsAccountName)
-        .Returns(
-          GetAccountResult.CreateSuccess(new Account
-          {
-            AccountType = AccountType.CreateFunds(),
-            QualifiedName = FundsAccountName,
-            Name = FundsAccountName,
-            ParentAccountQualifiedName = null,
-            AccountTypesWithDebitPermission = new[]
-            {
-              AccountType.CreateFunds(),
-              AccountType.CreateExpense(),
-              AccountType.CreateDebtor(),
-              AccountType.CreateCreditor()
-            },
-            AccountTypesWithCreditPermission = new[]
-            {
-              AccountType.CreateFunds(),
-              AccountType.CreateIncome(),
-              AccountType.CreateDebtor(),
-              AccountType.CreateCreditor()
-            }
-          }));
-
-      dataAccess
-        .GetAccount(IncomeAccountName)
-        .Returns(
-          GetAccountResult.CreateSuccess(new Account
-          {
-            AccountType = AccountType.CreateIncome(),
-            QualifiedName = IncomeAccountName,
-            Name = IncomeAccountName,
-            ParentAccountQualifiedName = null,
-            AccountTypesWithDebitPermission = new[]
-            {
-              AccountType.CreateFunds()
-            },
-            AccountTypesWithCreditPermission = new AccountType[] {}
-          }));
-
-      dataAccess
-        .GetAccount(ExpenseAccountName)
-        .Returns(
-          GetAccountResult.CreateSuccess(new Account
-          {
-            AccountType = AccountType.CreateExpense(),
-            QualifiedName = ExpenseAccountName,
-            Name = ExpenseAccountName,
-            ParentAccountQualifiedName = null,
-            AccountTypesWithDebitPermission = new AccountType[] {},
-            AccountTypesWithCreditPermission = new[]
-            {
-              AccountType.CreateFunds()
-            }
-          }));
-
-      dataAccess
-        .GetAccount(DebtorAccountName)
-        .Returns(
-          GetAccountResult.CreateSuccess(new Account
-          {
-            AccountType = AccountType.CreateDebtor(),
-            QualifiedName = DebtorAccountName,
-            Name = DebtorAccountName,
-            ParentAccountQualifiedName = null,
-            AccountTypesWithDebitPermission = new[]
-            {
-              AccountType.CreateFunds()
-            },
-            AccountTypesWithCreditPermission = new[]
-            {
-              AccountType.CreateFunds()
-            }
-          }));
-
-      dataAccess
-        .GetAccount(CreditorAccountName)
-        .Returns(
-          GetAccountResult.CreateSuccess(new Account
-          {
-            AccountType = AccountType.CreateCreditor(),
-            QualifiedName = CreditorAccountName,
-            Name = CreditorAccountName,
-            ParentAccountQualifiedName = null,
-            AccountTypesWithDebitPermission = new[]
-            {
-              AccountType.CreateFunds()
-            },
-            AccountTypesWithCreditPermission = new[]
-            {
-              AccountType.CreateFunds()
-            }
-          }));
     }
   }
 }

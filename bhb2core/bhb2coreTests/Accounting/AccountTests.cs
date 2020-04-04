@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -470,6 +470,8 @@ namespace bhb2coreTests.Accounting
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
+      string someNonBaseAccount = $"{FundsAccountId}{AccountIdSeparator}SomeAccount";
+
       accountingDataAccess
         .GetAccounts(
           isFunds: true,
@@ -482,16 +484,19 @@ namespace bhb2coreTests.Accounting
           new Account { Id = IncomeAccountId },
           new Account { Id = DebtorAccountId },
           new Account { Id = CreditorAccountId },
+          new Account { Id = someNonBaseAccount, ParentAccountId = FundsAccountId }
         });
 
       // Act.
       IEnumerable<AccountDto> accounts = await testObject.GetTransactionDebitAccounts();
 
       // Assert.
-      accounts.Single(a => a.Id.Equals(FundsAccountId));
+      Assert.IsNull(accounts.SingleOrDefault(a => a.Id.Equals(FundsAccountId)));
+
       accounts.Single(a => a.Id.Equals(IncomeAccountId));
       accounts.Single(a => a.Id.Equals(DebtorAccountId));
       accounts.Single(a => a.Id.Equals(CreditorAccountId));
+      accounts.Single(a => a.Id.Equals(someNonBaseAccount));
 
       Assert.Pass();
     }
@@ -501,6 +506,8 @@ namespace bhb2coreTests.Accounting
     {
       // Arrange.
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      string someNonBaseAccount = $"{FundsAccountId}{AccountIdSeparator}SomeAccount";
 
       accountingDataAccess
         .GetAccounts(
@@ -514,16 +521,18 @@ namespace bhb2coreTests.Accounting
           new Account { Id = ExpenseAccountId },
           new Account { Id = DebtorAccountId },
           new Account { Id = CreditorAccountId },
+          new Account { Id = someNonBaseAccount, ParentAccountId = FundsAccountId }
         });
 
       // Act.
       IEnumerable<AccountDto> accounts = await testObject.GetTransactionCreditAccounts();
 
       // Assert.
-      accounts.Single(a => a.Id.Equals(FundsAccountId));
+      Assert.IsNull(accounts.SingleOrDefault(a => a.Id.Equals(FundsAccountId)));
       accounts.Single(a => a.Id.Equals(ExpenseAccountId));
       accounts.Single(a => a.Id.Equals(DebtorAccountId));
       accounts.Single(a => a.Id.Equals(CreditorAccountId));
+      accounts.Single(a => a.Id.Equals(someNonBaseAccount));
 
       Assert.Pass();
     }

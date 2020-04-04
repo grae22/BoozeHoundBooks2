@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.ActionResults;
@@ -78,7 +79,11 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
         isDebtor: true,
         isCreditor: true);
 
-      IEnumerable<AccountDto> accountDtos = _mapper.Map<IEnumerable<Account>, IEnumerable<AccountDto>>(accounts);
+      var leafChildrenOnly = new List<Account>(accounts);
+
+      RemoveAccountsWithChildren(leafChildrenOnly);
+
+      IEnumerable<AccountDto> accountDtos = _mapper.Map<IEnumerable<Account>, IEnumerable<AccountDto>>(leafChildrenOnly);
 
       _logger.LogVerbose($"Returning transaction debit accounts: {Serialiser.Serialise(accountDtos)}");
 
@@ -95,7 +100,11 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
         isDebtor: true,
         isCreditor: true);
 
-      IEnumerable<AccountDto> accountDtos = _mapper.Map<IEnumerable<Account>, IEnumerable<AccountDto>>(accounts);
+      var leafChildrenOnly = new List<Account>(accounts);
+
+      RemoveAccountsWithChildren(leafChildrenOnly);
+
+      IEnumerable<AccountDto> accountDtos = _mapper.Map<IEnumerable<Account>, IEnumerable<AccountDto>>(leafChildrenOnly);
 
       _logger.LogVerbose($"Returning transaction credit accounts: {Serialiser.Serialise(accountDtos)}");
 
@@ -220,6 +229,29 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
       await _accountingDataAccess.AddAccount(account);
 
       _logger.LogInformation($"Added \"{name}\" base account: {account}");
+    }
+
+    private void RemoveAccountsWithChildren(in List<Account> accounts)
+    {
+      var accountsToRemove = new List<Account>();
+
+      foreach (var account in accounts)
+      {
+        bool accountIsParentToOtherAccounts =
+          accounts.Any(a =>
+            a.ParentAccountId != null &&
+            a.ParentAccountId.Equals(account.Id));
+
+        if (accountIsParentToOtherAccounts)
+        {
+          accountsToRemove.Add(account);
+        }
+      }
+
+      foreach (var account in accountsToRemove)
+      {
+        accounts.Remove(account);
+      }
     }
   }
 }

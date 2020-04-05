@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
-using bhb2core.Accounting.ActionResults;
+using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Engines.AccountingEngine.Interfaces;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
@@ -207,6 +208,52 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
       GetAccountResult result = await _accountingDataAccess.GetAccount(accountQualifiedName);
 
       return result.IsSuccess;
+    }
+
+    public async Task<DoubleEntryUpdateBalanceResult> PerformDoubleEntryUpdateAccountBalance(
+      string debitAccountQualifiedName,
+      string creditAccountQualifiedName,
+      decimal amount)
+    {
+      IReadOnlyDictionary<string, Account> accounts = await _accountingDataAccess.GetAccounts(
+        new[]
+        {
+          debitAccountQualifiedName,
+          creditAccountQualifiedName
+        });
+
+      Account debitAccount = accounts[debitAccountQualifiedName];
+      Account creditAccount = accounts[creditAccountQualifiedName];
+
+      if (!debitAccount.AccountTypesWithDebitPermission.Contains(creditAccount.AccountType))
+      {
+        string message = $"Funds cannot be moved from \"{debitAccount.QualifiedName}\" to \"{creditAccount.QualifiedName}\".";
+
+        _logger.LogError(message);
+
+        return DoubleEntryUpdateBalanceResult.CreateFailure(message);
+      }
+
+      if (!creditAccount.AccountTypesWithCreditPermission.Contains(debitAccount.AccountType))
+      {
+        string message = $"Funds cannot be moved to \"{creditAccount.QualifiedName}\" from \"{debitAccount.QualifiedName}\".";
+
+        _logger.LogError(message);
+
+        return DoubleEntryUpdateBalanceResult.CreateFailure(message);
+      }
+
+      decimal newDebitAccountBalance = debitAccount.Balance - amount;
+      decimal newCreditAccountBalance = creditAccount.Balance + amount;
+
+      await _accountingDataAccess.UpdateAccountBalances(
+        new Dictionary<string, decimal>
+        {
+          { debitAccountQualifiedName, newDebitAccountBalance },
+          { creditAccountQualifiedName, newCreditAccountBalance }
+        });
+
+      return DoubleEntryUpdateBalanceResult.CreateSuccess();
     }
 
     private async Task CreateBaseAccount(

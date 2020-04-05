@@ -1,6 +1,6 @@
 ﻿using bhb2core.Accounting.Models;
 
-namespace bhb2core.Accounting.ActionResults
+namespace bhb2core.Accounting.DataAccess.ActionResults
 {
   internal struct GetAccountResult
   {

@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using bhb2core.Accounting.ActionResults;
+using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
+using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
 using bhb2core.Accounting.Managers.AccountingManager.Interfaces;
 using bhb2core.Accounting.Managers.AccountingManager.SubManagers;
 using bhb2core.Utils.Logging;
@@ -30,6 +31,7 @@ namespace bhb2core.Accounting.Managers.AccountingManager
         logger);
 
       _transactionManager = new TransactionManager(
+        accountingDataAccess,
         accountingEngine,
         mapper,
         logger);
@@ -60,9 +62,9 @@ namespace bhb2core.Accounting.Managers.AccountingManager
       return await _accountManager.AddAccount(newAccountDto);
     }
 
-    public async Task ProcessTransaction(TransactionDto transactionDto)
+    public async Task<ProcessTransactionResult> ProcessTransaction(TransactionDto transactionDto)
     {
-      await _transactionManager.ProcessTransaction(transactionDto);
+      return await _transactionManager.ProcessTransaction(transactionDto);
     }
   }
 }

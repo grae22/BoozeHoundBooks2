@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using bhb2core.Accounting.ActionResults;
+using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Models;
 
 namespace bhb2core.Accounting.Interfaces

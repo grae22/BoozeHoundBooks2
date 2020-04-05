@@ -1,4 +1,4 @@
-﻿namespace bhb2core.Accounting.ActionResults
+﻿namespace bhb2core.Accounting.DataAccess.ActionResults
 {
   public struct AddAccountResult
   {

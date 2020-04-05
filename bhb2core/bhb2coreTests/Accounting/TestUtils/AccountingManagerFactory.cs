@@ -1,5 +1,5 @@
 ﻿using bhb2core;
-using bhb2core.Accounting.ActionResults;
+using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Engines.AccountingEngine;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Managers.AccountingManager;

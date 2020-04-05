@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using bhb2core.Accounting.ActionResults;
+using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Exceptions;
 using bhb2core.Accounting.Interfaces;

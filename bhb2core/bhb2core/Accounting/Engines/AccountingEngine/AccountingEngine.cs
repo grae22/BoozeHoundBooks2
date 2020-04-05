@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-using bhb2core.Accounting.ActionResults;
+using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Engines.AccountingEngine.Interfaces;
 using bhb2core.Accounting.Engines.AccountingEngine.SubEngines;
 using bhb2core.Accounting.Interfaces;
@@ -52,9 +52,15 @@ namespace bhb2core.Accounting.Engines.AccountingEngine
       return await _accountEngine.DoesAccountExist(accountQualifiedName);
     }
 
-    public async Task ProcessTransaction(Transaction transaction)
+    public async Task<DoubleEntryUpdateBalanceResult> PerformDoubleEntryUpdateAccountBalance(
+      string debitAccountQualifiedName,
+      string creditAccountQualifiedName,
+      decimal amount)
     {
-      await _transactionEngine.ProcessTransaction(transaction);
+      return await _accountEngine.PerformDoubleEntryUpdateAccountBalance(
+        debitAccountQualifiedName,
+        creditAccountQualifiedName,
+        amount);
     }
   }
 }

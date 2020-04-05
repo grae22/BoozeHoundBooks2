@@ -5,9 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using bhb2core.Accounting.ActionResults;
+using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
+using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
 using bhb2core.Utils.Logging;
 
 using bhb2desktop.Extensions;
@@ -122,7 +123,12 @@ namespace bhb2desktop
 
       Task.Run(async () =>
       {
-        await _accountingManager.ProcessTransaction(dlg.Transaction);
+        ProcessTransactionResult result = await _accountingManager.ProcessTransaction(dlg.Transaction);
+
+        if (!result.IsSuccess)
+        {
+          this.ShowErrorMessage($"Failed to process transaction: \"{result.FailureMessage}\".");
+        }
 
         await PopulateAccountsTree();
       });

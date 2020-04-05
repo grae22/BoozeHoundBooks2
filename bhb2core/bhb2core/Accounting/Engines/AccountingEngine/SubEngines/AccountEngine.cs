@@ -243,17 +243,19 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
         return DoubleEntryUpdateBalanceResult.CreateFailure(message);
       }
 
-      decimal newDebitAccountBalance = debitAccount.Balance - amount;
-      decimal newCreditAccountBalance = creditAccount.Balance + amount;
+      debitAccount.Balance -= amount;
+      creditAccount.Balance += amount;
 
       await _accountingDataAccess.UpdateAccountBalances(
         new Dictionary<string, decimal>
         {
-          { debitAccountQualifiedName, newDebitAccountBalance },
-          { creditAccountQualifiedName, newCreditAccountBalance }
+          { debitAccountQualifiedName, debitAccount.Balance },
+          { creditAccountQualifiedName, creditAccount.Balance }
         });
 
-      return DoubleEntryUpdateBalanceResult.CreateSuccess();
+      return DoubleEntryUpdateBalanceResult.CreateSuccess(
+        debitAccount,
+        creditAccount);
     }
 
     private async Task CreateBaseAccount(

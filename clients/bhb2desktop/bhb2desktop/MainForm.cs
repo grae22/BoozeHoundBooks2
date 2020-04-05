@@ -79,6 +79,11 @@ namespace bhb2desktop
         accounts.ToList());
     }
 
+    private void UpdateAccountTreeBalances(in IEnumerable<AccountDto> accounts)
+    {
+      // TODO
+    }
+
     private void AddAccount_OnClick(object sender, EventArgs args)
     {
       using var dlg = new AccountPropertiesDialog(_accountingManager);

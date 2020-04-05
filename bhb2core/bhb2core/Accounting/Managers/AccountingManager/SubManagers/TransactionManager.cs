@@ -54,7 +54,10 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 
       _logger.LogInformation($"Transaction processed: {transaction}");
 
-      return ProcessTransactionResult.CreateSuccess(null);
+      return ProcessTransactionResult.CreateSuccess(
+        null,
+        _mapper.Map<Account, AccountDto>(updateBalanceResult.DebitAccount),
+        _mapper.Map<Account, AccountDto>(updateBalanceResult.CreditAccount));
     }
   }
 }

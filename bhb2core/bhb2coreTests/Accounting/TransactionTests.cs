@@ -58,6 +58,45 @@ namespace bhb2coreTests.Accounting
     }
 
     [Test]
+    public async Task Given_Transaction_When_ProcessedSuccessfully_Then_ResultAccountBalancesAreCorrect()
+    {
+      // Arrange.
+      const string debitAccountName = "Funds";
+      const string creditAccountName = "Expense";
+      const decimal amount = 123.45m;
+
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      AccountingManagerFactory.ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
+
+      Account debitAccount = accountingDataAccess.GetAccount(debitAccountName).Result.Result;
+      Account creditAccount = accountingDataAccess.GetAccount(creditAccountName).Result.Result;
+
+      accountingDataAccess
+        .GetAccounts(Arg.Any<IEnumerable<string>>())
+        .Returns(
+          new Dictionary<string, Account>
+          {
+            { debitAccountName, debitAccount },
+            { creditAccountName, creditAccount }
+          });
+
+      var transaction = new TransactionDto
+      {
+        DebitAccountQualifiedName = debitAccountName,
+        CreditAccountQualifiedName = creditAccountName,
+        Amount = amount
+      };
+
+      // Act.
+      ProcessTransactionResult result = await testObject.ProcessTransaction(transaction);
+
+      // Assert.
+      Assert.AreEqual(-amount, result.DebitAccount.Balance);
+      Assert.AreEqual(amount, result.CreditAccount.Balance);
+    }
+
+    [Test]
     public async Task Given_SufficientFunds_When_TransactionProcessed_Then_AccountBalancesAreUpdatedCorrectly()
     {
       // Arrange.

@@ -5,11 +5,12 @@ VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "bhb2core", "bhb2core\bhb2core.csproj", "{80D04BE5-68E7-4C36-9DE6-1BA3C2CEE39F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bhb2coreTests", "bhb2coreTests\bhb2coreTests.csproj", "{BC08D031-369E-4DE0-B4EE-733F5CCAAD5E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "bhb2coreTests", "bhb2coreTests\bhb2coreTests.csproj", "{BC08D031-369E-4DE0-B4EE-733F5CCAAD5E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{78476AD5-249D-42FC-BF22-CBBA87C8708F}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		Notes.txt = Notes.txt
 		nuget.config = nuget.config
 	EndProjectSection
 EndProject

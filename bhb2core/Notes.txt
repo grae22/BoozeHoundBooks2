@@ -1,0 +1,25 @@
+===================
+ BHB2 Core - Notes
+===================
+
+Architecture
+------------
+
+This is an attempt at a iDesign (Juval Lowey) style architecture.
+
+Data access
+ - Purely data access orientated, no business logic.
+ - Examples: AddAccount, UpdateTransaction, etc. 
+
+Engines
+ - Provide focussed methods which implement business rules, each for achieving a single business action.
+ - Examples: AddAccount
+
+Managers
+ - Fulfill use-cases by orchestrating business functionality in the engines.
+ - Examples: ProcessTransaction
+
+Tests
+-----
+
+Unit-tests target behaviours rather than simply testing a single class - that is, vertical slices of functionality.

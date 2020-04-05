@@ -9,7 +9,7 @@ using bhb2core.Accounting.Models;
 using bhb2core.Utils.Extensions;
 using bhb2core.Utils.Logging;
 
-namespace bhb2core.Accounting.Engines.AccountingEngine.SubManagers
+namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
 {
   internal class AccountEngine : IAccountEngine
   {

@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
@@ -6,6 +8,8 @@ using bhb2core.Accounting.Managers.AccountingManager;
 using bhb2core.Accounting.Models;
 
 using bhb2coreTests.Accounting.TestUtils;
+
+using NSubstitute;
 
 using NUnit.Framework;
 
@@ -15,45 +19,56 @@ namespace bhb2coreTests.Accounting
   public class TransactionTests
   {
     [Test]
-    [Ignore("WIP")]
     public async Task Given_SufficientFunds_When_TransactionProcessed_Then_AccountBalancesAreUpdatedCorrectly()
     {
       // Arrange.
+      const string debitAccountName = "Funds";
+      const string creditAccountName = "Expense";
+      const decimal amount = 123.45m;
+
       AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
-      var debitAccount = new Account
-      {
-        QualifiedName = "Funds",
-        Name = "Funds",
-        Balance = 150m
-      };
+      AccountingManagerFactory.ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
-      var creditAccount = new Account
-      {
-        QualifiedName = "Expense",
-        Name = "Expense",
-        Balance = 0m
-      };
+      Account debitAccount = accountingDataAccess.GetAccount(debitAccountName).Result.Result;
+      Account creditAccount = accountingDataAccess.GetAccount(creditAccountName).Result.Result;
 
-      await accountingDataAccess.AddAccount(debitAccount);
-      await accountingDataAccess.AddAccount(creditAccount);
+      accountingDataAccess
+        .GetAccounts(Arg.Any<IEnumerable<string>>())
+        .Returns(
+          new Dictionary<string, Account>
+          {
+            { debitAccountName, debitAccount },
+            { creditAccountName, creditAccount }
+          });
 
       var transaction = new TransactionDto
       {
-        DebitAccountQualifiedName = debitAccount.QualifiedName,
-        CreditAccountQualifiedName = creditAccount.QualifiedName,
-        Amount = 123.45m
+        DebitAccountQualifiedName = debitAccountName,
+        CreditAccountQualifiedName = creditAccountName,
+        Amount = amount
       };
-
-      decimal expectedDebitAccountBalance = debitAccount.Balance - transaction.Amount;
-      decimal expectedCreditAccountBalance = creditAccount.Balance + transaction.Amount;
 
       // Act.
       await testObject.ProcessTransaction(transaction);
 
       // Assert.
-      Assert.AreEqual(expectedDebitAccountBalance, debitAccount.Balance);
-      Assert.AreEqual(expectedCreditAccountBalance, creditAccount.Balance);
+      decimal expectedDebitAccountBalance = -transaction.Amount;
+      decimal expectedCreditAccountBalance = transaction.Amount;
+
+      await accountingDataAccess
+        .Received(1)
+        .UpdateAccountBalances(
+          Arg.Is<IReadOnlyDictionary<string, decimal>>(balancesByAccount =>
+            balancesByAccount.Single(x =>
+              x.Key.Equals(debitAccountName)).Value == expectedDebitAccountBalance));
+
+      await accountingDataAccess
+        .Received(1)
+        .UpdateAccountBalances(
+          Arg.Is<IReadOnlyDictionary<string, decimal>>(balancesByAccount =>
+            balancesByAccount.Single(x =>
+              x.Key.Equals(creditAccountName)).Value == expectedCreditAccountBalance));
     }
   }
 }

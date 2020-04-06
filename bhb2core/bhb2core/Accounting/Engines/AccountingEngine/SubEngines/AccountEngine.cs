@@ -210,12 +210,13 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
       return result.IsSuccess;
     }
 
-    // TODO: Method needs refactoring.
+    // TODO: Method needs refactoring decompose?
     public async Task<DoubleEntryUpdateBalanceResult> PerformDoubleEntryUpdateAccountBalance(
       string debitAccountQualifiedName,
       string creditAccountQualifiedName,
       decimal amount)
     {
+      // Get accounts.
       IReadOnlyDictionary<string, Account> accounts = await _accountingDataAccess.GetAccounts(
         new[]
         {
@@ -226,6 +227,7 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
       Account debitAccount = accounts[debitAccountQualifiedName];
       Account creditAccount = accounts[creditAccountQualifiedName];
 
+      // Check accounts can transact.
       if (!debitAccount.AccountTypesWithDebitPermission.Contains(creditAccount.AccountType))
       {
         string message = $"Funds cannot be moved from \"{debitAccount.QualifiedName}\" to \"{creditAccount.QualifiedName}\".";
@@ -244,16 +246,7 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
         return DoubleEntryUpdateBalanceResult.CreateFailure(message);
       }
 
-      debitAccount.Balance -= amount;
-      creditAccount.Balance += amount;
-
-      await _accountingDataAccess.UpdateAccountBalances(
-        new Dictionary<string, decimal>
-        {
-          { debitAccountQualifiedName, debitAccount.Balance },
-          { creditAccountQualifiedName, creditAccount.Balance }
-        });
-
+      // Get debit account parent accounts.
       GetResult<IEnumerable<Account>> getParentAccountsResult =
         await _accountingDataAccess.GetParentAccountsOrdered(debitAccountQualifiedName);
 
@@ -264,6 +257,7 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
 
       IEnumerable<Account> parentDebitAccounts = getParentAccountsResult.Result;
 
+      // Get credit account parent accounts.
       getParentAccountsResult =
         await _accountingDataAccess.GetParentAccountsOrdered(creditAccountQualifiedName);
 
@@ -274,21 +268,26 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
 
       IEnumerable<Account> parentCreditAccounts = getParentAccountsResult.Result;
 
-      var updatedBalancesByParentAccounts = new Dictionary<string, decimal>();
+      // Update balances for all affected accounts.
+      var updatedBalancesByAccount = new Dictionary<string, decimal>
+      {
+        { debitAccount.QualifiedName, debitAccount.Balance -= amount },
+        { creditAccount.QualifiedName, creditAccount.Balance += amount }
+      };
 
       parentDebitAccounts
         .ToList()
-        .ForEach(a => updatedBalancesByParentAccounts.Add(
+        .ForEach(a => updatedBalancesByAccount.Add(
           a.QualifiedName,
           a.Balance -= amount));
 
       parentCreditAccounts
         .ToList()
-        .ForEach(a => updatedBalancesByParentAccounts.Add(
+        .ForEach(a => updatedBalancesByAccount.Add(
           a.QualifiedName,
           a.Balance += amount));
 
-      await _accountingDataAccess.UpdateAccountBalances(updatedBalancesByParentAccounts);
+      await _accountingDataAccess.UpdateAccountBalances(updatedBalancesByAccount);
 
       var allUpdatedAccounts = new List<Account>(parentDebitAccounts);
       allUpdatedAccounts.AddRange(parentCreditAccounts);

@@ -140,6 +140,14 @@ namespace bhb2coreTests.Accounting
             { creditAccountName, creditAccount }
           });
 
+      accountingDataAccess
+        .GetParentAccountsOrdered(debitAccountName)
+        .Returns(GetResult<IEnumerable<Account>>.CreateSuccess(new Account[] {}));
+
+      accountingDataAccess
+        .GetParentAccountsOrdered(creditAccountName)
+        .Returns(GetResult<IEnumerable<Account>>.CreateSuccess(new Account[] {}));
+
       var transaction = new TransactionDto
       {
         DebitAccountQualifiedName = debitAccountName,

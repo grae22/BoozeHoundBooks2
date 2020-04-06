@@ -56,7 +56,7 @@ namespace bhb2core.Accounting.DataAccess
       return await Task.FromResult(accounts);
     }
 
-    public async Task<GetAccountResult> GetAccount(string accountQualifiedName)
+    public async Task<GetResult<Account>> GetAccount(string accountQualifiedName)
     {
       Account account =
         await Task.FromResult(
@@ -64,10 +64,10 @@ namespace bhb2core.Accounting.DataAccess
 
       if (account == null)
       {
-        return GetAccountResult.CreateFailure($"Account not found \"{accountQualifiedName}\".");
+        return GetResult<Account>.CreateFailure($"Account not found \"{accountQualifiedName}\".");
       }
 
-      return GetAccountResult.CreateSuccess(account);
+      return GetResult<Account>.CreateSuccess(account);
     }
 
     public async Task<IReadOnlyDictionary<string, Account>> GetAccounts(
@@ -79,6 +79,25 @@ namespace bhb2core.Accounting.DataAccess
           .ToDictionary(a => a.QualifiedName);
 
       return await Task.FromResult(accounts);
+    }
+
+    public async Task<GetResult<IEnumerable<Account>>> GetParentAccountsOrdered(string accountQualifiedName)
+    {
+      Account account =
+        _accounts.FirstOrDefault(a => a.QualifiedName.Equals(accountQualifiedName, StringComparison.Ordinal));
+
+      var parentAccounts = new List<Account>();
+
+      try
+      {
+        await GetAccountParentsRecursive(account, parentAccounts);
+      }
+      catch (AccountException ex)
+      {
+        GetResult<IEnumerable<Account>>.CreateFailure(ex.Message);
+      }
+
+      return GetResult<IEnumerable<Account>>.CreateSuccess(parentAccounts);
     }
 
     public async Task AddAccount(Account account)
@@ -107,12 +126,37 @@ namespace bhb2core.Accounting.DataAccess
     {
       foreach (var accountNameAndBalance in balancesByAccountQualifiedName)
       {
+        string accountQualifiedName = accountNameAndBalance.Key;
+        decimal balance = accountNameAndBalance.Value;
+
         _accounts
-          .Single(a => a.QualifiedName.Equals(accountNameAndBalance.Key))
-          .Balance = accountNameAndBalance.Value;
+          .Single(a => a.QualifiedName.Equals(accountQualifiedName))
+          .Balance = balance;
       }
 
       await Task.Delay(0);
+    }
+
+    private async Task GetAccountParentsRecursive(
+      Account account,
+      ICollection<Account> parentAccounts)
+    {
+      if (!account.HasParent)
+      {
+        return;
+      }
+
+      Account parentAccount = _accounts
+        .FirstOrDefault(a => a.QualifiedName.Equals(account.ParentAccountQualifiedName, StringComparison.Ordinal));
+
+      if (parentAccount == null)
+      {
+        throw new AccountException($"Account not found: \"{account.ParentAccountQualifiedName}\".", string.Empty);
+      }
+
+      parentAccounts.Add(parentAccount);
+
+      await GetAccountParentsRecursive(parentAccount, parentAccounts);
     }
   }
 }

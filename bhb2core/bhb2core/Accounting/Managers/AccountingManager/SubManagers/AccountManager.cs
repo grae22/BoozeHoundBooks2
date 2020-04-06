@@ -105,7 +105,7 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
         throw new ArgumentNullException(nameof(newAccountDto));
       }
 
-      GetAccountResult getParentAccountResult =
+      GetResult<Account> getParentAccountResult =
         await _accountingDataAccess.GetAccount(newAccountDto.ParentAccountQualifiedName);
 
       if (!getParentAccountResult.IsSuccess)

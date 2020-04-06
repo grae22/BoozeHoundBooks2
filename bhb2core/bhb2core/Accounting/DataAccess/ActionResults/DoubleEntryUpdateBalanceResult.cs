@@ -1,18 +1,17 @@
-﻿using bhb2core.Accounting.Models;
+﻿using System.Collections.Generic;
+
+using bhb2core.Accounting.Models;
 
 namespace bhb2core.Accounting.DataAccess.ActionResults
 {
   internal struct DoubleEntryUpdateBalanceResult
   {
-    public static DoubleEntryUpdateBalanceResult CreateSuccess(
-      in Account debitAccount,
-      in Account creditAccount)
+    public static DoubleEntryUpdateBalanceResult CreateSuccess(in IEnumerable<Account> updatedAccounts)
     {
       return new DoubleEntryUpdateBalanceResult(
         true,
         null,
-        debitAccount,
-        creditAccount);
+        updatedAccounts);
     }
 
     public static DoubleEntryUpdateBalanceResult CreateFailure(in string message)
@@ -20,25 +19,21 @@ namespace bhb2core.Accounting.DataAccess.ActionResults
       return new DoubleEntryUpdateBalanceResult(
         false,
         message,
-        null,
         null);
     }
 
     public bool IsSuccess { get; }
     public string FailureMessage { get; }
-    public Account DebitAccount { get; }
-    public Account CreditAccount { get; }
+    public IEnumerable<Account> UpdatedAccounts { get; }
 
     private DoubleEntryUpdateBalanceResult(
       in bool isSuccess,
       in string failureMessage,
-      in Account debitAccount,
-      in Account creditAccount)
+      in IEnumerable<Account> updatedAccounts)
     {
       IsSuccess = isSuccess;
       FailureMessage = failureMessage;
-      DebitAccount = debitAccount;
-      CreditAccount = creditAccount;
+      UpdatedAccounts = updatedAccounts;
     }
   }
 }

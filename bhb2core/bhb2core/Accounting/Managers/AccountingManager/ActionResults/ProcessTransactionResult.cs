@@ -1,4 +1,6 @@
-﻿using bhb2core.Accounting.Dto;
+﻿using System.Collections.Generic;
+
+using bhb2core.Accounting.Dto;
 
 namespace bhb2core.Accounting.Managers.AccountingManager.ActionResults
 {
@@ -6,15 +8,13 @@ namespace bhb2core.Accounting.Managers.AccountingManager.ActionResults
   {
     public static ProcessTransactionResult CreateSuccess(
       in TransactionDto transaction,
-      in AccountDto debitAccount,
-      in AccountDto creditAccount)
+      in IEnumerable<AccountDto> updatedAccounts)
     {
       return new ProcessTransactionResult(
         true,
         null,
         transaction,
-        debitAccount,
-        creditAccount);
+        updatedAccounts);
     }
 
     public static ProcessTransactionResult CreateFailure(in string failureMessage)
@@ -23,28 +23,24 @@ namespace bhb2core.Accounting.Managers.AccountingManager.ActionResults
         false,
         failureMessage,
         null,
-        null,
         null);
     }
 
     public bool IsSuccess { get; }
     public string FailureMessage { get; }
     public TransactionDto Result { get; }
-    public AccountDto DebitAccount { get; }
-    public AccountDto CreditAccount { get; }
+    public IEnumerable<AccountDto> UpdatedAccounts { get; }
 
     private ProcessTransactionResult(
       in bool isSuccess,
       in string failureMessage,
       in TransactionDto result,
-      in AccountDto debitAccount,
-      in AccountDto creditAccount)
+      in IEnumerable<AccountDto> updatedAccounts)
     {
       IsSuccess = isSuccess;
       FailureMessage = failureMessage;
       Result = result;
-      DebitAccount = debitAccount;
-      CreditAccount = creditAccount;
+      UpdatedAccounts = updatedAccounts;
     }
   }
 }

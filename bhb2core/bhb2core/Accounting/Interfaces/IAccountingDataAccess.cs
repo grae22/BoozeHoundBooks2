@@ -10,7 +10,7 @@ namespace bhb2core.Accounting.Interfaces
   {
     Task<IEnumerable<Account>> GetAllAccounts();
 
-    Task<GetAccountResult> GetAccount(string accountQualifiedName);
+    Task<GetResult<Account>> GetAccount(string accountQualifiedName);
 
     Task<IEnumerable<Account>> GetAccounts(
       bool isFunds = false,
@@ -21,6 +21,8 @@ namespace bhb2core.Accounting.Interfaces
 
     Task<IReadOnlyDictionary<string, Account>> GetAccounts(
       IEnumerable<string> accountQualifiedNames);
+
+    Task<GetResult<IEnumerable<Account>>> GetParentAccountsOrdered(string accountQualifiedName);
 
     Task AddAccount(Account account);
 

@@ -60,7 +60,7 @@ namespace bhb2coreTests.Accounting.TestUtils
       dataAccess
         .GetAccount(FundsAccountName)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account
+          GetResult<Account>.CreateSuccess(new Account
           {
             AccountType = AccountType.CreateFunds(),
             QualifiedName = FundsAccountName,
@@ -85,7 +85,7 @@ namespace bhb2coreTests.Accounting.TestUtils
       dataAccess
         .GetAccount(IncomeAccountName)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account
+          GetResult<Account>.CreateSuccess(new Account
           {
             AccountType = AccountType.CreateIncome(),
             QualifiedName = IncomeAccountName,
@@ -101,7 +101,7 @@ namespace bhb2coreTests.Accounting.TestUtils
       dataAccess
         .GetAccount(ExpenseAccountName)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account
+          GetResult<Account>.CreateSuccess(new Account
           {
             AccountType = AccountType.CreateExpense(),
             QualifiedName = ExpenseAccountName,
@@ -117,7 +117,7 @@ namespace bhb2coreTests.Accounting.TestUtils
       dataAccess
         .GetAccount(DebtorAccountName)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account
+          GetResult<Account>.CreateSuccess(new Account
           {
             AccountType = AccountType.CreateDebtor(),
             QualifiedName = DebtorAccountName,
@@ -136,7 +136,7 @@ namespace bhb2coreTests.Accounting.TestUtils
       dataAccess
         .GetAccount(CreditorAccountName)
         .Returns(
-          GetAccountResult.CreateSuccess(new Account
+          GetResult<Account>.CreateSuccess(new Account
           {
             AccountType = AccountType.CreateCreditor(),
             QualifiedName = CreditorAccountName,

@@ -156,11 +156,7 @@ namespace bhb2desktop
           return;
         }
 
-        UpdateAccountTreeBalances(new[]
-        {
-          result.DebitAccount,
-          result.CreditAccount
-        });
+        UpdateAccountTreeBalances(result.UpdatedAccounts);
       });
     }
   }

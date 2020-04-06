@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.DataAccess.ActionResults;
@@ -56,8 +57,7 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 
       return ProcessTransactionResult.CreateSuccess(
         null,
-        _mapper.Map<Account, AccountDto>(updateBalanceResult.DebitAccount),
-        _mapper.Map<Account, AccountDto>(updateBalanceResult.CreditAccount));
+        _mapper.Map<IEnumerable<Account>, IEnumerable<AccountDto>>(updateBalanceResult.UpdatedAccounts));
     }
   }
 }

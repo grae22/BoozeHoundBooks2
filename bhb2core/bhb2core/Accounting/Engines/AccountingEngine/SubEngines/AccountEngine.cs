@@ -205,11 +205,12 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
 
     public async Task<bool> DoesAccountExist(string accountQualifiedName)
     {
-      GetAccountResult result = await _accountingDataAccess.GetAccount(accountQualifiedName);
+      GetResult<Account> result = await _accountingDataAccess.GetAccount(accountQualifiedName);
 
       return result.IsSuccess;
     }
 
+    // TODO: Method needs refactoring.
     public async Task<DoubleEntryUpdateBalanceResult> PerformDoubleEntryUpdateAccountBalance(
       string debitAccountQualifiedName,
       string creditAccountQualifiedName,
@@ -253,9 +254,48 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
           { creditAccountQualifiedName, creditAccount.Balance }
         });
 
-      return DoubleEntryUpdateBalanceResult.CreateSuccess(
-        debitAccount,
-        creditAccount);
+      GetResult<IEnumerable<Account>> getParentAccountsResult =
+        await _accountingDataAccess.GetParentAccountsOrdered(debitAccountQualifiedName);
+
+      if (!getParentAccountsResult.IsSuccess)
+      {
+        return DoubleEntryUpdateBalanceResult.CreateFailure(getParentAccountsResult.FailureMessage);
+      }
+
+      IEnumerable<Account> parentDebitAccounts = getParentAccountsResult.Result;
+
+      getParentAccountsResult =
+        await _accountingDataAccess.GetParentAccountsOrdered(creditAccountQualifiedName);
+
+      if (!getParentAccountsResult.IsSuccess)
+      {
+        return DoubleEntryUpdateBalanceResult.CreateFailure(getParentAccountsResult.FailureMessage);
+      }
+
+      IEnumerable<Account> parentCreditAccounts = getParentAccountsResult.Result;
+
+      var updatedBalancesByParentAccounts = new Dictionary<string, decimal>();
+
+      parentDebitAccounts
+        .ToList()
+        .ForEach(a => updatedBalancesByParentAccounts.Add(
+          a.QualifiedName,
+          a.Balance -= amount));
+
+      parentCreditAccounts
+        .ToList()
+        .ForEach(a => updatedBalancesByParentAccounts.Add(
+          a.QualifiedName,
+          a.Balance += amount));
+
+      await _accountingDataAccess.UpdateAccountBalances(updatedBalancesByParentAccounts);
+
+      var allUpdatedAccounts = new List<Account>(parentDebitAccounts);
+      allUpdatedAccounts.AddRange(parentCreditAccounts);
+      allUpdatedAccounts.Add(debitAccount);
+      allUpdatedAccounts.Add(creditAccount);
+
+      return DoubleEntryUpdateBalanceResult.CreateSuccess(allUpdatedAccounts);
     }
 
     private async Task CreateBaseAccount(

@@ -339,5 +339,80 @@ namespace bhb2coreTests.Accounting
             balancesByAccount.Single(x =>
               x.Key.Equals(creditParentAccountName)).Value == expectedCreditAccountBalance));
     }
+
+    [Test]
+    public async Task Given_Transaction_When_AccountsShareParent_Then_ParentAccountBalanceShouldNotBeUpdated()
+    {
+      // Arrange.
+      const string debitAccountName = "Bank";
+      const string creditAccountName = "Cash";
+      const string parentAccountName = "Funds";
+      const decimal amount = 123.45m;
+
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      AccountingManagerFactory.ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
+
+      Account parentAccount = accountingDataAccess.GetAccount(parentAccountName).Result.Result;
+
+      var debitAccount = new Account
+      {
+        AccountType = AccountType.CreateFunds(),
+        QualifiedName = debitAccountName,
+        ParentAccountQualifiedName = parentAccountName,
+        AccountTypesWithDebitPermission = parentAccount.AccountTypesWithDebitPermission,
+        AccountTypesWithCreditPermission = parentAccount.AccountTypesWithCreditPermission
+      };
+
+      var creditAccount = new Account
+      {
+        AccountType = AccountType.CreateExpense(),
+        QualifiedName = creditAccountName,
+        ParentAccountQualifiedName = parentAccountName,
+        AccountTypesWithDebitPermission = parentAccount.AccountTypesWithDebitPermission,
+        AccountTypesWithCreditPermission = parentAccount.AccountTypesWithCreditPermission
+      };
+
+      accountingDataAccess
+        .GetAccounts(Arg.Any<IEnumerable<string>>())
+        .Returns(
+          new Dictionary<string, Account>
+          {
+            { debitAccountName, debitAccount },
+            { creditAccountName, creditAccount }
+          });
+
+      accountingDataAccess
+        .GetParentAccountsOrdered(debitAccountName)
+        .Returns(GetResult<IEnumerable<Account>>.CreateSuccess(new[]
+        {
+          parentAccount
+        }));
+
+      accountingDataAccess
+        .GetParentAccountsOrdered(creditAccountName)
+        .Returns(GetResult<IEnumerable<Account>>.CreateSuccess(new[]
+        {
+          parentAccount
+        }));
+
+      var transaction = new TransactionDto
+      {
+        DebitAccountQualifiedName = debitAccountName,
+        CreditAccountQualifiedName = creditAccountName,
+        Amount = amount
+      };
+
+      // Act.
+      await testObject.ProcessTransaction(transaction);
+
+      // Assert.
+      await accountingDataAccess
+        .Received(0)
+        .UpdateAccountBalances(
+          Arg.Is<IReadOnlyDictionary<string, decimal>>(balancesByAccount =>
+            balancesByAccount.Any(x =>
+              x.Key.Equals(parentAccountName))));
+    }
   }
 }

@@ -230,6 +230,13 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
       Account debitAccount = accounts[debitAccountQualifiedName];
       Account creditAccount = accounts[creditAccountQualifiedName];
 
+      bool isParentAccountShared =
+        debitAccount.HasParent &&
+        creditAccount.HasParent &&
+        debitAccount.ParentAccountQualifiedName.Equals(
+          creditAccount.ParentAccountQualifiedName,
+          StringComparison.Ordinal);
+
       // Check accounts can transact.
       if (!debitAccount.AccountTypesWithDebitPermission.Contains(creditAccount.AccountType))
       {
@@ -249,27 +256,33 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
         return DoubleEntryUpdateBalanceResult.CreateFailure(message);
       }
 
-      // Get debit account parent accounts.
-      GetResult<IEnumerable<Account>> getParentAccountsResult =
-        await _accountingDataAccess.GetParentAccountsOrdered(debitAccountQualifiedName);
+      IEnumerable<Account> parentDebitAccounts = new Account[0];
+      IEnumerable<Account> parentCreditAccounts = new Account[0];
 
-      if (!getParentAccountsResult.IsSuccess)
+      if (!isParentAccountShared)
       {
-        return DoubleEntryUpdateBalanceResult.CreateFailure(getParentAccountsResult.FailureMessage);
+        // Get debit account parent accounts.
+        GetResult<IEnumerable<Account>> getParentAccountsResult =
+          await _accountingDataAccess.GetParentAccountsOrdered(debitAccountQualifiedName);
+
+        if (!getParentAccountsResult.IsSuccess)
+        {
+          return DoubleEntryUpdateBalanceResult.CreateFailure(getParentAccountsResult.FailureMessage);
+        }
+
+        parentDebitAccounts = getParentAccountsResult.Result;
+
+        // Get credit account parent accounts.
+        getParentAccountsResult =
+          await _accountingDataAccess.GetParentAccountsOrdered(creditAccountQualifiedName);
+
+        if (!getParentAccountsResult.IsSuccess)
+        {
+          return DoubleEntryUpdateBalanceResult.CreateFailure(getParentAccountsResult.FailureMessage);
+        }
+
+        parentCreditAccounts = getParentAccountsResult.Result;
       }
-
-      IEnumerable<Account> parentDebitAccounts = getParentAccountsResult.Result;
-
-      // Get credit account parent accounts.
-      getParentAccountsResult =
-        await _accountingDataAccess.GetParentAccountsOrdered(creditAccountQualifiedName);
-
-      if (!getParentAccountsResult.IsSuccess)
-      {
-        return DoubleEntryUpdateBalanceResult.CreateFailure(getParentAccountsResult.FailureMessage);
-      }
-
-      IEnumerable<Account> parentCreditAccounts = getParentAccountsResult.Result;
 
       // Update balances for all affected accounts.
       var updatedBalancesByAccount = new Dictionary<string, decimal>

@@ -9,6 +9,7 @@ using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
 using bhb2core.Utils.Extensions;
 using bhb2core.Utils.Logging;
+using bhb2core.Utils.Serialisation;
 
 namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
 {
@@ -216,6 +217,8 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
       string creditAccountQualifiedName,
       decimal amount)
     {
+      _logger.LogInformation($"Attempting to move {amount:N} from \"{debitAccountQualifiedName}\" to \"{creditAccountQualifiedName}\"...");
+
       // Get accounts.
       IReadOnlyDictionary<string, Account> accounts = await _accountingDataAccess.GetAccounts(
         new[]
@@ -286,6 +289,8 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
         .ForEach(a => updatedBalancesByAccount.Add(
           a.QualifiedName,
           a.Balance += amount));
+
+      _logger.LogVerbose($"Attempting to update account balances: {Serialiser.Serialise(updatedBalancesByAccount)}");
 
       await _accountingDataAccess.UpdateAccountBalances(updatedBalancesByAccount);
 

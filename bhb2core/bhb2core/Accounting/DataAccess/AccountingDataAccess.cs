@@ -103,9 +103,9 @@ namespace bhb2core.Accounting.DataAccess
     public async Task<bool> IsParentAccount(string accountQualifiedName)
     {
       bool hasChildren = _accounts
-        .Any(a => a.ParentAccountQualifiedName.Equals(
+        .Any(a => a.ParentAccountQualifiedName?.Equals(
           accountQualifiedName,
-          StringComparison.Ordinal));
+          StringComparison.Ordinal) ?? false);
 
       return await Task.FromResult(hasChildren);
     }

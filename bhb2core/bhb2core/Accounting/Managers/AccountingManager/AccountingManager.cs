@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.DataAccess.ActionResults;
@@ -17,6 +18,7 @@ namespace bhb2core.Accounting.Managers.AccountingManager
   {
     private readonly IAccountManager _accountManager;
     private readonly ITransactionManager _transactionManager;
+    private readonly ILogger _logger;
 
     public AccountingManager(
       in IAccountingEngine accountingEngine,
@@ -24,6 +26,8 @@ namespace bhb2core.Accounting.Managers.AccountingManager
       in IMapper mapper,
       in ILogger logger)
     {
+      _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
       _accountManager = new AccountManager(
         accountingEngine,
         accountingDataAccess,
@@ -59,12 +63,30 @@ namespace bhb2core.Accounting.Managers.AccountingManager
 
     public async Task<AddAccountResult> AddAccount(NewAccountDto newAccountDto)
     {
-      return await _accountManager.AddAccount(newAccountDto);
+      try
+      {
+        return await _accountManager.AddAccount(newAccountDto);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError("Unhandled exception.", ex);
+
+        return AddAccountResult.CreateFailure($"Unhandled error: \"{ex.Message}\".");
+      }
     }
 
     public async Task<ProcessTransactionResult> ProcessTransaction(TransactionDto transactionDto)
     {
-      return await _transactionManager.ProcessTransaction(transactionDto);
+      try
+      {
+        return await _transactionManager.ProcessTransaction(transactionDto);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError("Unhandled exception.", ex);
+
+        return ProcessTransactionResult.CreateFailure($"Unhandled error: \"{ex.Message}\".");
+      }
     }
   }
 }

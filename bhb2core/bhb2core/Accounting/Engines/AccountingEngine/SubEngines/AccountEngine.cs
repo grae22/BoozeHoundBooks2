@@ -211,7 +211,8 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
       return result.IsSuccess;
     }
 
-    // TODO: Method needs refactoring decompose?
+    // TODO: Method needs refactoring - decompose?
+    // TODO: Transactions to non-leaf (with children) accounts should fail.
     public async Task<DoubleEntryUpdateBalanceResult> PerformDoubleEntryUpdateAccountBalance(
       string debitAccountQualifiedName,
       string creditAccountQualifiedName,

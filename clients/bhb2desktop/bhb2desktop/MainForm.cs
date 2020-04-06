@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -20,6 +21,7 @@ namespace bhb2desktop
     private readonly SynchronizationContext _synchronizationContext;
     private readonly ILogger _logger;
     private readonly IAccountingManager _accountingManager;
+    private readonly ConcurrentDictionary<string, TreeNode> _accountTreeNodesByAccountQualifiedName = new ConcurrentDictionary<string, TreeNode>();
 
     public MainForm(
       IAccountingManager accountingManager,
@@ -46,31 +48,32 @@ namespace bhb2desktop
           var accountsList = (List<AccountDto>)accountsListAsObject;
 
           _accountsTree.Nodes.Clear();
+          _accountTreeNodesByAccountQualifiedName.Clear();
 
-          var nodesByAccountId = new Dictionary<string, TreeNode>();
-
-          while (nodesByAccountId.Count < accountsList.Count)
+          while (_accountTreeNodesByAccountQualifiedName.Count < accountsList.Count)
           {
             foreach (var account in accountsList)
             {
               if (!account.HasParent)
               {
-                TreeNode newBaseNode = _accountsTree.Nodes.Add($"{account.Name}  ( {account.Balance:N} )");
+                TreeNode newBaseNode = _accountsTree.Nodes.Add(FormatAccountTreeNodeText(account));
 
-                nodesByAccountId.Add(account.QualifiedName, newBaseNode);
+                _accountTreeNodesByAccountQualifiedName.TryAdd(account.QualifiedName, newBaseNode);
 
                 continue;
               }
 
-              if (!nodesByAccountId.TryGetValue(account.ParentAccountQualifiedName, out TreeNode parentNode))
+              if (!_accountTreeNodesByAccountQualifiedName.TryGetValue(
+                account.ParentAccountQualifiedName,
+                out TreeNode parentNode))
               {
                 _logger.LogError($"Failed to find parent account \"{account.ParentAccountQualifiedName}\".");
                 continue;
               }
 
-              TreeNode newNode = parentNode.Nodes.Add($"{account.Name}  ( {account.Balance:N} )");
+              TreeNode newNode = parentNode.Nodes.Add(FormatAccountTreeNodeText(account));
 
-              nodesByAccountId.Add(account.QualifiedName, newNode);
+              _accountTreeNodesByAccountQualifiedName.TryAdd(account.QualifiedName, newNode);
             }
           }
 
@@ -81,7 +84,23 @@ namespace bhb2desktop
 
     private void UpdateAccountTreeBalances(in IEnumerable<AccountDto> accounts)
     {
-      // TODO
+      _synchronizationContext.Post(
+        accountsAsObject =>
+        {
+          foreach (var account in (IEnumerable<AccountDto>)accountsAsObject)
+          {
+            if (_accountTreeNodesByAccountQualifiedName.TryGetValue(account.QualifiedName, out TreeNode node))
+            {
+              node.Text = FormatAccountTreeNodeText(account);
+            }
+          }
+        },
+        accounts);
+    }
+
+    private static string FormatAccountTreeNodeText(in AccountDto account)
+    {
+      return $"{account.Name}  ( {account.Balance:N} )";
     }
 
     private void AddAccount_OnClick(object sender, EventArgs args)
@@ -133,9 +152,15 @@ namespace bhb2desktop
         if (!result.IsSuccess)
         {
           this.ShowErrorMessage($"Failed to process transaction: \"{result.FailureMessage}\".");
+
+          return;
         }
 
-        await PopulateAccountsTree();
+        UpdateAccountTreeBalances(new[]
+        {
+          result.DebitAccount,
+          result.CreditAccount
+        });
       });
     }
   }

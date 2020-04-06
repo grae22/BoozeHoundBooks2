@@ -238,6 +238,25 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
           creditAccount.ParentAccountQualifiedName,
           StringComparison.Ordinal);
 
+      // Don't allow transfer from an account which isn't a leaf (no children) account.
+      if (await _accountingDataAccess.IsParentAccount(debitAccountQualifiedName))
+      {
+        string message = $"Parent accounts cannot be transacted upon, \"{debitAccountQualifiedName}\" has children.";
+
+        _logger.LogError(message);
+
+        return DoubleEntryUpdateBalanceResult.CreateFailure(message);
+      }
+
+      if (await _accountingDataAccess.IsParentAccount(creditAccountQualifiedName))
+      {
+        string message = $"Parent accounts cannot be transacted upon, \"{creditAccountQualifiedName}\" has children.";
+
+        _logger.LogError(message);
+
+        return DoubleEntryUpdateBalanceResult.CreateFailure(message);
+      }
+
       // Check accounts can transact.
       if (!debitAccount.AccountTypesWithDebitPermission.Contains(creditAccount.AccountType))
       {

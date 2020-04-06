@@ -100,6 +100,16 @@ namespace bhb2core.Accounting.DataAccess
       return GetResult<IEnumerable<Account>>.CreateSuccess(parentAccounts);
     }
 
+    public async Task<bool> IsParentAccount(string accountQualifiedName)
+    {
+      bool hasChildren = _accounts
+        .Any(a => a.ParentAccountQualifiedName.Equals(
+          accountQualifiedName,
+          StringComparison.Ordinal));
+
+      return await Task.FromResult(hasChildren);
+    }
+
     public async Task AddAccount(Account account)
     {
       bool accountAlreadyExists =

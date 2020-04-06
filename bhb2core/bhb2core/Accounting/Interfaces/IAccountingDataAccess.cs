@@ -24,6 +24,8 @@ namespace bhb2core.Accounting.Interfaces
 
     Task<GetResult<IEnumerable<Account>>> GetParentAccountsOrdered(string accountQualifiedName);
 
+    Task<bool> IsParentAccount(string accountQualifiedName);
+
     Task AddAccount(Account account);
 
     Task UpdateAccountBalances(

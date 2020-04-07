@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
 using bhb2core.Accounting.Managers.AccountingManager.Interfaces;
 using bhb2core.Accounting.Managers.AccountingManager.SubManagers;
+using bhb2core.Common.ActionResults;
 using bhb2core.Utils.Logging;
 using bhb2core.Utils.Mapping;
 
@@ -46,22 +46,22 @@ namespace bhb2core.Accounting.Managers.AccountingManager
       await _accountManager.Initialise();
     }
 
-    public async Task<IEnumerable<AccountDto>> GetAllAccounts()
+    public async Task<GetResult<IEnumerable<AccountDto>>> GetAllAccounts()
     {
       return await _accountManager.GetAllAccounts();
     }
 
-    public async Task<IEnumerable<AccountDto>> GetTransactionDebitAccounts()
+    public async Task<GetResult<IEnumerable<AccountDto>>> GetTransactionDebitAccounts()
     {
       return await _accountManager.GetTransactionDebitAccounts();
     }
 
-    public async Task<IEnumerable<AccountDto>> GetTransactionCreditAccounts()
+    public async Task<GetResult<IEnumerable<AccountDto>>> GetTransactionCreditAccounts()
     {
       return await _accountManager.GetTransactionCreditAccounts();
     }
 
-    public async Task<AddAccountResult> AddAccount(NewAccountDto newAccountDto)
+    public async Task<ActionResult> AddAccount(NewAccountDto newAccountDto)
     {
       try
       {
@@ -71,7 +71,7 @@ namespace bhb2core.Accounting.Managers.AccountingManager
       {
         _logger.LogError("Unhandled exception.", ex);
 
-        return AddAccountResult.CreateFailure($"Unhandled error: \"{ex.Message}\".");
+        return ActionResult.CreateFailure($"Unhandled error: \"{ex.Message}\".");
       }
     }
 

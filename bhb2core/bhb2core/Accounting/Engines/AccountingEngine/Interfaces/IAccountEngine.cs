@@ -2,6 +2,7 @@
 
 using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Models;
+using bhb2core.Common.ActionResults;
 
 namespace bhb2core.Accounting.Engines.AccountingEngine.Interfaces
 {
@@ -17,7 +18,7 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.Interfaces
       in NewAccount newAccount,
       out string error);
 
-    Task<AddAccountResult> AddAccount(NewAccount newAccount);
+    Task<ActionResult> AddAccount(NewAccount newAccount);
 
     Task<bool> DoesAccountExist(string accountQualifiedName);
 

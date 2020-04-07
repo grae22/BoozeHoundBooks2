@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Exceptions;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Managers.AccountingManager;
 using bhb2core.Accounting.Models;
+using bhb2core.Common.ActionResults;
 
 using bhb2coreTests.Accounting.TestUtils;
 
@@ -258,7 +258,7 @@ namespace bhb2coreTests.Accounting
         .Throws(new AccountException("Account already exists", ""));
 
       // Act.
-      AddAccountResult result = await testObject.AddAccount(newAccount);
+      ActionResult result = await testObject.AddAccount(newAccount);
 
       // Assert.
       Assert.IsFalse(result.IsSuccess);
@@ -280,7 +280,7 @@ namespace bhb2coreTests.Accounting
       };
 
       // Act.
-      AddAccountResult result = await testObject.AddAccount(newAccount);
+      ActionResult result = await testObject.AddAccount(newAccount);
 
       // Assert.
       Assert.IsFalse(result.IsSuccess);
@@ -373,10 +373,11 @@ namespace bhb2coreTests.Accounting
 
       accountingDataAccess
         .GetAccounts(Arg.Any<string[]>())
-        .Returns(new Dictionary<string, Account>
-        {
-          { BaseAccountNames[0], new Account() }
-        });
+        .Returns(GetResult<IReadOnlyDictionary<string, Account>>.CreateSuccess(
+          new Dictionary<string, Account>
+          {
+            { BaseAccountNames[0], new Account() }
+          }));
 
       var newAccount = new NewAccountDto
       {
@@ -588,7 +589,7 @@ namespace bhb2coreTests.Accounting
       };
 
       // Act.
-      AddAccountResult result = await testObject.AddAccount(newAccount);
+      ActionResult result = await testObject.AddAccount(newAccount);
 
       // Assert.
       Assert.IsFalse(result.IsSuccess);
@@ -607,7 +608,7 @@ namespace bhb2coreTests.Accounting
       };
 
       // Act.
-      AddAccountResult result = await testObject.AddAccount(newAccount);
+      ActionResult result = await testObject.AddAccount(newAccount);
 
       // Assert.
       Assert.IsFalse(result.IsSuccess);
@@ -627,19 +628,21 @@ namespace bhb2coreTests.Accounting
           isIncome: true,
           isDebtor: true,
           isCreditor: true)
-        .Returns(new[]
+        .Returns(GetResult<IEnumerable<Account>>.CreateSuccess(new[]
         {
           new Account { QualifiedName = FundsAccountName },
           new Account { QualifiedName = IncomeAccountName },
           new Account { QualifiedName = DebtorAccountName },
           new Account { QualifiedName = CreditorAccountName },
           new Account { QualifiedName = someNonBaseAccount, ParentAccountQualifiedName = FundsAccountName }
-        });
+        }));
 
       // Act.
-      IEnumerable<AccountDto> accounts = await testObject.GetTransactionDebitAccounts();
+      GetResult<IEnumerable<AccountDto>> accountsResult = await testObject.GetTransactionDebitAccounts();
 
       // Assert.
+      IEnumerable<AccountDto> accounts = accountsResult.Result;
+
       Assert.IsNull(accounts.SingleOrDefault(a => a.QualifiedName.Equals(FundsAccountName)));
 
       accounts.Single(a => a.QualifiedName.Equals(IncomeAccountName));
@@ -664,19 +667,21 @@ namespace bhb2coreTests.Accounting
           isExpense: true,
           isDebtor: true,
           isCreditor: true)
-        .Returns(new[]
+        .Returns(GetResult<IEnumerable<Account>>.CreateSuccess(new[]
         {
           new Account { QualifiedName = FundsAccountName },
           new Account { QualifiedName = ExpenseAccountName },
           new Account { QualifiedName = DebtorAccountName },
           new Account { QualifiedName = CreditorAccountName },
           new Account { QualifiedName = someNonBaseAccount, ParentAccountQualifiedName = FundsAccountName }
-        });
+        }));
 
       // Act.
-      IEnumerable<AccountDto> accounts = await testObject.GetTransactionCreditAccounts();
+      GetResult<IEnumerable<AccountDto>> accountsResult = await testObject.GetTransactionCreditAccounts();
 
       // Assert.
+      IEnumerable<AccountDto> accounts = accountsResult.Result;
+
       Assert.IsNull(accounts.SingleOrDefault(a => a.QualifiedName.Equals(FundsAccountName)));
       accounts.Single(a => a.QualifiedName.Equals(ExpenseAccountName));
       accounts.Single(a => a.QualifiedName.Equals(DebtorAccountName));

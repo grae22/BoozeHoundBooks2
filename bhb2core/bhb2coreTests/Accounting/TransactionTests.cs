@@ -2,12 +2,12 @@
 using System.Linq;
 using System.Threading.Tasks;
 
-using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Managers.AccountingManager;
 using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
 using bhb2core.Accounting.Models;
+using bhb2core.Common.ActionResults;
 
 using bhb2coreTests.Accounting.TestUtils;
 
@@ -37,12 +37,12 @@ namespace bhb2coreTests.Accounting
 
       accountingDataAccess
         .GetAccounts(Arg.Any<IEnumerable<string>>())
-        .Returns(
+        .Returns(GetResult<IReadOnlyDictionary<string, Account>>.CreateSuccess(
           new Dictionary<string, Account>
           {
             { debitAccountName, debitAccount },
             { creditAccountName, creditAccount }
-          });
+          }));
 
       accountingDataAccess
         .GetParentAccountsOrdered(debitAccountName)
@@ -51,6 +51,10 @@ namespace bhb2coreTests.Accounting
       accountingDataAccess
         .GetParentAccountsOrdered(creditAccountName)
         .Returns(GetResult<IEnumerable<Account>>.CreateSuccess(new Account[0]));
+
+      accountingDataAccess
+        .UpdateAccountBalances(default)
+        .ReturnsForAnyArgs(ActionResult.CreateSuccess());
 
       var transaction = new TransactionDto
       {
@@ -83,12 +87,12 @@ namespace bhb2coreTests.Accounting
 
       accountingDataAccess
         .GetAccounts(Arg.Any<IEnumerable<string>>())
-        .Returns(
+        .Returns(GetResult<IReadOnlyDictionary<string, Account>>.CreateSuccess(
           new Dictionary<string, Account>
           {
             { debitAccountName, debitAccount },
             { creditAccountName, creditAccount }
-          });
+          }));
 
       accountingDataAccess
         .GetParentAccountsOrdered(debitAccountName)
@@ -97,6 +101,10 @@ namespace bhb2coreTests.Accounting
       accountingDataAccess
         .GetParentAccountsOrdered(creditAccountName)
         .Returns(GetResult<IEnumerable<Account>>.CreateSuccess(new Account[0]));
+
+      accountingDataAccess
+        .UpdateAccountBalances(default)
+        .ReturnsForAnyArgs(ActionResult.CreateSuccess());
 
       var transaction = new TransactionDto
       {
@@ -133,12 +141,12 @@ namespace bhb2coreTests.Accounting
 
       accountingDataAccess
         .GetAccounts(Arg.Any<IEnumerable<string>>())
-        .Returns(
+        .Returns(GetResult<IReadOnlyDictionary<string, Account>>.CreateSuccess(
           new Dictionary<string, Account>
           {
             { debitAccountName, debitAccount },
             { creditAccountName, creditAccount }
-          });
+          }));
 
       accountingDataAccess
         .GetParentAccountsOrdered(debitAccountName)
@@ -214,12 +222,12 @@ namespace bhb2coreTests.Accounting
 
       accountingDataAccess
         .GetAccounts(Arg.Any<IEnumerable<string>>())
-        .Returns(
+        .Returns(GetResult<IReadOnlyDictionary<string, Account>>.CreateSuccess(
           new Dictionary<string, Account>
           {
             { debitAccountName, debitAccount },
             { creditAccountName, creditAccount }
-          });
+          }));
 
       accountingDataAccess
         .GetParentAccountsOrdered(debitAccountName)
@@ -234,6 +242,10 @@ namespace bhb2coreTests.Accounting
         {
           parentCreditAccount
         }));
+
+      accountingDataAccess
+        .UpdateAccountBalances(default)
+        .ReturnsForAnyArgs(ActionResult.CreateSuccess());
 
       var transaction = new TransactionDto
       {
@@ -290,12 +302,12 @@ namespace bhb2coreTests.Accounting
 
       accountingDataAccess
         .GetAccounts(Arg.Any<IEnumerable<string>>())
-        .Returns(
+        .Returns(GetResult<IReadOnlyDictionary<string, Account>>.CreateSuccess(
           new Dictionary<string, Account>
           {
             { debitAccountName, debitAccount },
             { creditAccountName, creditAccount }
-          });
+          }));
 
       accountingDataAccess
         .GetParentAccountsOrdered(debitAccountName)
@@ -375,12 +387,12 @@ namespace bhb2coreTests.Accounting
 
       accountingDataAccess
         .GetAccounts(Arg.Any<IEnumerable<string>>())
-        .Returns(
+        .Returns(GetResult<IReadOnlyDictionary<string, Account>>.CreateSuccess(
           new Dictionary<string, Account>
           {
             { debitAccountName, debitAccount },
             { creditAccountName, creditAccount }
-          });
+          }));
 
       accountingDataAccess
         .GetParentAccountsOrdered(debitAccountName)
@@ -452,12 +464,12 @@ namespace bhb2coreTests.Accounting
 
       accountingDataAccess
         .GetAccounts(Arg.Any<IEnumerable<string>>())
-        .Returns(
+        .Returns(GetResult<IReadOnlyDictionary<string, Account>>.CreateSuccess(
           new Dictionary<string, Account>
           {
             { debitParentAccountName, parentDebitAccount },
             { creditAccountName, creditAccount }
-          });
+          }));
 
       accountingDataAccess
         .GetParentAccountsOrdered(debitParentAccountName)
@@ -515,12 +527,12 @@ namespace bhb2coreTests.Accounting
 
       accountingDataAccess
         .GetAccounts(Arg.Any<IEnumerable<string>>())
-        .Returns(
+        .Returns(GetResult<IReadOnlyDictionary<string, Account>>.CreateSuccess(
           new Dictionary<string, Account>
           {
             { debitAccountName, debitAccount },
             { creditParentAccountName, parentCreditAccount }
-          });
+          }));
 
       accountingDataAccess
         .GetParentAccountsOrdered(debitAccountName)

@@ -7,6 +7,7 @@ using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Engines.AccountingEngine.Interfaces;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
+using bhb2core.Common.ActionResults;
 using bhb2core.Utils.Extensions;
 using bhb2core.Utils.Logging;
 using bhb2core.Utils.Serialisation;
@@ -179,7 +180,7 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
       return true;
     }
 
-    public async Task<AddAccountResult> AddAccount(NewAccount newAccount)
+    public async Task<ActionResult> AddAccount(NewAccount newAccount)
     {
       _logger.LogVerbose($"Add account request received, account details: {newAccount}");
 
@@ -197,11 +198,18 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
         Balance = 0
       };
 
-      await _accountingDataAccess.AddAccount(account);
+      ActionResult result = await _accountingDataAccess.AddAccount(account);
 
-      _logger.LogInformation($"Account added: {account}");
+      if (result.IsSuccess)
+      {
+        _logger.LogInformation($"Account added: {account}");
+      }
+      else
+      {
+        _logger.LogError($"Failed to add account: {result.FailureMessage}");
+      }
 
-      return AddAccountResult.CreateSuccess();
+      return result;
     }
 
     public async Task<bool> DoesAccountExist(string accountQualifiedName)
@@ -220,12 +228,23 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
       _logger.LogInformation($"Attempting to move {amount:N} from \"{debitAccountQualifiedName}\" to \"{creditAccountQualifiedName}\"...");
 
       // Get accounts.
-      IReadOnlyDictionary<string, Account> accounts = await _accountingDataAccess.GetAccounts(
+      GetResult<IReadOnlyDictionary<string, Account>> getAccountsResult = await _accountingDataAccess.GetAccounts(
         new[]
         {
           debitAccountQualifiedName,
           creditAccountQualifiedName
         });
+
+      if (!getAccountsResult.IsSuccess)
+      {
+        var message = $"Error retrieving double-entry accounts: {getAccountsResult.FailureMessage}";
+
+        _logger.LogError(message);
+
+        return DoubleEntryUpdateBalanceResult.CreateFailure(message);
+      }
+
+      IReadOnlyDictionary<string, Account> accounts = getAccountsResult.Result;
 
       Account debitAccount = accounts[debitAccountQualifiedName];
       Account creditAccount = accounts[creditAccountQualifiedName];
@@ -324,7 +343,16 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
 
       _logger.LogVerbose($"Attempting to update account balances: {Serialiser.Serialise(updatedBalancesByAccount)}");
 
-      await _accountingDataAccess.UpdateAccountBalances(updatedBalancesByAccount);
+      ActionResult updateBalanceResult = await _accountingDataAccess.UpdateAccountBalances(updatedBalancesByAccount);
+
+      if (!updateBalanceResult.IsSuccess)
+      {
+        var message = $"Error updating all account balances: {updateBalanceResult.FailureMessage}";
+
+        _logger.LogError(message);
+
+        return DoubleEntryUpdateBalanceResult.CreateFailure(message);
+      }
 
       var allUpdatedAccounts = new List<Account>(parentDebitAccounts);
       allUpdatedAccounts.AddRange(parentCreditAccounts);

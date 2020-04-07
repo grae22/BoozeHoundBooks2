@@ -5,6 +5,7 @@ using bhb2core.Accounting.Engines.AccountingEngine.Interfaces;
 using bhb2core.Accounting.Engines.AccountingEngine.SubEngines;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
+using bhb2core.Common.ActionResults;
 using bhb2core.Utils.Logging;
 
 namespace bhb2core.Accounting.Engines.AccountingEngine
@@ -42,7 +43,7 @@ namespace bhb2core.Accounting.Engines.AccountingEngine
       return _accountEngine.ValidateNewAccount(newAccount, out error);
     }
 
-    public async Task<AddAccountResult> AddAccount(NewAccount newAccount)
+    public async Task<ActionResult> AddAccount(NewAccount newAccount)
     {
       return await _accountEngine.AddAccount(newAccount);
     }

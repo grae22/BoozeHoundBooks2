@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Exceptions;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Managers.AccountingManager.Interfaces;
 using bhb2core.Accounting.Models;
+using bhb2core.Common.ActionResults;
 using bhb2core.Utils.Logging;
 using bhb2core.Utils.Mapping;
 using bhb2core.Utils.Serialisation;
@@ -41,30 +41,40 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
       await _accountingEngine.CreateBaseAccountsIfMissing();
     }
 
-    public async Task<IEnumerable<AccountDto>> GetAllAccounts()
+    public async Task<GetResult<IEnumerable<AccountDto>>> GetAllAccounts()
     {
       _logger.LogVerbose("Request received for all accounts.");
 
-      IEnumerable<Account> accounts = await _accountingDataAccess.GetAllAccounts();
+      GetResult<IEnumerable<Account>> accountsResult = await _accountingDataAccess.GetAllAccounts();
 
-      IEnumerable<AccountDto> accountDtos = _mapper.Map<IEnumerable<Account>, IEnumerable<AccountDto>>(accounts);
+      if (!accountsResult.IsSuccess)
+      {
+        return GetResult<IEnumerable<AccountDto>>.CreateFailure(accountsResult.FailureMessage);
+      }
+
+      IEnumerable<AccountDto> accountDtos = _mapper.Map<IEnumerable<Account>, IEnumerable<AccountDto>>(accountsResult.Result);
 
       _logger.LogVerbose($"Returning accounts: {Serialiser.Serialise(accountDtos)}");
 
-      return accountDtos;
+      return GetResult<IEnumerable<AccountDto>>.CreateSuccess(accountDtos);
     }
 
-    public async Task<IEnumerable<AccountDto>> GetTransactionDebitAccounts()
+    public async Task<GetResult<IEnumerable<AccountDto>>> GetTransactionDebitAccounts()
     {
       _logger.LogVerbose("Request received for transaction debit accounts.");
 
-      IEnumerable<Account> accounts = await _accountingDataAccess.GetAccounts(
+      GetResult<IEnumerable<Account>> accountsResult = await _accountingDataAccess.GetAccounts(
         isFunds: true,
         isIncome: true,
         isDebtor: true,
         isCreditor: true);
 
-      var leafChildrenOnly = new List<Account>(accounts);
+      if (!accountsResult.IsSuccess)
+      {
+        return GetResult<IEnumerable<AccountDto>>.CreateFailure(accountsResult.FailureMessage);
+      }
+
+      var leafChildrenOnly = new List<Account>(accountsResult.Result);
 
       RemoveAccountsWithChildren(leafChildrenOnly);
 
@@ -72,20 +82,25 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 
       _logger.LogVerbose($"Returning transaction debit accounts: {Serialiser.Serialise(accountDtos)}");
 
-      return accountDtos;
+      return GetResult<IEnumerable<AccountDto>>.CreateSuccess(accountDtos);
     }
 
-    public async Task<IEnumerable<AccountDto>> GetTransactionCreditAccounts()
+    public async Task<GetResult<IEnumerable<AccountDto>>> GetTransactionCreditAccounts()
     {
       _logger.LogVerbose("Request received for transaction credit accounts.");
 
-      IEnumerable<Account> accounts = await _accountingDataAccess.GetAccounts(
+      GetResult<IEnumerable<Account>> accountsResult = await _accountingDataAccess.GetAccounts(
         isFunds: true,
         isExpense: true,
         isDebtor: true,
         isCreditor: true);
 
-      var leafChildrenOnly = new List<Account>(accounts);
+      if (!accountsResult.IsSuccess)
+      {
+        return GetResult<IEnumerable<AccountDto>>.CreateFailure(accountsResult.FailureMessage);
+      }
+
+      var leafChildrenOnly = new List<Account>(accountsResult.Result);
 
       RemoveAccountsWithChildren(leafChildrenOnly);
 
@@ -93,10 +108,10 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
 
       _logger.LogVerbose($"Returning transaction credit accounts: {Serialiser.Serialise(accountDtos)}");
 
-      return accountDtos;
+      return GetResult<IEnumerable<AccountDto>>.CreateSuccess(accountDtos);
     }
 
-    public async Task<AddAccountResult> AddAccount(NewAccountDto newAccountDto)
+    public async Task<ActionResult> AddAccount(NewAccountDto newAccountDto)
     {
       _logger.LogVerbose($"Add account request received, account details: {newAccountDto}");
 
@@ -112,7 +127,7 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
       {
         _logger.LogError($"Parent account not found for new account: {newAccountDto}");
 
-        return AddAccountResult.CreateFailure("Parent account not found.");
+        return ActionResult.CreateFailure("Parent account not found.");
       }
 
       var newAccount = new NewAccount
@@ -129,7 +144,7 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
       {
         _logger.LogError($"New account validation failed: \"{validationError}\" : {newAccount}");
 
-        return AddAccountResult.CreateFailure(validationError);
+        return ActionResult.CreateFailure(validationError);
       }
 
       try
@@ -140,7 +155,7 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
       {
         _logger.LogError($"Failed to add account: \"{ex.Message}\". Details: \"{ex.Details}\".");
 
-        return AddAccountResult.CreateFailure(ex.Message);
+        return ActionResult.CreateFailure(ex.Message);
       }
     }
 

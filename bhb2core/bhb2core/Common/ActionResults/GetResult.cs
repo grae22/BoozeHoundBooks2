@@ -1,6 +1,6 @@
-﻿namespace bhb2core.Accounting.DataAccess.ActionResults
+﻿namespace bhb2core.Common.ActionResults
 {
-  internal struct GetResult<T>
+  public struct GetResult<T>
   {
     public static GetResult<T> CreateSuccess(in T account)
     {

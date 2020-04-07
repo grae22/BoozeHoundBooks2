@@ -34,11 +34,21 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
       _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task Initialise()
+    public async Task<bool> Initialise()
     {
       _logger.LogInformation("Initialising...");
 
-      await _accountingEngine.CreateBaseAccountsIfMissing();
+      ActionResult createBaseAccountsResult = await _accountingEngine.CreateBaseAccountsIfMissing();
+
+      if (!createBaseAccountsResult.IsSuccess)
+      {
+        _logger.LogError(
+          $"Initialisation failed - error while creating base accounts: {createBaseAccountsResult.FailureMessage}");
+
+        return false;
+      }
+
+      return true;
     }
 
     public async Task<GetResult<IEnumerable<AccountDto>>> GetAllAccounts()

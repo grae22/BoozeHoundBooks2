@@ -8,6 +8,6 @@ namespace bhb2core.Accounting.Interfaces
     IAccountManager,
     ITransactionManager
   {
-    new Task Initialise();
+    new Task<bool> Initialise();
   }
 }

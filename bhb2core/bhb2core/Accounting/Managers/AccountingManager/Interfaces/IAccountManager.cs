@@ -8,7 +8,7 @@ namespace bhb2core.Accounting.Managers.AccountingManager.Interfaces
 {
   public interface IAccountManager
   {
-    Task Initialise();
+    Task<bool> Initialise();
 
     Task<GetResult<IEnumerable<AccountDto>>> GetAllAccounts();
 

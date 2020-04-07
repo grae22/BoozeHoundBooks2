@@ -187,14 +187,14 @@ namespace bhb2coreTests.Accounting
     }
 
     [Test]
-    public void Given_NoBaseAccounts_When_Initialised_Then_CreditorAccountCreated()
+    public async Task Given_NoBaseAccounts_When_Initialised_Then_CreditorAccountCreated()
     {
       // Arrange.
       // Act.
       AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
 
       // Assert.
-      accountingDataAccess
+      await accountingDataAccess
         .Received(1)
         .AddAccount(Arg.Is<Account>(a =>
           a.AccountType.IsCreditor &&
@@ -202,7 +202,7 @@ namespace bhb2coreTests.Accounting
           a.Name.Equals(CreditorAccountName) &&
           a.Balance == 0m));
 
-      accountingDataAccess
+      await accountingDataAccess
         .Received(1)
         .AddAccount(Arg.Is<Account>(a =>
           a.QualifiedName.Equals(CreditorAccountName) &&
@@ -212,7 +212,7 @@ namespace bhb2coreTests.Accounting
           !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateDebtor()) &&
           !a.AccountTypesWithDebitPermission.Contains(AccountType.CreateCreditor())));
 
-      accountingDataAccess
+      await accountingDataAccess
         .Received(1)
         .AddAccount(Arg.Is<Account>(a =>
           a.QualifiedName.Equals(CreditorAccountName) &&

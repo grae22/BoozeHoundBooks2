@@ -21,8 +21,7 @@ namespace bhb2coreTests.Accounting.TestUtils
 
     public static AccountingManager Create(
       out IAccountingDataAccess accountingDataAccess,
-      in bool performInitialisation = true,
-      in bool configureDataAccessWithBaseAccounts = true)
+      in bool performInitialisation = true)
     {
       Bhb2Core.Initialise(
         out ILogger logger,
@@ -41,14 +40,31 @@ namespace bhb2coreTests.Accounting.TestUtils
 
       if (performInitialisation)
       {
+        accountingDataAccess
+          .AddAccount(Arg.Is<Account>(a => a.Name.Equals(FundsAccountName)))
+          .Returns(ActionResult.CreateSuccess());
+
+        accountingDataAccess
+          .AddAccount(Arg.Is<Account>(a => a.Name.Equals(IncomeAccountName)))
+          .Returns(ActionResult.CreateSuccess());
+
+        accountingDataAccess
+          .AddAccount(Arg.Is<Account>(a => a.Name.Equals(ExpenseAccountName)))
+          .Returns(ActionResult.CreateSuccess());
+
+        accountingDataAccess
+          .AddAccount(Arg.Is<Account>(a => a.Name.Equals(DebtorAccountName)))
+          .Returns(ActionResult.CreateSuccess());
+
+        accountingDataAccess
+          .AddAccount(Arg.Is<Account>(a => a.Name.Equals(CreditorAccountName)))
+          .Returns(ActionResult.CreateSuccess());
+
         accountingManager
           .Initialise()
           .GetAwaiter()
           .GetResult();
-      }
 
-      if (configureDataAccessWithBaseAccounts)
-      {
         ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
       }
 

@@ -44,7 +44,7 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
       _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task CreateBaseAccountsIfMissing()
+    public async Task<ActionResult> CreateBaseAccountsIfMissing()
     {
       _logger.LogInformation("Creating base accounts if missing...");
 
@@ -65,7 +65,7 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
 
       if (missingAccounts.Contains(FundsAccountName))
       {
-        await CreateBaseAccount(
+        ActionResult result = await CreateBaseAccount(
           FundsAccountName,
           new[]
           {
@@ -82,11 +82,16 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
             AccountType.CreateCreditor()
           },
           isFunds: true);
+
+        if (!result.IsSuccess)
+        {
+          return result;
+        }
       }
 
       if (missingAccounts.Contains(IncomeAccountName))
       {
-        await CreateBaseAccount(
+        ActionResult result = await CreateBaseAccount(
           IncomeAccountName,
           new[]
           {
@@ -94,11 +99,16 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
           },
           new AccountType[] { },
           isIncome: true);
+
+        if (!result.IsSuccess)
+        {
+          return result;
+        }
       }
 
       if (missingAccounts.Contains(ExpenseAccountName))
       {
-        await CreateBaseAccount(
+        ActionResult result = await CreateBaseAccount(
           ExpenseAccountName,
           new AccountType[] { },
           new[]
@@ -106,11 +116,16 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
             AccountType.CreateFunds()
           },
           isExpense: true);
+
+        if (!result.IsSuccess)
+        {
+          return result;
+        }
       }
 
       if (missingAccounts.Contains(DebtorAccountName))
       {
-        await CreateBaseAccount(
+        ActionResult result = await CreateBaseAccount(
           DebtorAccountName,
           new[]
           {
@@ -121,11 +136,16 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
             AccountType.CreateFunds()
           },
           isDebtor: true);
+
+        if (!result.IsSuccess)
+        {
+          return result;
+        }
       }
 
       if (missingAccounts.Contains(CreditorAccountName))
       {
-        await CreateBaseAccount(
+        ActionResult result = await CreateBaseAccount(
           CreditorAccountName,
           new[]
           {
@@ -136,7 +156,14 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
             AccountType.CreateFunds(),
           },
           isCreditor: true);
+
+        if (!result.IsSuccess)
+        {
+          return result;
+        }
       }
+
+      return ActionResult.CreateSuccess();
     }
 
     public string BuildAccountQualifiedName(in string name, in string parentQualifiedName)
@@ -362,7 +389,7 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
       return DoubleEntryUpdateBalanceResult.CreateSuccess(allUpdatedAccounts);
     }
 
-    private async Task CreateBaseAccount(
+    private async Task<ActionResult> CreateBaseAccount(
       string name,
       IEnumerable<AccountType> accountTypesWithDebitPermission,
       IEnumerable<AccountType> accountTypesWithCreditPermission,
@@ -390,9 +417,20 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
         AccountTypesWithCreditPermission = accountTypesWithCreditPermission
       };
 
-      await _accountingDataAccess.AddAccount(account);
+      ActionResult result = await _accountingDataAccess.AddAccount(account);
+
+      if (!result.IsSuccess)
+      {
+        var message = $"Failed to create base account \"{name}\": {result.FailureMessage}";
+
+        _logger.LogError(message);
+
+        return ActionResult.CreateFailure(message);
+      }
 
       _logger.LogInformation($"Added \"{name}\" base account: {account}");
+
+      return ActionResult.CreateSuccess();
     }
   }
 }

@@ -41,9 +41,9 @@ namespace bhb2core.Accounting.Managers.AccountingManager
         logger);
     }
 
-    public async Task Initialise()
+    public async Task<bool> Initialise()
     {
-      await _accountManager.Initialise();
+      return await _accountManager.Initialise();
     }
 
     public async Task<GetResult<IEnumerable<AccountDto>>> GetAllAccounts()

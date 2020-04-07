@@ -48,17 +48,44 @@ namespace bhb2core.Accounting.Managers.AccountingManager
 
     public async Task<GetResult<IEnumerable<AccountDto>>> GetAllAccounts()
     {
-      return await _accountManager.GetAllAccounts();
+      try
+      {
+        return await _accountManager.GetAllAccounts();
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError("Unhandled exception.", ex);
+
+        return GetResult<IEnumerable<AccountDto>>.CreateFailure($"Unhandled error: \"{ex.Message}\".");
+      }
     }
 
     public async Task<GetResult<IEnumerable<AccountDto>>> GetTransactionDebitAccounts()
     {
-      return await _accountManager.GetTransactionDebitAccounts();
+      try
+      {
+        return await _accountManager.GetTransactionDebitAccounts();
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError("Unhandled exception.", ex);
+
+        return GetResult<IEnumerable<AccountDto>>.CreateFailure($"Unhandled error: \"{ex.Message}\".");
+      }
     }
 
     public async Task<GetResult<IEnumerable<AccountDto>>> GetTransactionCreditAccounts()
     {
-      return await _accountManager.GetTransactionCreditAccounts();
+      try
+      {
+        return await _accountManager.GetTransactionCreditAccounts();
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError("Unhandled exception.", ex);
+
+        return GetResult<IEnumerable<AccountDto>>.CreateFailure($"Unhandled error: \"{ex.Message}\".");
+      }
     }
 
     public async Task<ActionResult> AddAccount(NewAccountDto newAccountDto)

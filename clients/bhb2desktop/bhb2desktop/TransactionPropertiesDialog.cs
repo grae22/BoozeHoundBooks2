@@ -5,6 +5,7 @@ using System.Windows.Forms;
 
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
+using bhb2core.Common.ActionResults;
 
 using bhb2desktop.Extensions;
 
@@ -14,23 +15,15 @@ namespace bhb2desktop
   {
     public TransactionDto Transaction { get; private set; }
 
-    private readonly IEnumerable<AccountDto> _debitAccounts;
-    private readonly IEnumerable<AccountDto> _creditAccounts;
+    private readonly IAccountingManager _accountingManager;
+    private IEnumerable<AccountDto> _debitAccounts;
+    private IEnumerable<AccountDto> _creditAccounts;
 
     public TransactionPropertiesDialog(IAccountingManager accountingManager)
     {
-      if (accountingManager == null)
-      {
-        throw new ArgumentNullException(nameof(accountingManager));
-      }
-
-      _debitAccounts = accountingManager.GetTransactionDebitAccounts().Result;
-      _creditAccounts = accountingManager.GetTransactionCreditAccounts().Result;
+      _accountingManager = accountingManager ?? throw new ArgumentNullException(nameof(accountingManager));
 
       InitializeComponent();
-
-      PopulateDebitAccountComboBox();
-      PopulateCreditAccountComboBox();
     }
 
     private void PopulateDebitAccountComboBox()
@@ -91,6 +84,39 @@ namespace bhb2desktop
       }
 
       _creditAccountComboBox.SelectedIndex = 0;
+    }
+
+    private void Dialog_OnLoad(object sender, EventArgs args)
+    {
+      // Get debit accounts.
+      GetResult<IEnumerable<AccountDto>> getAccountsResult = _accountingManager.GetTransactionDebitAccounts().Result;
+
+      if (!getAccountsResult.IsSuccess)
+      {
+        this.ShowErrorMessage("Failed to retrieve debit accounts.", getAccountsResult.FailureMessage);
+
+        DialogResult = DialogResult.Cancel;
+        Close();
+      }
+
+      _debitAccounts = getAccountsResult.Result;
+
+      // Get credit accounts.
+      getAccountsResult = _accountingManager.GetTransactionCreditAccounts().Result;
+
+      if (!getAccountsResult.IsSuccess)
+      {
+        this.ShowErrorMessage("Failed to retrieve credit accounts.", getAccountsResult.FailureMessage);
+
+        DialogResult = DialogResult.Cancel;
+        Close();
+      }
+
+      _creditAccounts = getAccountsResult.Result;
+
+      // Populate drop-downs.
+      PopulateDebitAccountComboBox();
+      PopulateCreditAccountComboBox();
     }
 
     private void DebitAccount_OnSelectedChangeCommitted(object sender, EventArgs args)

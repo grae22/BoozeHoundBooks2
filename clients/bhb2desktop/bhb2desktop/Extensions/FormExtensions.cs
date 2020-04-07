@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Windows.Forms;
 
 namespace bhb2desktop.Extensions
 {
@@ -11,6 +12,18 @@ namespace bhb2desktop.Extensions
       MessageBox.Show(
         message,
         "Error",
+        MessageBoxButtons.OK,
+        MessageBoxIcon.Error);
+    }
+
+    public static void ShowErrorMessage(
+      this Form form,
+      string message,
+      string details)
+    {
+      MessageBox.Show(
+        message,
+        $"Error{Environment.NewLine}{Environment.NewLine}{details}",
         MessageBoxButtons.OK,
         MessageBoxIcon.Error);
     }

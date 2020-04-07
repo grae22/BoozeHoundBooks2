@@ -10,6 +10,7 @@ using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
+using bhb2core.Common.ActionResults;
 using bhb2core.Utils.Logging;
 
 using bhb2desktop.Extensions;
@@ -32,15 +33,21 @@ namespace bhb2desktop
       _synchronizationContext = SynchronizationContext.Current;
 
       InitializeComponent();
-
-      Task.Run(async () => await PopulateAccountsTree());
     }
 
     private async Task PopulateAccountsTree()
     {
       _logger.LogVerbose("Populating accounts tree...");
 
-      IEnumerable<AccountDto> accounts = await _accountingManager.GetAllAccounts();
+      GetResult<IEnumerable<AccountDto>> getAccountsResult = await _accountingManager.GetAllAccounts();
+
+      if (!getAccountsResult.IsSuccess)
+      {
+        this.ShowErrorMessage("Failed to retrieve accounts.", getAccountsResult.FailureMessage);
+        return;
+      }
+
+      IEnumerable<AccountDto> accounts = getAccountsResult.Result;
 
       _synchronizationContext.Post(
         accountsListAsObject =>
@@ -103,6 +110,11 @@ namespace bhb2desktop
       return $"{account.Name}  ( {account.Balance:N} )";
     }
 
+    private void Form_OnLoad(object sender, EventArgs args)
+    {
+      Task.Run(async () => await PopulateAccountsTree());
+    }
+
     private void AddAccount_OnClick(object sender, EventArgs args)
     {
       using var dlg = new AccountPropertiesDialog(_accountingManager);
@@ -120,7 +132,7 @@ namespace bhb2desktop
         ParentAccountQualifiedName = dlg.Account.ParentAccountQualifiedName
       };
 
-      AddAccountResult result = _accountingManager.AddAccount(account).Result;
+      ActionResult result = _accountingManager.AddAccount(account).Result;
 
       if (!result.IsSuccess)
       {

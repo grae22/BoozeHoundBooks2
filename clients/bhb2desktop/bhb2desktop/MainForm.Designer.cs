@@ -44,6 +44,8 @@ namespace bhb2desktop
       ClientSize = new Size(800, 450);
       Text = "Booze Hound Books 2";
 
+      Load += Form_OnLoad;
+
       _menuStrip = new MenuStrip
       {
       };

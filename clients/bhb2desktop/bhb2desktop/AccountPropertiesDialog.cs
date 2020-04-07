@@ -5,6 +5,7 @@ using System.Windows.Forms;
 
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
+using bhb2core.Common.ActionResults;
 
 using bhb2desktop.Extensions;
 
@@ -27,9 +28,17 @@ namespace bhb2desktop
 
     private void PopulateParentComboBox()
     {
-      IEnumerable<AccountDto> accounts = _accountingManager.GetAllAccounts().Result;
+      GetResult<IEnumerable<AccountDto>> getAccountsResult = _accountingManager.GetAllAccounts().Result;
 
-      accounts
+      if (!getAccountsResult.IsSuccess)
+      {
+        this.ShowErrorMessage("Failed to retrieve accounts.", getAccountsResult.FailureMessage);
+
+        DialogResult = DialogResult.Cancel;
+        Close();
+      }
+
+      getAccountsResult.Result
         .ToList()
         .ForEach(a =>
           _parentComboBox.Items.Add(a.QualifiedName));

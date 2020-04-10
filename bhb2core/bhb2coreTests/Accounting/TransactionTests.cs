@@ -632,5 +632,59 @@ namespace bhb2coreTests.Accounting
           t.Date == transaction.Date &&
           t.Amount == transaction.Amount));
     }
+
+    [Test]
+    public async Task Given_Transaction_When_WriteToTransactionLogFails_Then_ResultIsFailure()
+    {
+      // Arrange.
+      const string debitAccountName = "Funds";
+      const string creditAccountName = "Expense";
+      const decimal amount = 123.45m;
+
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      AccountingManagerFactory.ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
+
+      Account debitAccount = accountingDataAccess.GetAccount(debitAccountName).Result.Result;
+      Account creditAccount = accountingDataAccess.GetAccount(creditAccountName).Result.Result;
+
+      accountingDataAccess
+        .GetAccounts(Arg.Any<IEnumerable<string>>())
+        .Returns(GetResult<IReadOnlyDictionary<string, Account>>.CreateSuccess(
+          new Dictionary<string, Account>
+          {
+            { debitAccountName, debitAccount },
+            { creditAccountName, creditAccount }
+          }));
+
+      accountingDataAccess
+        .GetParentAccountsOrdered(debitAccountName)
+        .Returns(GetResult<IEnumerable<Account>>.CreateSuccess(new Account[0]));
+
+      accountingDataAccess
+        .GetParentAccountsOrdered(creditAccountName)
+        .Returns(GetResult<IEnumerable<Account>>.CreateSuccess(new Account[0]));
+
+      accountingDataAccess
+        .UpdateAccountBalances(default)
+        .ReturnsForAnyArgs(ActionResult.CreateSuccess());
+
+      accountingDataAccess
+        .AddTransaction(default)
+        .ReturnsForAnyArgs(ActionResult.CreateFailure(string.Empty));
+
+      var transaction = new TransactionDto
+      {
+        DebitAccountQualifiedName = debitAccountName,
+        CreditAccountQualifiedName = creditAccountName,
+        Amount = amount
+      };
+
+      // Act.
+      ProcessTransactionResult result = await testObject.ProcessTransaction(transaction);
+
+      // Assert.
+      Assert.IsFalse(result.IsSuccess);
+    }
   }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Exceptions;
 using bhb2core.Accounting.Interfaces;
-using bhb2core.Accounting.Managers.AccountingManager;
+using bhb2core.Accounting.Managers;
 using bhb2core.Accounting.Models;
 using bhb2core.Common.ActionResults;
 

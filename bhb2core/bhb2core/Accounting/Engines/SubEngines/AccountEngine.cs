@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.DataAccess.ActionResults;
-using bhb2core.Accounting.Engines.AccountingEngine.Interfaces;
+using bhb2core.Accounting.Engines.Interfaces;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
 using bhb2core.Common.ActionResults;
@@ -12,7 +12,7 @@ using bhb2core.Utils.Extensions;
 using bhb2core.Utils.Logging;
 using bhb2core.Utils.Serialisation;
 
-namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
+namespace bhb2core.Accounting.Engines.SubEngines
 {
   internal class AccountEngine : IAccountEngine
   {

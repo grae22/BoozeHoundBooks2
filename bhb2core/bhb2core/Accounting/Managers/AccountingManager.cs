@@ -4,14 +4,14 @@ using System.Threading.Tasks;
 
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
-using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
-using bhb2core.Accounting.Managers.AccountingManager.Interfaces;
-using bhb2core.Accounting.Managers.AccountingManager.SubManagers;
+using bhb2core.Accounting.Managers.ActionResults;
+using bhb2core.Accounting.Managers.Interfaces;
+using bhb2core.Accounting.Managers.SubManagers;
 using bhb2core.Common.ActionResults;
 using bhb2core.Utils.Logging;
 using bhb2core.Utils.Mapping;
 
-namespace bhb2core.Accounting.Managers.AccountingManager
+namespace bhb2core.Accounting.Managers
 {
   // NOTE: Don't make this public - add a factory and other assemblies can use that.
   internal class AccountingManager : IAccountingManager

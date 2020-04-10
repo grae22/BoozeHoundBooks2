@@ -1,7 +1,7 @@
 ﻿using bhb2core;
-using bhb2core.Accounting.Engines.AccountingEngine;
+using bhb2core.Accounting.Engines;
 using bhb2core.Accounting.Interfaces;
-using bhb2core.Accounting.Managers.AccountingManager;
+using bhb2core.Accounting.Managers;
 using bhb2core.Accounting.Models;
 using bhb2core.Common.ActionResults;
 using bhb2core.Utils.Logging;

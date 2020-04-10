@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
-using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
-using bhb2core.Accounting.Managers.AccountingManager.Interfaces;
+using bhb2core.Accounting.Managers.ActionResults;
+using bhb2core.Accounting.Managers.Interfaces;
 using bhb2core.Accounting.Models;
 using bhb2core.Common.ActionResults;
 using bhb2core.Utils.Logging;
 using bhb2core.Utils.Mapping;
 
-namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
+namespace bhb2core.Accounting.Managers.SubManagers
 {
   internal class TransactionManager : ITransactionManager
   {

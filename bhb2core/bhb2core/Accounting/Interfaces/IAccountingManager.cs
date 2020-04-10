@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-using bhb2core.Accounting.Managers.AccountingManager.Interfaces;
+using bhb2core.Accounting.Managers.Interfaces;
 
 namespace bhb2core.Accounting.Interfaces
 {

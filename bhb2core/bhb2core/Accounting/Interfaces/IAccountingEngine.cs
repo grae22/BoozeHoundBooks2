@@ -1,4 +1,4 @@
-﻿using bhb2core.Accounting.Engines.AccountingEngine.Interfaces;
+﻿using bhb2core.Accounting.Engines.Interfaces;
 
 namespace bhb2core.Accounting.Interfaces
 {

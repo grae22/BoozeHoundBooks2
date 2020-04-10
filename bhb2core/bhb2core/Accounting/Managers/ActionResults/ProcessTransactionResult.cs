@@ -2,7 +2,7 @@
 
 using bhb2core.Accounting.Dto;
 
-namespace bhb2core.Accounting.Managers.AccountingManager.ActionResults
+namespace bhb2core.Accounting.Managers.ActionResults
 {
   public struct ProcessTransactionResult
   {

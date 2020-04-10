@@ -16,6 +16,7 @@ namespace bhb2core.Accounting.Managers
   // NOTE: Don't make this public - add a factory and other assemblies can use that.
   internal class AccountingManager : IAccountingManager
   {
+    private readonly IAccountingDataAccess _accountingDataAccess;
     private readonly IAccountManager _accountManager;
     private readonly ITransactionManager _transactionManager;
     private readonly ILogger _logger;
@@ -26,6 +27,7 @@ namespace bhb2core.Accounting.Managers
       in IMapper mapper,
       in ILogger logger)
     {
+      _accountingDataAccess = accountingDataAccess ?? throw new ArgumentNullException(nameof(accountingDataAccess));
       _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
       _accountManager = new AccountManager(
@@ -41,9 +43,23 @@ namespace bhb2core.Accounting.Managers
         logger);
     }
 
-    public async Task<bool> Initialise()
+    public async Task<ActionResult> Initialise()
     {
-      return await _accountManager.Initialise();
+      ActionResult dataAccessInitialiseResult = await _accountingDataAccess.Initialise();
+
+      if (!dataAccessInitialiseResult.IsSuccess)
+      {
+        return dataAccessInitialiseResult;
+      }
+
+      ActionResult accountManagerInitialiseResult = await _accountManager.Initialise();
+
+      if (!accountManagerInitialiseResult.IsSuccess)
+      {
+        return accountManagerInitialiseResult;
+      }
+
+      return ActionResult.CreateSuccess();
     }
 
     public async Task<GetResult<IEnumerable<AccountDto>>> GetAllAccounts()

@@ -1,4 +1,7 @@
-﻿using bhb2core.Accounting.DataAccess.Interfaces;
+﻿using System.Threading.Tasks;
+
+using bhb2core.Accounting.DataAccess.Interfaces;
+using bhb2core.Common.ActionResults;
 
 namespace bhb2core.Accounting.Interfaces
 {
@@ -6,5 +9,6 @@ namespace bhb2core.Accounting.Interfaces
     IAccountDataAccess,
     ITransactionDataAccess
   {
+    public Task<ActionResult> Initialise();
   }
 }

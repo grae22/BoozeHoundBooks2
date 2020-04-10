@@ -7,18 +7,35 @@ using bhb2core.Accounting.DataAccess.Interfaces;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
 using bhb2core.Common.ActionResults;
+using bhb2core.Utils.Logging;
+using bhb2core.Utils.Persistence;
 
 namespace bhb2core.Accounting.DataAccess
 {
   internal class AccountingDataAccess : IAccountingDataAccess
   {
+    private readonly IPersistor _persistor;
+    private readonly ILogger _logger;
     private readonly IAccountDataAccess _accountDataAccess;
     private readonly ITransactionDataAccess _transactionDataAccess;
 
-    public AccountingDataAccess()
+    public AccountingDataAccess(
+      in IPersistor persistor,
+      in ILogger logger)
     {
-      _accountDataAccess = new AccountDataAccess();
-      _transactionDataAccess = new TransactionDataAccess();
+      _persistor = persistor ?? throw new ArgumentNullException(nameof(persistor));
+      _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+      _accountDataAccess = new AccountDataAccess(persistor);
+      _transactionDataAccess = new TransactionDataAccess(persistor);
+
+      _persistor.Register(_accountDataAccess as IPersistable);
+      _persistor.Register(_transactionDataAccess as IPersistable);
+    }
+
+    public async Task<ActionResult> Initialise()
+    {
+      return await LoadData();
     }
 
     public async Task<GetResult<IEnumerable<Account>>> GetAllAccounts()
@@ -81,6 +98,11 @@ namespace bhb2core.Accounting.DataAccess
     public async Task<bool> DoesTransactionExist(Guid idempotencyId)
     {
       return await _transactionDataAccess.DoesTransactionExist(idempotencyId);
+    }
+
+    private async Task<ActionResult> LoadData()
+    {
+      return await _persistor.Restore();
     }
   }
 }

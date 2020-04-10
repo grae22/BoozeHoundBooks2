@@ -1,10 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using bhb2core;
-using bhb2core.Accounting.Interfaces;
-using bhb2core.Utils.Logging;
-using bhb2core.Utils.Mapping;
+using bhb2core.Common.ActionResults;
+using bhb2core.Utils.Configuration;
 
 namespace bhb2desktop
 {
@@ -14,17 +15,35 @@ namespace bhb2desktop
     ///  The main entry point for the application.
     /// </summary>
     [STAThread]
-    static void Main()
+    public static async Task Main()
     {
-      Bhb2Core.Initialise(
-        out ILogger _logger,
-        out IMapper mapper,
-        out IAccountingManager _accountingManager);
-
       Application.SetHighDpiMode(HighDpiMode.SystemAware);
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
-      Application.Run(new MainForm(_accountingManager, _logger));
+
+      IConfiguration configuration = ConfigurationBuilder.Build(
+        new Dictionary<string, string>
+        {
+          { "dataFilename", @"c:\dev\prj\other\boozehoundbooks2\clients\bhb2desktop\bhb2desktop\bin\test.bhb2" }
+        });
+
+      ActionResult result = await Bhb2Core.Initialise(configuration);
+
+      if (!result.IsSuccess)
+      {
+        MessageBox.Show(
+          $"Core initialisation failed.{Environment.NewLine}{Environment.NewLine}{result.FailureMessage}",
+          "Error",
+          MessageBoxButtons.OK,
+          MessageBoxIcon.Error);
+
+        return;
+      }
+
+      Application.Run(
+        new MainForm(
+          Bhb2Core.AccountingManager,
+          Bhb2Core.Logger));
     }
   }
 }

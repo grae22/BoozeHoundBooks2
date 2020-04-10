@@ -4,7 +4,7 @@ using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Managers;
 using bhb2core.Accounting.Models;
 using bhb2core.Common.ActionResults;
-using bhb2core.Utils.Logging;
+using bhb2core.Utils.Configuration;
 using bhb2core.Utils.Mapping;
 
 using NSubstitute;
@@ -23,23 +23,29 @@ namespace bhb2coreTests.Accounting.TestUtils
       out IAccountingDataAccess accountingDataAccess,
       in bool performInitialisation = true)
     {
-      Bhb2Core.Initialise(
-        out ILogger logger,
-        out IMapper mapper,
-        out IAccountingManager ignoredAccountingManager);
+      var configuration = Substitute.For<IConfiguration>();
+
+      Bhb2Core
+        .Initialise(configuration)
+        .GetAwaiter()
+        .GetResult();
 
       accountingDataAccess = Substitute.For<IAccountingDataAccess>();
 
-      var transactionEngine = new AccountingEngine(accountingDataAccess, logger);
+      var transactionEngine = new AccountingEngine(accountingDataAccess, Bhb2Core.Logger);
 
       var accountingManager = new AccountingManager(
         transactionEngine,
         accountingDataAccess,
-        mapper,
-        logger);
+        new AutoMapperImplementation(Bhb2Core.Logger),
+        Bhb2Core.Logger);
 
       if (performInitialisation)
       {
+        accountingDataAccess
+          .Initialise()
+          .Returns(ActionResult.CreateSuccess());
+
         accountingDataAccess
           .AddAccount(Arg.Is<Account>(a => a.Name.Equals(FundsAccountName)))
           .Returns(ActionResult.CreateSuccess());

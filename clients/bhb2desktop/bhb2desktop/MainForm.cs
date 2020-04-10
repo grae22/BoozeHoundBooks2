@@ -146,18 +146,22 @@ namespace bhb2desktop
         ParentAccountQualifiedName = dlg.Account.ParentAccountQualifiedName
       };
 
-      ActionResult result = _accountingManager.AddAccount(account).Result;
-
-      if (!result.IsSuccess)
+      Task.Run(async () =>
       {
-        this.ShowErrorMessage($"Failed to add the account.{Environment.NewLine}{Environment.NewLine}{result.FailureMessage}");
+        ActionResult result = _accountingManager.AddAccount(account).Result;
 
-        dlg.ShowDialog();
+        if (!result.IsSuccess)
+        {
+          this.ShowErrorMessage(
+            $"Failed to add the account.{Environment.NewLine}{Environment.NewLine}{result.FailureMessage}");
 
-        return;
-      }
+          //dlg.ShowDialog();
 
-      Task.Run(async () => await PopulateAccountsTree());
+          return;
+        }
+
+        await PopulateAccountsTree();
+      });
     }
 
     private void NewTransaction_OnClick(object sender, EventArgs args)

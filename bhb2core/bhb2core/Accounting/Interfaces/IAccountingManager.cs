@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 
 using bhb2core.Accounting.Managers.Interfaces;
+using bhb2core.Common.ActionResults;
 
 namespace bhb2core.Accounting.Interfaces
 {
@@ -8,6 +9,6 @@ namespace bhb2core.Accounting.Interfaces
     IAccountManager,
     ITransactionManager
   {
-    new Task<bool> Initialise();
+    new Task<ActionResult> Initialise();
   }
 }

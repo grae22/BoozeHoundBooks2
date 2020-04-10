@@ -7,13 +7,24 @@ using bhb2core.Accounting.DataAccess.Interfaces;
 using bhb2core.Accounting.Exceptions;
 using bhb2core.Accounting.Models;
 using bhb2core.Common.ActionResults;
+using bhb2core.Utils.Persistence;
 using bhb2core.Utils.Serialisation;
 
 namespace bhb2core.Accounting.DataAccess.DataAccessors
 {
-  internal class AccountDataAccess : IAccountDataAccess
+  internal class AccountDataAccess : IAccountDataAccess, IPersistable
   {
+    public string PersistenceId => "Accounts";
+
+    private const string SerialisedDataAccountsKey = "accounts";
+
+    private readonly IPersistor _persistor;
     private readonly List<Account> _accounts = new List<Account>();
+
+    public AccountDataAccess(in IPersistor persistor)
+    {
+      _persistor = persistor ?? throw new ArgumentNullException(nameof(persistor));
+    }
 
     public async Task<GetResult<IEnumerable<Account>>> GetAllAccounts()
     {
@@ -138,8 +149,7 @@ namespace bhb2core.Accounting.DataAccess.DataAccessors
 
       _accounts.Add(account);
 
-      return await Task.FromResult(
-        ActionResult.CreateSuccess());
+      return await _persistor.Persist();
     }
 
     public async Task<ActionResult> UpdateAccountBalances(
@@ -155,8 +165,28 @@ namespace bhb2core.Accounting.DataAccess.DataAccessors
           .Balance = balance;
       }
 
-      return await Task.FromResult(
-        ActionResult.CreateSuccess());
+      return await _persistor.Persist();
+    }
+
+    public string Serialise()
+    {
+      var serialisedDataByKey = new Dictionary<string, string>
+      {
+        { SerialisedDataAccountsKey, Serialiser.Serialise(_accounts) }
+      };
+
+      return Serialiser.Serialise(serialisedDataByKey);
+    }
+
+    public void Deserialise(in string serialisedData)
+    {
+      var serialisedDataByKey = Serialiser.Deserialise<IReadOnlyDictionary<string, string>>(serialisedData);
+
+      _accounts.Clear();
+
+      _accounts.AddRange(
+        Serialiser.Deserialise<List<Account>>(
+          serialisedDataByKey[SerialisedDataAccountsKey]));
     }
 
     private async Task GetAccountParentsRecursive(

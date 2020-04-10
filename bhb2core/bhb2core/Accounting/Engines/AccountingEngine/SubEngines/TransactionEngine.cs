@@ -26,7 +26,13 @@ namespace bhb2core.Accounting.Engines.AccountingEngine.SubEngines
     {
       _logger.LogVerbose($"Received transaction: {transaction}");
 
-      // TODO: Add idempotency for transactions.
+      if (await _accountingDataAccess.DoesTransactionExist(transaction.IdempotencyId))
+      {
+        _logger.LogError($"Transaction already exists with idempotency-id: {transaction.IdempotencyId}");
+
+        return ActionResult.CreateFailure("Transaction already exists.");
+      }
+
       return await _accountingDataAccess.AddTransaction(transaction);
     }
   }

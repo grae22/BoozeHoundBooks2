@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.DataAccess.DataAccessors;
@@ -75,6 +76,11 @@ namespace bhb2core.Accounting.DataAccess
     public async Task<ActionResult> AddTransaction(Transaction transaction)
     {
       return await _transactionDataAccess.AddTransaction(transaction);
+    }
+
+    public async Task<bool> DoesTransactionExist(Guid idempotencyId)
+    {
+      return await _transactionDataAccess.DoesTransactionExist(idempotencyId);
     }
   }
 }

@@ -7,6 +7,7 @@ namespace bhb2core.Accounting.Models
 {
   internal class Transaction : ToStringSerialiser
   {
+    public Guid IdempotencyId { get; set; }
     public string DebitAccountQualifiedName { get; set; }
     public string CreditAccountQualifiedName { get; set; }
     public decimal Amount { get; set; }

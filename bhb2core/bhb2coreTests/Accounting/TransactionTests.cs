@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -645,34 +646,6 @@ namespace bhb2coreTests.Accounting
 
       AccountingManagerFactory.ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
 
-      Account debitAccount = accountingDataAccess.GetAccount(debitAccountName).Result.Result;
-      Account creditAccount = accountingDataAccess.GetAccount(creditAccountName).Result.Result;
-
-      accountingDataAccess
-        .GetAccounts(Arg.Any<IEnumerable<string>>())
-        .Returns(GetResult<IReadOnlyDictionary<string, Account>>.CreateSuccess(
-          new Dictionary<string, Account>
-          {
-            { debitAccountName, debitAccount },
-            { creditAccountName, creditAccount }
-          }));
-
-      accountingDataAccess
-        .GetParentAccountsOrdered(debitAccountName)
-        .Returns(GetResult<IEnumerable<Account>>.CreateSuccess(new Account[0]));
-
-      accountingDataAccess
-        .GetParentAccountsOrdered(creditAccountName)
-        .Returns(GetResult<IEnumerable<Account>>.CreateSuccess(new Account[0]));
-
-      accountingDataAccess
-        .UpdateAccountBalances(default)
-        .ReturnsForAnyArgs(ActionResult.CreateSuccess());
-
-      accountingDataAccess
-        .AddTransaction(default)
-        .ReturnsForAnyArgs(ActionResult.CreateFailure(string.Empty));
-
       var transaction = new TransactionDto
       {
         DebitAccountQualifiedName = debitAccountName,
@@ -685,6 +658,40 @@ namespace bhb2coreTests.Accounting
 
       // Assert.
       Assert.IsFalse(result.IsSuccess);
+    }
+
+    [Test]
+    public async Task Given_TransactionExists_When_SameIdempotencyIdReceived_Then_ResultIsFailure()
+    {
+      // Arrange.
+      const string debitAccountName = "Funds";
+      const string creditAccountName = "Expense";
+      const decimal amount = 123.45m;
+
+      var idemptotencyId = Guid.NewGuid();
+
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      AccountingManagerFactory.ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
+
+      accountingDataAccess
+        .DoesTransactionExist(idemptotencyId)
+        .Returns(true);
+
+      var transaction = new TransactionDto
+      {
+        IdempotencyId = idemptotencyId,
+        DebitAccountQualifiedName = debitAccountName,
+        CreditAccountQualifiedName = creditAccountName,
+        Amount = amount
+      };
+
+      // Act.
+      ProcessTransactionResult result = await testObject.ProcessTransaction(transaction);
+
+      // Assert.
+      Assert.IsFalse(result.IsSuccess);
+      StringAssert.Contains("already exists", result.FailureMessage);
     }
   }
 }

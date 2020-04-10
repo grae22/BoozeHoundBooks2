@@ -104,6 +104,21 @@ namespace bhb2desktop
         accounts);
     }
 
+    private void AddTransactionToGrid(in TransactionDto transaction)
+    {
+      _transactionGrid.Rows.Add(
+        new object[]
+        {
+          transaction.Date,
+          transaction.IsCommitted,
+          transaction.Amount,
+          string.Empty,
+          transaction.DebitAccountQualifiedName,
+          transaction.CreditAccountQualifiedName,
+          string.Empty
+        });
+    }
+
     private static string FormatAccountTreeNodeText(in AccountDto account)
     {
       return $"{account.Name}  ( {account.Balance:N} )";
@@ -168,6 +183,7 @@ namespace bhb2desktop
         }
 
         UpdateAccountTreeBalances(result.UpdatedAccounts);
+        AddTransactionToGrid(dlg.Transaction);
       });
     }
   }

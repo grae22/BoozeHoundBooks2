@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.DataAccess.Interfaces;
@@ -9,14 +10,23 @@ namespace bhb2core.Accounting.DataAccess.DataAccessors
 {
   internal class TransactionDataAccess : ITransactionDataAccess
   {
-    public Task<ActionResult> AddTransaction(Transaction transaction)
+    private readonly Dictionary<Guid, Transaction> _transactions = new Dictionary<Guid, Transaction>();
+
+    public async Task<ActionResult> AddTransaction(Transaction transaction)
     {
-      throw new System.NotImplementedException();
+      if (_transactions.TryAdd(transaction.IdempotencyId, transaction))
+      {
+        return await Task.FromResult(
+          ActionResult.CreateSuccess());
+      }
+
+      return ActionResult.CreateFailure("Failed to add transaction to transaction log.");
     }
 
-    public Task<bool> DoesTransactionExist(Guid idempotencyId)
+    public async Task<bool> DoesTransactionExist(Guid idempotencyId)
     {
-      throw new NotImplementedException();
+      return await Task.FromResult(
+        _transactions.ContainsKey(idempotencyId));
     }
   }
 }

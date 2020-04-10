@@ -128,6 +128,7 @@ namespace bhb2desktop
     {
       Transaction = new TransactionDto
       {
+        IdempotencyId = Guid.NewGuid(),
         DebitAccountQualifiedName = _debitAccountComboBox.Text,
         CreditAccountQualifiedName = _creditAccountComboBox.Text,
         Date = _datePicker.Value,

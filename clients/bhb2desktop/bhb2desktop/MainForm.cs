@@ -6,10 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Dto;
 using bhb2core.Accounting.Interfaces;
-using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
+using bhb2core.Accounting.Managers.ActionResults;
 using bhb2core.Common.ActionResults;
 using bhb2core.Utils.Logging;
 

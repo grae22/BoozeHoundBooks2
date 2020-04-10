@@ -70,6 +70,8 @@ namespace bhb2core.Accounting.Managers.SubManagers
 
     public async Task<GetResult<IEnumerable<TransactionDto>>> GetTransactions()
     {
+      _logger.LogVerbose("Received request for transactions.");
+
       GetResult<IEnumerable<Transaction>> getTransactionsResult = await _accountingDataAccess.GetTransactions();
 
       if (!getTransactionsResult.IsSuccess)

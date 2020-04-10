@@ -62,7 +62,6 @@ namespace bhb2core.Utils.Persistence
       try
       {
         Logger.LogInformation("Restoring data started.");
-
         Logger.LogInformation($"Restoring from \"{_filename}\"...");
 
         string data = await File.ReadAllTextAsync(_filename);
@@ -77,6 +76,7 @@ namespace bhb2core.Utils.Persistence
           if (!PersistablesById.ContainsKey(id))
           {
             Logger.LogError($"\"{id}\" is not a registered persistable.");
+            continue;
           }
 
           Logger.LogInformation($"Restoring \"{id}\"...");

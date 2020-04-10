@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.Models;
@@ -11,5 +12,7 @@ namespace bhb2core.Accounting.DataAccess.Interfaces
     Task<ActionResult> AddTransaction(Transaction transaction);
 
     Task<bool> DoesTransactionExist(Guid idempotencyId);
+
+    Task<GetResult<IEnumerable<Transaction>>> GetTransactions();
   }
 }

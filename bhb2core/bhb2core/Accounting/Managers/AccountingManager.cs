@@ -131,5 +131,19 @@ namespace bhb2core.Accounting.Managers
         return ProcessTransactionResult.CreateFailure($"Unhandled error: \"{ex.Message}\".");
       }
     }
+
+    public async Task<GetResult<IEnumerable<TransactionDto>>> GetTransactions()
+    {
+      try
+      {
+        return await _transactionManager.GetTransactions();
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError("Unhandled exception.", ex);
+
+        return GetResult<IEnumerable<TransactionDto>>.CreateFailure($"Unhandled error: \"{ex.Message}\".");
+      }
+    }
   }
 }

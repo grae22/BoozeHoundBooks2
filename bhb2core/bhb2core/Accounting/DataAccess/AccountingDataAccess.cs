@@ -95,6 +95,11 @@ namespace bhb2core.Accounting.DataAccess
       return await _transactionDataAccess.AddTransaction(transaction);
     }
 
+    public async Task<GetResult<IEnumerable<Transaction>>> GetTransactions()
+    {
+      return await _transactionDataAccess.GetTransactions();
+    }
+
     public async Task<bool> DoesTransactionExist(Guid idempotencyId)
     {
       return await _transactionDataAccess.DoesTransactionExist(idempotencyId);

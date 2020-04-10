@@ -51,6 +51,7 @@ namespace bhb2core.Utils.Mapping
       return new MapperConfiguration(
         cfg =>
         {
+          cfg.CreateMap<Transaction, TransactionDto>();
           cfg.CreateMap<TransactionDto, Transaction>();
           cfg.CreateMap<Account, AccountDto>();
           cfg.CreateMap<AccountDto, Account>();

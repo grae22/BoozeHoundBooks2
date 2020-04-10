@@ -67,5 +67,20 @@ namespace bhb2core.Accounting.Managers.SubManagers
         null,
         _mapper.Map<IEnumerable<Account>, IEnumerable<AccountDto>>(updateBalanceResult.UpdatedAccounts));
     }
+
+    public async Task<GetResult<IEnumerable<TransactionDto>>> GetTransactions()
+    {
+      GetResult<IEnumerable<Transaction>> getTransactionsResult = await _accountingDataAccess.GetTransactions();
+
+      if (!getTransactionsResult.IsSuccess)
+      {
+        return GetResult<IEnumerable<TransactionDto>>.CreateFailure(getTransactionsResult.FailureMessage);
+      }
+
+      IEnumerable<TransactionDto> transactions =
+        _mapper.Map<IEnumerable<Transaction>, IEnumerable<TransactionDto>>(getTransactionsResult.Result);
+
+      return GetResult<IEnumerable<TransactionDto>>.CreateSuccess(transactions);
+    }
   }
 }

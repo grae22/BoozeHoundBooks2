@@ -104,19 +104,44 @@ namespace bhb2desktop
         accounts);
     }
 
+    private async Task PopulateTransactionGrid()
+    {
+      _synchronizationContext.Post(
+        tg =>
+          ((DataGridView)tg).Rows.Clear(),
+        _transactionGrid);
+
+      GetResult<IEnumerable<TransactionDto>> getResult = await _accountingManager.GetTransactions();
+
+      if (!getResult.IsSuccess)
+      {
+        this.ShowErrorMessage($"Failed to retrieve transactions: \"{getResult.FailureMessage}\".");
+        return;
+      }
+
+      foreach (var transaction in getResult.Result)
+      {
+        AddTransactionToGrid(transaction);
+      }
+    }
+
     private void AddTransactionToGrid(in TransactionDto transaction)
     {
-      _transactionGrid.Rows.Add(
-        new object[]
+      _synchronizationContext.Post(
+        t =>
         {
-          transaction.Date,
-          transaction.IsCommitted,
-          transaction.Amount,
-          string.Empty,
-          transaction.DebitAccountQualifiedName,
-          transaction.CreditAccountQualifiedName,
-          string.Empty
-        });
+          var tran = (TransactionDto)t;
+
+          _transactionGrid.Rows.Add(
+            tran.Date,
+            tran.IsCommitted,
+            tran.Amount,
+            string.Empty,
+            tran.DebitAccountQualifiedName,
+            tran.CreditAccountQualifiedName,
+            string.Empty);
+        },
+        transaction);
     }
 
     private static string FormatAccountTreeNodeText(in AccountDto account)
@@ -126,7 +151,11 @@ namespace bhb2desktop
 
     private void Form_OnLoad(object sender, EventArgs args)
     {
-      Task.Run(async () => await PopulateAccountsTree());
+      Task.Run(async () =>
+      {
+        await PopulateAccountsTree();
+        await PopulateTransactionGrid();
+      });
     }
 
     private void AddAccount_OnClick(object sender, EventArgs args)

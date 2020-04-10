@@ -100,6 +100,7 @@ namespace bhb2desktop
       _transactionGrid = new DataGridView
       {
         AutoSize = true,
+        AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
         ColumnCount = 7,
         Dock = DockStyle.Fill,
         ReadOnly = true
@@ -108,25 +109,32 @@ namespace bhb2desktop
       _transactionGrid.Columns[0].Name = "Date";
       _transactionGrid.Columns[0].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
       _transactionGrid.Columns[0].DefaultCellStyle.Format = "yyyy-MM-dd";
+      _transactionGrid.Columns[0].FillWeight = 0.05f;
 
       _transactionGrid.Columns[1].Name = "Committed";
       _transactionGrid.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+      _transactionGrid.Columns[1].FillWeight = 0.05f;
 
       _transactionGrid.Columns[2].Name = "Amount";
       _transactionGrid.Columns[2].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
       _transactionGrid.Columns[2].DefaultCellStyle.Format = "N";
+      _transactionGrid.Columns[2].FillWeight = 0.15f;
 
       _transactionGrid.Columns[3].Name = "Allocations";
       _transactionGrid.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+      _transactionGrid.Columns[3].FillWeight = 0.15f;
 
       _transactionGrid.Columns[4].Name = "Debit Account";
       _transactionGrid.Columns[4].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+      _transactionGrid.Columns[4].FillWeight = 0.2f;
 
       _transactionGrid.Columns[5].Name = "Credit Account";
       _transactionGrid.Columns[5].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+      _transactionGrid.Columns[5].FillWeight = 0.2f;
 
       _transactionGrid.Columns[6].Name = "Description";
       _transactionGrid.Columns[6].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+      _transactionGrid.Columns[6].FillWeight = 0.2f;
 
       SuspendLayout();
 

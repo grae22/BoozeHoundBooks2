@@ -40,6 +40,12 @@ namespace bhb2core.Accounting.DataAccess.DataAccessors
         _transactions.ContainsKey(idempotencyId));
     }
 
+    public async Task<GetResult<IEnumerable<Transaction>>> GetTransactions()
+    {
+      return await Task.FromResult(
+        GetResult<IEnumerable<Transaction>>.CreateSuccess(_transactions.Values));
+    }
+
     public string Serialise()
     {
       var serialisedDataByKey = new Dictionary<string, string>

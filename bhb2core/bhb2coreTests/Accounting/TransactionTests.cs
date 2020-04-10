@@ -56,6 +56,10 @@ namespace bhb2coreTests.Accounting
         .UpdateAccountBalances(default)
         .ReturnsForAnyArgs(ActionResult.CreateSuccess());
 
+      accountingDataAccess
+        .AddTransaction(default)
+        .ReturnsForAnyArgs(ActionResult.CreateSuccess());
+
       var transaction = new TransactionDto
       {
         DebitAccountQualifiedName = debitAccountName,
@@ -104,6 +108,10 @@ namespace bhb2coreTests.Accounting
 
       accountingDataAccess
         .UpdateAccountBalances(default)
+        .ReturnsForAnyArgs(ActionResult.CreateSuccess());
+
+      accountingDataAccess
+        .AddTransaction(default)
         .ReturnsForAnyArgs(ActionResult.CreateSuccess());
 
       var transaction = new TransactionDto
@@ -155,6 +163,10 @@ namespace bhb2coreTests.Accounting
       accountingDataAccess
         .GetParentAccountsOrdered(creditAccountName)
         .Returns(GetResult<IEnumerable<Account>>.CreateSuccess(new Account[0]));
+
+      accountingDataAccess
+        .AddTransaction(default)
+        .ReturnsForAnyArgs(ActionResult.CreateSuccess());
 
       var transaction = new TransactionDto
       {
@@ -247,6 +259,10 @@ namespace bhb2coreTests.Accounting
         .UpdateAccountBalances(default)
         .ReturnsForAnyArgs(ActionResult.CreateSuccess());
 
+      accountingDataAccess
+        .AddTransaction(default)
+        .ReturnsForAnyArgs(ActionResult.CreateSuccess());
+
       var transaction = new TransactionDto
       {
         DebitAccountQualifiedName = debitAccountName,
@@ -322,6 +338,10 @@ namespace bhb2coreTests.Accounting
         {
           parentCreditAccount
         }));
+
+      accountingDataAccess
+        .AddTransaction(default)
+        .ReturnsForAnyArgs(ActionResult.CreateSuccess());
 
       var transaction = new TransactionDto
       {
@@ -431,7 +451,6 @@ namespace bhb2coreTests.Accounting
     public async Task Given_TransactionWhichDebitsNonLeafAccount_When_Processed_Then_ResultIsFailure()
     {
       // Arrange.
-      const string debitAccountName = "Cash";
       const string creditAccountName = "Food";
       const string debitParentAccountName = "Funds";
       const string creditParentAccountName = "Expense";
@@ -443,15 +462,6 @@ namespace bhb2coreTests.Accounting
 
       Account parentDebitAccount = accountingDataAccess.GetAccount(debitParentAccountName).Result.Result;
       Account parentCreditAccount = accountingDataAccess.GetAccount(creditParentAccountName).Result.Result;
-
-      var debitAccount = new Account
-      {
-        AccountType = AccountType.CreateFunds(),
-        QualifiedName = debitAccountName,
-        ParentAccountQualifiedName = debitParentAccountName,
-        AccountTypesWithDebitPermission = parentDebitAccount.AccountTypesWithDebitPermission,
-        AccountTypesWithCreditPermission = parentDebitAccount.AccountTypesWithCreditPermission
-      };
 
       var creditAccount = new Account
       {
@@ -561,6 +571,66 @@ namespace bhb2coreTests.Accounting
 
       // Assert.
       Assert.IsFalse(result.IsSuccess);
+    }
+
+    [Test]
+    public async Task Given_Transaction_When_Processed_Then_WrittenToTransactionLog()
+    {
+      // Arrange.
+      const string debitAccountName = "Funds";
+      const string creditAccountName = "Expense";
+      const decimal amount = 123.45m;
+
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      AccountingManagerFactory.ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
+
+      Account debitAccount = accountingDataAccess.GetAccount(debitAccountName).Result.Result;
+      Account creditAccount = accountingDataAccess.GetAccount(creditAccountName).Result.Result;
+
+      accountingDataAccess
+        .GetAccounts(Arg.Any<IEnumerable<string>>())
+        .Returns(GetResult<IReadOnlyDictionary<string, Account>>.CreateSuccess(
+          new Dictionary<string, Account>
+          {
+            { debitAccountName, debitAccount },
+            { creditAccountName, creditAccount }
+          }));
+
+      accountingDataAccess
+        .GetParentAccountsOrdered(debitAccountName)
+        .Returns(GetResult<IEnumerable<Account>>.CreateSuccess(new Account[0]));
+
+      accountingDataAccess
+        .GetParentAccountsOrdered(creditAccountName)
+        .Returns(GetResult<IEnumerable<Account>>.CreateSuccess(new Account[0]));
+
+      accountingDataAccess
+        .UpdateAccountBalances(default)
+        .ReturnsForAnyArgs(ActionResult.CreateSuccess());
+
+      accountingDataAccess
+        .AddTransaction(default)
+        .ReturnsForAnyArgs(ActionResult.CreateSuccess());
+
+      var transaction = new TransactionDto
+      {
+        DebitAccountQualifiedName = debitAccountName,
+        CreditAccountQualifiedName = creditAccountName,
+        Amount = amount
+      };
+
+      // Act.
+      await testObject.ProcessTransaction(transaction);
+
+      // Assert.
+      await accountingDataAccess
+        .Received(1)
+        .AddTransaction(Arg.Is<Transaction>(t =>
+          t.DebitAccountQualifiedName.Equals(transaction.DebitAccountQualifiedName) &&
+          t.CreditAccountQualifiedName.Equals(transaction.CreditAccountQualifiedName) &&
+          t.Date == transaction.Date &&
+          t.Amount == transaction.Amount));
     }
   }
 }

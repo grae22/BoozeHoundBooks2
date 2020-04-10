@@ -8,6 +8,7 @@ using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Managers.AccountingManager.ActionResults;
 using bhb2core.Accounting.Managers.AccountingManager.Interfaces;
 using bhb2core.Accounting.Models;
+using bhb2core.Common.ActionResults;
 using bhb2core.Utils.Logging;
 using bhb2core.Utils.Mapping;
 
@@ -41,6 +42,15 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
         return ProcessTransactionResult.CreateFailure("Input transaction is null.");
       }
 
+      Transaction transaction = _mapper.Map<TransactionDto, Transaction>(transactionDto);
+
+      ActionResult addTransactionResult = await _accountingEngine.AddTransaction(transaction);
+
+      if (!addTransactionResult.IsSuccess)
+      {
+        return ProcessTransactionResult.CreateFailure(addTransactionResult.FailureMessage);
+      }
+
       DoubleEntryUpdateBalanceResult updateBalanceResult = await _accountingEngine.PerformDoubleEntryUpdateAccountBalance(
         transactionDto.DebitAccountQualifiedName,
         transactionDto.CreditAccountQualifiedName,
@@ -50,8 +60,6 @@ namespace bhb2core.Accounting.Managers.AccountingManager.SubManagers
       {
         return ProcessTransactionResult.CreateFailure(updateBalanceResult.FailureMessage);
       }
-
-      Transaction transaction = _mapper.Map<TransactionDto, Transaction>(transactionDto);
 
       _logger.LogInformation($"Transaction processed: {transaction}");
 

@@ -3,9 +3,9 @@
 using bhb2core.Accounting.Models;
 using bhb2core.Common.ActionResults;
 
-namespace bhb2core.Accounting.Engines.AccountingEngine.Interfaces
+namespace bhb2core.Accounting.DataAccess.Interfaces
 {
-  internal interface ITransactionEngine
+  internal interface ITransactionDataAccess
   {
     Task<ActionResult> AddTransaction(Transaction transaction);
   }

@@ -63,5 +63,10 @@ namespace bhb2core.Accounting.Engines.AccountingEngine
         creditAccountQualifiedName,
         amount);
     }
+
+    public async Task<ActionResult> AddTransaction(Transaction transaction)
+    {
+      return await _transactionEngine.AddTransaction(transaction);
+    }
   }
 }

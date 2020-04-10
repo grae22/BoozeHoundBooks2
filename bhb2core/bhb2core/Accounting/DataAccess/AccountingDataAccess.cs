@@ -1,24 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using bhb2core.Accounting.Exceptions;
+using bhb2core.Accounting.DataAccess.DataAccessors;
+using bhb2core.Accounting.DataAccess.Interfaces;
 using bhb2core.Accounting.Interfaces;
 using bhb2core.Accounting.Models;
 using bhb2core.Common.ActionResults;
-using bhb2core.Utils.Serialisation;
 
 namespace bhb2core.Accounting.DataAccess
 {
   internal class AccountingDataAccess : IAccountingDataAccess
   {
-    private readonly List<Account> _accounts = new List<Account>();
+    private readonly IAccountDataAccess _accountDataAccess;
+    private readonly ITransactionDataAccess _transactionDataAccess;
+
+    public AccountingDataAccess()
+    {
+      _accountDataAccess = new AccountDataAccess();
+      _transactionDataAccess = new TransactionDataAccess();
+    }
 
     public async Task<GetResult<IEnumerable<Account>>> GetAllAccounts()
     {
-      return await Task.FromResult(
-        GetResult<IEnumerable<Account>>.CreateSuccess(_accounts));
+      return await _accountDataAccess.GetAllAccounts();
     }
 
     public async Task<GetResult<IEnumerable<Account>>> GetAccounts(
@@ -28,157 +32,49 @@ namespace bhb2core.Accounting.DataAccess
       bool isDebtor = false,
       bool isCreditor = false)
     {
-      var accounts = new List<Account>();
-
-      if (isFunds)
-      {
-        accounts.AddRange(_accounts.Where(a => a.AccountType.IsFunds));
-      }
-
-      if (isIncome)
-      {
-        accounts.AddRange(_accounts.Where(a => a.AccountType.IsIncome));
-      }
-
-      if (isExpense)
-      {
-        accounts.AddRange(_accounts.Where(a => a.AccountType.IsExpense));
-      }
-
-      if (isDebtor)
-      {
-        accounts.AddRange(_accounts.Where(a => a.AccountType.IsDebtor));
-      }
-
-      if (isCreditor)
-      {
-        accounts.AddRange(_accounts.Where(a => a.AccountType.IsCreditor));
-      }
-
-      return await Task.FromResult(
-        GetResult<IEnumerable<Account>>.CreateSuccess(accounts));
+      return await _accountDataAccess.GetAccounts(
+        isFunds,
+        isIncome,
+        isExpense,
+        isDebtor,
+        isCreditor);
     }
 
     public async Task<GetResult<Account>> GetAccount(string accountQualifiedName)
     {
-      Account account =
-        await Task.FromResult(
-          _accounts.FirstOrDefault(a => a.QualifiedName.Equals(accountQualifiedName)));
-
-      if (account == null)
-      {
-        return GetResult<Account>.CreateFailure($"Account not found \"{accountQualifiedName}\".");
-      }
-
-      return GetResult<Account>.CreateSuccess(account);
+      return await _accountDataAccess.GetAccount(accountQualifiedName);
     }
 
     public async Task<GetResult<IReadOnlyDictionary<string, Account>>> GetAccounts(
       IEnumerable<string> accountQualifiedNames)
     {
-      Dictionary<string, Account> accounts =
-        _accounts
-          .Where(a => accountQualifiedNames.Contains(a.QualifiedName))
-          .ToDictionary(a => a.QualifiedName);
-
-      if (accounts.Count != accountQualifiedNames.Count())
-      {
-        IEnumerable<string> missingAccounts = accountQualifiedNames.Where(a => !accounts.ContainsKey(a));
-
-        return GetResult<IReadOnlyDictionary<string, Account>>.CreateFailure(
-          $"Failed to find account(s): {Serialiser.Serialise(missingAccounts)}");
-      }
-
-      return await Task.FromResult(
-        GetResult<IReadOnlyDictionary<string, Account>>.CreateSuccess(accounts));
+      return await _accountDataAccess.GetAccounts(accountQualifiedNames);
     }
 
     public async Task<GetResult<IEnumerable<Account>>> GetParentAccountsOrdered(string accountQualifiedName)
     {
-      Account account =
-        _accounts.FirstOrDefault(a => a.QualifiedName.Equals(accountQualifiedName, StringComparison.Ordinal));
-
-      var parentAccounts = new List<Account>();
-
-      try
-      {
-        await GetAccountParentsRecursive(account, parentAccounts);
-      }
-      catch (AccountException ex)
-      {
-        GetResult<IEnumerable<Account>>.CreateFailure(ex.Message);
-      }
-
-      return GetResult<IEnumerable<Account>>.CreateSuccess(parentAccounts);
+      return await _accountDataAccess.GetParentAccountsOrdered(accountQualifiedName);
     }
 
     public async Task<bool> IsParentAccount(string accountQualifiedName)
     {
-      bool hasChildren = _accounts
-        .Any(a => a.ParentAccountQualifiedName?.Equals(
-          accountQualifiedName,
-          StringComparison.Ordinal) ?? false);
-
-      return await Task.FromResult(hasChildren);
+      return await _accountDataAccess.IsParentAccount(accountQualifiedName);
     }
 
     public async Task<ActionResult> AddAccount(Account account)
     {
-      bool accountAlreadyExists =
-        _accounts
-          .Exists(a =>
-            a.QualifiedName.Equals(
-              account.QualifiedName,
-              StringComparison.OrdinalIgnoreCase));
-
-      if (accountAlreadyExists)
-      {
-        return ActionResult.CreateFailure($"Account already exists \"{account.QualifiedName}\".");
-      }
-
-      _accounts.Add(account);
-
-      return await Task.FromResult(
-        ActionResult.CreateSuccess());
+      return await _accountDataAccess.AddAccount(account);
     }
 
     public async Task<ActionResult> UpdateAccountBalances(
       IReadOnlyDictionary<string, decimal> balancesByAccountQualifiedName)
     {
-      foreach (var accountNameAndBalance in balancesByAccountQualifiedName)
-      {
-        string accountQualifiedName = accountNameAndBalance.Key;
-        decimal balance = accountNameAndBalance.Value;
-
-        _accounts
-          .Single(a => a.QualifiedName.Equals(accountQualifiedName))
-          .Balance = balance;
-      }
-
-      return await Task.FromResult(
-        ActionResult.CreateSuccess());
+      return await _accountDataAccess.UpdateAccountBalances(balancesByAccountQualifiedName);
     }
 
-    private async Task GetAccountParentsRecursive(
-      Account account,
-      ICollection<Account> parentAccounts)
+    public async Task<ActionResult> AddTransaction(Transaction transaction)
     {
-      if (!account.HasParent)
-      {
-        return;
-      }
-
-      Account parentAccount = _accounts
-        .FirstOrDefault(a => a.QualifiedName.Equals(account.ParentAccountQualifiedName, StringComparison.Ordinal));
-
-      if (parentAccount == null)
-      {
-        throw new AccountException($"Account not found: \"{account.ParentAccountQualifiedName}\".", string.Empty);
-      }
-
-      parentAccounts.Add(parentAccount);
-
-      await GetAccountParentsRecursive(parentAccount, parentAccounts);
+      return await _transactionDataAccess.AddTransaction(transaction);
     }
   }
 }

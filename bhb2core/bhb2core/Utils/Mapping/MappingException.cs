@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace bhb2core.Accounting.Exceptions
+namespace bhb2core.Utils.Mapping
 {
   internal class MappingException : Exception
   {

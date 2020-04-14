@@ -3,7 +3,6 @@
 using AutoMapper;
 
 using bhb2core.Accounting.Dto;
-using bhb2core.Accounting.Exceptions;
 using bhb2core.Accounting.Models;
 using bhb2core.Utils.Logging;
 

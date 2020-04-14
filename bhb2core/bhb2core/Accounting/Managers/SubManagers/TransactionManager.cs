@@ -51,21 +51,21 @@ namespace bhb2core.Accounting.Managers.SubManagers
         return ProcessTransactionResult.CreateFailure(addTransactionResult.FailureMessage);
       }
 
-      DoubleEntryUpdateBalanceResult updateBalanceResult = await _accountingEngine.PerformDoubleEntryUpdateAccountBalance(
+      UpdateAccountBalancesResult updateAccountResult = await _accountingEngine.PerformDoubleEntryUpdateAccountBalance(
         transactionDto.DebitAccountQualifiedName,
         transactionDto.CreditAccountQualifiedName,
         transactionDto.Amount);
 
-      if (!updateBalanceResult.IsSuccess)
+      if (!updateAccountResult.IsSuccess)
       {
-        return ProcessTransactionResult.CreateFailure(updateBalanceResult.FailureMessage);
+        return ProcessTransactionResult.CreateFailure(updateAccountResult.FailureMessage);
       }
 
       _logger.LogInformation($"Transaction processed: {transaction}");
 
       return ProcessTransactionResult.CreateSuccess(
         null,
-        _mapper.Map<IEnumerable<Account>, IEnumerable<AccountDto>>(updateBalanceResult.UpdatedAccounts));
+        _mapper.Map<IEnumerable<Account>, IEnumerable<AccountDto>>(updateAccountResult.UpdatedAccounts));
     }
 
     public async Task<GetResult<IEnumerable<TransactionDto>>> GetTransactions()

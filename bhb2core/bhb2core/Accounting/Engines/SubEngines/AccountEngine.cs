@@ -247,7 +247,7 @@ namespace bhb2core.Accounting.Engines.SubEngines
     }
 
     // TODO: Method needs refactoring - decompose?
-    public async Task<DoubleEntryUpdateBalanceResult> PerformDoubleEntryUpdateAccountBalance(
+    public async Task<UpdateAccountBalancesResult> PerformDoubleEntryUpdateAccountBalance(
       string debitAccountQualifiedName,
       string creditAccountQualifiedName,
       decimal amount)
@@ -268,7 +268,7 @@ namespace bhb2core.Accounting.Engines.SubEngines
 
         _logger.LogError(message);
 
-        return DoubleEntryUpdateBalanceResult.CreateFailure(message);
+        return UpdateAccountBalancesResult.CreateFailure(message);
       }
 
       IReadOnlyDictionary<string, Account> accounts = getAccountsResult.Result;
@@ -290,7 +290,7 @@ namespace bhb2core.Accounting.Engines.SubEngines
 
         _logger.LogError(message);
 
-        return DoubleEntryUpdateBalanceResult.CreateFailure(message);
+        return UpdateAccountBalancesResult.CreateFailure(message);
       }
 
       if (await _accountingDataAccess.IsParentAccount(creditAccountQualifiedName))
@@ -299,7 +299,7 @@ namespace bhb2core.Accounting.Engines.SubEngines
 
         _logger.LogError(message);
 
-        return DoubleEntryUpdateBalanceResult.CreateFailure(message);
+        return UpdateAccountBalancesResult.CreateFailure(message);
       }
 
       // Check accounts can transact.
@@ -309,7 +309,7 @@ namespace bhb2core.Accounting.Engines.SubEngines
 
         _logger.LogError(message);
 
-        return DoubleEntryUpdateBalanceResult.CreateFailure(message);
+        return UpdateAccountBalancesResult.CreateFailure(message);
       }
 
       if (!creditAccount.AccountTypesWithCreditPermission.Contains(debitAccount.AccountType))
@@ -318,7 +318,7 @@ namespace bhb2core.Accounting.Engines.SubEngines
 
         _logger.LogError(message);
 
-        return DoubleEntryUpdateBalanceResult.CreateFailure(message);
+        return UpdateAccountBalancesResult.CreateFailure(message);
       }
 
       IEnumerable<Account> parentDebitAccounts = new Account[0];
@@ -332,7 +332,7 @@ namespace bhb2core.Accounting.Engines.SubEngines
 
         if (!getParentAccountsResult.IsSuccess)
         {
-          return DoubleEntryUpdateBalanceResult.CreateFailure(getParentAccountsResult.FailureMessage);
+          return UpdateAccountBalancesResult.CreateFailure(getParentAccountsResult.FailureMessage);
         }
 
         parentDebitAccounts = getParentAccountsResult.Result;
@@ -343,7 +343,7 @@ namespace bhb2core.Accounting.Engines.SubEngines
 
         if (!getParentAccountsResult.IsSuccess)
         {
-          return DoubleEntryUpdateBalanceResult.CreateFailure(getParentAccountsResult.FailureMessage);
+          return UpdateAccountBalancesResult.CreateFailure(getParentAccountsResult.FailureMessage);
         }
 
         parentCreditAccounts = getParentAccountsResult.Result;
@@ -378,7 +378,7 @@ namespace bhb2core.Accounting.Engines.SubEngines
 
         _logger.LogError(message);
 
-        return DoubleEntryUpdateBalanceResult.CreateFailure(message);
+        return UpdateAccountBalancesResult.CreateFailure(message);
       }
 
       var allUpdatedAccounts = new List<Account>(parentDebitAccounts);
@@ -386,7 +386,7 @@ namespace bhb2core.Accounting.Engines.SubEngines
       allUpdatedAccounts.Add(debitAccount);
       allUpdatedAccounts.Add(creditAccount);
 
-      return DoubleEntryUpdateBalanceResult.CreateSuccess(allUpdatedAccounts);
+      return UpdateAccountBalancesResult.CreateSuccess(allUpdatedAccounts);
     }
 
     private async Task<ActionResult> CreateBaseAccount(

@@ -4,19 +4,19 @@ using bhb2core.Accounting.Models;
 
 namespace bhb2core.Accounting.DataAccess.ActionResults
 {
-  internal struct DoubleEntryUpdateBalanceResult
+  internal struct UpdateAccountBalancesResult
   {
-    public static DoubleEntryUpdateBalanceResult CreateSuccess(in IEnumerable<Account> updatedAccounts)
+    public static UpdateAccountBalancesResult CreateSuccess(in IEnumerable<Account> updatedAccounts)
     {
-      return new DoubleEntryUpdateBalanceResult(
+      return new UpdateAccountBalancesResult(
         true,
         null,
         updatedAccounts);
     }
 
-    public static DoubleEntryUpdateBalanceResult CreateFailure(in string message)
+    public static UpdateAccountBalancesResult CreateFailure(in string message)
     {
-      return new DoubleEntryUpdateBalanceResult(
+      return new UpdateAccountBalancesResult(
         false,
         message,
         null);
@@ -26,7 +26,7 @@ namespace bhb2core.Accounting.DataAccess.ActionResults
     public string FailureMessage { get; }
     public IEnumerable<Account> UpdatedAccounts { get; }
 
-    private DoubleEntryUpdateBalanceResult(
+    private UpdateAccountBalancesResult(
       in bool isSuccess,
       in string failureMessage,
       in IEnumerable<Account> updatedAccounts)

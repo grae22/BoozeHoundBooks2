@@ -53,7 +53,7 @@ namespace bhb2core.Accounting.Engines
       return await _accountEngine.DoesAccountExist(accountQualifiedName);
     }
 
-    public async Task<DoubleEntryUpdateBalanceResult> PerformDoubleEntryUpdateAccountBalance(
+    public async Task<UpdateAccountBalancesResult> PerformDoubleEntryUpdateAccountBalance(
       string debitAccountQualifiedName,
       string creditAccountQualifiedName,
       decimal amount)

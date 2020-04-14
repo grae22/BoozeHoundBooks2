@@ -22,7 +22,7 @@ namespace bhb2core.Accounting.Engines.Interfaces
 
     Task<bool> DoesAccountExist(string accountQualifiedName);
 
-    Task<DoubleEntryUpdateBalanceResult> PerformDoubleEntryUpdateAccountBalance(
+    Task<UpdateAccountBalancesResult> PerformDoubleEntryUpdateAccountBalance(
       string debitAccountQualifiedName,
       string creditAccountQualifiedName,
       decimal amount);

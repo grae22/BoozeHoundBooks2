@@ -27,6 +27,13 @@ namespace bhb2core.Accounting.Managers.SubManagers
       _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+    public async Task<ActionResult> Initialise()
+    {
+      _logger.LogInformation("Initialising...");
+
+      return await _accountingEngine.CreateCurrentPeriodIfNoneExist();
+    }
+
     public async Task<ActionResult> AddPeriod(PeriodDto periodDto)
     {
       _logger.LogInformation($"Call received for period: {periodDto}");

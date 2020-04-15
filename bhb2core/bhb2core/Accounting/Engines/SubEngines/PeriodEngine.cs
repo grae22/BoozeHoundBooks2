@@ -22,6 +22,34 @@ namespace bhb2core.Accounting.Engines.SubEngines
       _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+    public async Task<ActionResult> CreateCurrentPeriodIfNoneExist()
+    {
+      GetResult<Period> getLastPeriodResult = await _accountingDataAccess.GetLastPeriod();
+
+      if (getLastPeriodResult.IsSuccess)
+      {
+        _logger.LogInformation("Periods found, nothing to do.");
+
+        return ActionResult.CreateSuccess();
+      }
+
+      _logger.LogInformation("No periods found, creating current period...");
+
+      DateTime now = DateTime.Now;
+
+      var period = new Period(
+        new DateTime( 
+          now.Year,
+          now.Month,
+          1),
+        new DateTime(
+          now.Year,
+          now.Month,
+          DateTime.DaysInMonth(now.Year, now.Month)));
+
+      return await _accountingDataAccess.AddPeriod(period);
+    }
+
     public bool ValidatePeriod(in Period period, out string message)
     {
       if (period == null)

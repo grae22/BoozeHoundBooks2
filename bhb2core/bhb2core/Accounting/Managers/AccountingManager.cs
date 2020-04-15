@@ -51,6 +51,8 @@ namespace bhb2core.Accounting.Managers
 
     public async Task<ActionResult> Initialise()
     {
+      _logger.LogInformation("Initialising...");
+
       ActionResult dataAccessInitialiseResult = await _accountingDataAccess.Initialise();
 
       if (!dataAccessInitialiseResult.IsSuccess)
@@ -64,6 +66,15 @@ namespace bhb2core.Accounting.Managers
       {
         return accountManagerInitialiseResult;
       }
+
+      ActionResult periodManagerInitialiseResult = await _periodManager.Initialise();
+
+      if (!periodManagerInitialiseResult.IsSuccess)
+      {
+        return periodManagerInitialiseResult;
+      }
+
+      _logger.LogInformation("Initialisation complete.");
 
       return ActionResult.CreateSuccess();
     }

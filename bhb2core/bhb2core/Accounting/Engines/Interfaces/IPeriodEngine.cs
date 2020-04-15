@@ -7,6 +7,8 @@ namespace bhb2core.Accounting.Engines.Interfaces
 {
   internal interface IPeriodEngine
   {
+    Task<ActionResult> CreateCurrentPeriodIfNoneExist();
+
     bool ValidatePeriod(
       in Period period,
       out string message);

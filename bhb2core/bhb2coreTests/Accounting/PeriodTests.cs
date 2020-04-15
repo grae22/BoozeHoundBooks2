@@ -19,6 +19,33 @@ namespace bhb2coreTests.Accounting
   public class PeriodTests
   {
     [Test]
+    public void Given_StartingUp_When_NoPeriodsExist_Then_AddPeriodForCurrentMonth()
+    {
+      // Arrange.
+      DateTime now = DateTime.Now;
+
+      var expectedPeriodStart = new DateTime(
+        now.Year,
+        now.Month,
+        1);
+
+      var expectedPeriodEnd = new DateTime(
+        now.Year,
+        now.Month,
+        DateTime.DaysInMonth(now.Year, now.Month));
+
+      // Act.
+      AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      // Assert.
+      accountingDataAccess
+        .Received(1)
+        .AddPeriod(Arg.Is<Period>(p =>
+          p.Start == expectedPeriodStart &&
+          p.End == expectedPeriodEnd));
+    }
+
+    [Test]
     public async Task Given_NoExistingPeriods_When_Added_Then_ResultIsSuccess()
     {
       // Arrange.

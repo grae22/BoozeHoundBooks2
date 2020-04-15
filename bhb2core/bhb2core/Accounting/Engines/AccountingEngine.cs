@@ -33,6 +33,11 @@ namespace bhb2core.Accounting.Engines
         logger);
     }
 
+    public async Task<ActionResult> CreateCurrentPeriodIfNoneExist()
+    {
+      return await _periodEngine.CreateCurrentPeriodIfNoneExist();
+    }
+
     public async Task<ActionResult> CreateBaseAccountsIfMissing()
     {
       return await _accountEngine.CreateBaseAccountsIfMissing();

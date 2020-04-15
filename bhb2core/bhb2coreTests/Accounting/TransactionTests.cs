@@ -61,6 +61,11 @@ namespace bhb2coreTests.Accounting
         .AddTransaction(default)
         .ReturnsForAnyArgs(ActionResult.CreateSuccess());
 
+      accountingDataAccess
+        .GetPeriodForDate(Arg.Any<DateTime>())
+        .Returns(GetResult<Period>.CreateSuccess(
+          new Period(DateTime.Now, DateTime.Now)));
+
       var transaction = new TransactionDto
       {
         DebitAccountQualifiedName = debitAccountName,
@@ -115,6 +120,11 @@ namespace bhb2coreTests.Accounting
         .AddTransaction(default)
         .ReturnsForAnyArgs(ActionResult.CreateSuccess());
 
+      accountingDataAccess
+        .GetPeriodForDate(Arg.Any<DateTime>())
+        .Returns(GetResult<Period>.CreateSuccess(
+          new Period(DateTime.Now, DateTime.Now)));
+
       var transaction = new TransactionDto
       {
         DebitAccountQualifiedName = debitAccountName,
@@ -168,6 +178,11 @@ namespace bhb2coreTests.Accounting
       accountingDataAccess
         .AddTransaction(default)
         .ReturnsForAnyArgs(ActionResult.CreateSuccess());
+
+      accountingDataAccess
+        .GetPeriodForDate(Arg.Any<DateTime>())
+        .Returns(GetResult<Period>.CreateSuccess(
+          new Period(DateTime.Now, DateTime.Now)));
 
       var transaction = new TransactionDto
       {
@@ -264,6 +279,11 @@ namespace bhb2coreTests.Accounting
         .AddTransaction(default)
         .ReturnsForAnyArgs(ActionResult.CreateSuccess());
 
+      accountingDataAccess
+        .GetPeriodForDate(Arg.Any<DateTime>())
+        .Returns(GetResult<Period>.CreateSuccess(
+          new Period(DateTime.Now, DateTime.Now)));
+
       var transaction = new TransactionDto
       {
         DebitAccountQualifiedName = debitAccountName,
@@ -343,6 +363,11 @@ namespace bhb2coreTests.Accounting
       accountingDataAccess
         .AddTransaction(default)
         .ReturnsForAnyArgs(ActionResult.CreateSuccess());
+
+      accountingDataAccess
+        .GetPeriodForDate(Arg.Any<DateTime>())
+        .Returns(GetResult<Period>.CreateSuccess(
+          new Period(DateTime.Now, DateTime.Now)));
 
       var transaction = new TransactionDto
       {
@@ -614,6 +639,11 @@ namespace bhb2coreTests.Accounting
         .AddTransaction(default)
         .ReturnsForAnyArgs(ActionResult.CreateSuccess());
 
+      accountingDataAccess
+        .GetPeriodForDate(Arg.Any<DateTime>())
+        .Returns(GetResult<Period>.CreateSuccess(
+          new Period(DateTime.Now, DateTime.Now)));
+
       var transaction = new TransactionDto
       {
         DebitAccountQualifiedName = debitAccountName,
@@ -678,6 +708,16 @@ namespace bhb2coreTests.Accounting
         .DoesTransactionExist(idemptotencyId)
         .Returns(true);
 
+      accountingDataAccess
+        .GetPeriodForDate(Arg.Any<DateTime>())
+        .Returns(GetResult<Period>.CreateSuccess(
+          new Period(DateTime.Now, DateTime.Now)));
+
+      accountingDataAccess
+        .GetPeriodForDate(Arg.Any<DateTime>())
+        .Returns(GetResult<Period>.CreateSuccess(
+          new Period(DateTime.Now, DateTime.Now)));
+
       var transaction = new TransactionDto
       {
         IdempotencyId = idemptotencyId,
@@ -692,6 +732,40 @@ namespace bhb2coreTests.Accounting
       // Assert.
       Assert.IsFalse(result.IsSuccess);
       StringAssert.Contains("already exists", result.FailureMessage);
+    }
+
+    [Test]
+    public async Task Given_NewTransaction_When_NoPeriodExistsForDate_Then_ResultIsFailure()
+    {
+      // Arrange.
+      const string debitAccountName = "Funds";
+      const string creditAccountName = "Expense";
+      const decimal amount = 123.45m;
+
+      var idemptotencyId = Guid.NewGuid();
+
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      AccountingManagerFactory.ConfigureDataAccessWithBaseAccounts(accountingDataAccess);
+
+      accountingDataAccess
+        .AddTransaction(Arg.Any<Transaction>())
+        .Returns(ActionResult.CreateSuccess());
+
+      var transaction = new TransactionDto
+      {
+        IdempotencyId = idemptotencyId,
+        DebitAccountQualifiedName = debitAccountName,
+        CreditAccountQualifiedName = creditAccountName,
+        Amount = amount
+      };
+
+      // Act.
+      ProcessTransactionResult result = await testObject.ProcessTransaction(transaction);
+
+      // Assert.
+      Assert.IsFalse(result.IsSuccess);
+      StringAssert.Contains("period", result.FailureMessage);
     }
   }
 }

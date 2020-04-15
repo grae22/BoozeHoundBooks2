@@ -42,6 +42,23 @@ namespace bhb2core.Accounting.DataAccess.DataAccessors
         GetResult<Period>.CreateSuccess(period));
     }
 
+    public async Task<GetResult<Period>> GetPeriodForDate(DateTime date)
+    {
+      Period period = _periods
+        .FirstOrDefault(p =>
+          p.Start <= date &&
+          p.End >= date);
+
+      if (period == null)
+      {
+        return await Task.FromResult(
+          GetResult<Period>.CreateFailure($"No period found for date: {date:yyyy-MM-dd}"));
+      }
+
+      return await Task.FromResult(
+        GetResult<Period>.CreateSuccess(period));
+    }
+
     public string Serialise()
     {
       var serialisedData = new Dictionary<string, string>

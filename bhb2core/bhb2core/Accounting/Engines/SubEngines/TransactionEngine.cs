@@ -33,6 +33,17 @@ namespace bhb2core.Accounting.Engines.SubEngines
         return ActionResult.CreateFailure("Transaction already exists.");
       }
 
+      GetResult<Period> getPeriodResult = await _accountingDataAccess.GetPeriodForDate(transaction.Date);
+
+      if (!getPeriodResult.IsSuccess)
+      {
+        string message = $"Cannot add transaction due to period error: \"{getPeriodResult.FailureMessage}\".";
+
+        _logger.LogError(message);
+
+        return ActionResult.CreateFailure(message);
+      }
+
       return await _accountingDataAccess.AddTransaction(transaction);
     }
   }

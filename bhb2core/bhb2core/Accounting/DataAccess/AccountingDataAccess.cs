@@ -29,7 +29,7 @@ namespace bhb2core.Accounting.DataAccess
 
       _accountDataAccess = new AccountDataAccess(persistor);
       _transactionDataAccess = new TransactionDataAccess(persistor);
-      _periodDataAccess = new PeriodDataAccess();
+      _periodDataAccess = new PeriodDataAccess(persistor);
 
       _persistor.Register(_accountDataAccess as IPersistable);
       _persistor.Register(_transactionDataAccess as IPersistable);

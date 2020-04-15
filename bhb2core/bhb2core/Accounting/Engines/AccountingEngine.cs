@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Engines.Interfaces;
@@ -14,6 +15,7 @@ namespace bhb2core.Accounting.Engines
   {
     private readonly IAccountEngine _accountEngine;
     private readonly ITransactionEngine _transactionEngine;
+    private readonly IPeriodEngine _periodEngine;
 
     public AccountingEngine(
       in IAccountingDataAccess accountingDataAccess,
@@ -24,6 +26,10 @@ namespace bhb2core.Accounting.Engines
         logger);
 
       _transactionEngine = new TransactionEngine(
+        accountingDataAccess,
+        logger);
+
+      _periodEngine = new PeriodEngine(
         accountingDataAccess,
         logger);
     }
@@ -67,6 +73,18 @@ namespace bhb2core.Accounting.Engines
     public async Task<ActionResult> AddTransaction(Transaction transaction)
     {
       return await _transactionEngine.AddTransaction(transaction);
+    }
+
+    public bool ValidatePeriod(
+      in Period period,
+      out string message)
+    {
+      return _periodEngine.ValidatePeriod(period, out message);
+    }
+
+    public async Task<ActionResult> AddPeriod(Period period)
+    {
+      return await _periodEngine.AddPeriod(period);
     }
   }
 }

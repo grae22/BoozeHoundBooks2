@@ -19,6 +19,7 @@ namespace bhb2core.Accounting.Managers
     private readonly IAccountingDataAccess _accountingDataAccess;
     private readonly IAccountManager _accountManager;
     private readonly ITransactionManager _transactionManager;
+    private readonly IPeriodManager _periodManager;
     private readonly ILogger _logger;
 
     public AccountingManager(
@@ -38,6 +39,11 @@ namespace bhb2core.Accounting.Managers
 
       _transactionManager = new TransactionManager(
         accountingDataAccess,
+        accountingEngine,
+        mapper,
+        logger);
+
+      _periodManager = new PeriodManager(
         accountingEngine,
         mapper,
         logger);
@@ -143,6 +149,20 @@ namespace bhb2core.Accounting.Managers
         _logger.LogError("Unhandled exception.", ex);
 
         return GetResult<IEnumerable<TransactionDto>>.CreateFailure($"Unhandled error: \"{ex.Message}\".");
+      }
+    }
+
+    public async Task<ActionResult> AddPeriod(PeriodDto period)
+    {
+      try
+      {
+        return await _periodManager.AddPeriod(period);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError("Unhandled exception.", ex);
+
+        return ActionResult.CreateFailure($"Unhandled error: \"{ex.Message}\".");
       }
     }
   }

@@ -18,6 +18,7 @@ namespace bhb2core.Accounting.DataAccess
     private readonly ILogger _logger;
     private readonly IAccountDataAccess _accountDataAccess;
     private readonly ITransactionDataAccess _transactionDataAccess;
+    private readonly IPeriodDataAccess _periodDataAccess;
 
     public AccountingDataAccess(
       in IPersistor persistor,
@@ -28,9 +29,11 @@ namespace bhb2core.Accounting.DataAccess
 
       _accountDataAccess = new AccountDataAccess(persistor);
       _transactionDataAccess = new TransactionDataAccess(persistor);
+      _periodDataAccess = new PeriodDataAccess();
 
       _persistor.Register(_accountDataAccess as IPersistable);
       _persistor.Register(_transactionDataAccess as IPersistable);
+      _persistor.Register(_periodDataAccess as IPersistable);
     }
 
     public async Task<ActionResult> Initialise()
@@ -103,6 +106,16 @@ namespace bhb2core.Accounting.DataAccess
     public async Task<bool> DoesTransactionExist(Guid idempotencyId)
     {
       return await _transactionDataAccess.DoesTransactionExist(idempotencyId);
+    }
+
+    public async Task<ActionResult> AddPeriod(Period period)
+    {
+      return await _periodDataAccess.AddPeriod(period);
+    }
+
+    public async Task<GetResult<Period>> GetLastPeriod()
+    {
+      return await _periodDataAccess.GetLastPeriod();
     }
 
     private async Task<ActionResult> LoadData()

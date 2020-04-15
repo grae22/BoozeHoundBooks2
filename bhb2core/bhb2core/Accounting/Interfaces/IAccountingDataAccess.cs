@@ -7,7 +7,8 @@ namespace bhb2core.Accounting.Interfaces
 {
   internal interface IAccountingDataAccess :
     IAccountDataAccess,
-    ITransactionDataAccess
+    ITransactionDataAccess,
+    IPeriodDataAccess
   {
     public Task<ActionResult> Initialise();
   }

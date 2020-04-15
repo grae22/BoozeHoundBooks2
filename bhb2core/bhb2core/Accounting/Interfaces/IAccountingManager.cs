@@ -7,7 +7,8 @@ namespace bhb2core.Accounting.Interfaces
 {
   public interface IAccountingManager :
     IAccountManager,
-    ITransactionManager
+    ITransactionManager,
+    IPeriodManager
   {
     new Task<ActionResult> Initialise();
   }

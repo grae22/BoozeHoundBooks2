@@ -4,7 +4,8 @@ namespace bhb2core.Accounting.Interfaces
 {
   internal interface IAccountingEngine :
     IAccountEngine,
-    ITransactionEngine
+    ITransactionEngine,
+    IPeriodEngine
   {
   }
 }

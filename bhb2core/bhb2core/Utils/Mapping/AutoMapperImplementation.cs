@@ -57,6 +57,7 @@ namespace bhb2core.Utils.Mapping
           cfg.CreateMap<AccountType, AccountTypeDto>();
           cfg.CreateMap<AccountTypeDto, AccountType>();
           cfg.CreateMap<PeriodDto, Period>();
+          cfg.CreateMap<UpdatePeriodEndDateDto, UpdatePeriodEndDate>();
         });
     }
   }

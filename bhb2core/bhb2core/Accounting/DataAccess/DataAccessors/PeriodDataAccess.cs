@@ -65,6 +65,27 @@ namespace bhb2core.Accounting.DataAccess.DataAccessors
         GetResult<Period>.CreateSuccess(period));
     }
 
+    public async Task<ActionResult> UpdateLastPeriodEndDate(DateTime newEnd)
+    {
+      GetResult<Period> getLastPeriodResult = await GetLastPeriod();
+
+      if (!getLastPeriodResult.IsSuccess)
+      {
+        return ActionResult.CreateFailure("Failed to retrieve last period");
+      }
+
+      Period oldLastPeriod = getLastPeriodResult.Result;
+
+      var newLastPeriod = new Period(
+        oldLastPeriod.Start,
+        newEnd);
+
+      _periods.Remove(oldLastPeriod);
+      _periods.Add(newLastPeriod);
+
+      return await _persistor.Persist();
+    }
+
     public string Serialise()
     {
       var serialisedData = new Dictionary<string, string>

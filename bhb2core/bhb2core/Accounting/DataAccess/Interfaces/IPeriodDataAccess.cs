@@ -13,5 +13,7 @@ namespace bhb2core.Accounting.DataAccess.Interfaces
     Task<GetResult<Period>> GetLastPeriod();
 
     Task<GetResult<Period>> GetPeriodForDate(DateTime date);
+
+    Task<ActionResult> UpdateLastPeriodEndDate(DateTime newEnd);
   }
 }

@@ -12,5 +12,7 @@ namespace bhb2core.Accounting.Engines.Interfaces
       out string message);
 
     Task<ActionResult> AddPeriod(Period period);
+
+    Task<ActionResult> UpdatePeriodEndDate(UpdatePeriodEndDate updatePeriodEndDate);
   }
 }

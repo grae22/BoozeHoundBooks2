@@ -8,5 +8,7 @@ namespace bhb2core.Accounting.Managers.Interfaces
   public interface IPeriodManager
   {
     Task<ActionResult> AddPeriod(PeriodDto period);
+
+    Task<ActionResult> UpdatePeriodEndDate(UpdatePeriodEndDateDto updatePeriodEndDate);
   }
 }

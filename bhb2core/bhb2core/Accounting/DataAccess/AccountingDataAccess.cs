@@ -123,6 +123,11 @@ namespace bhb2core.Accounting.DataAccess
       return await _periodDataAccess.GetPeriodForDate(date);
     }
 
+    public async Task<ActionResult> UpdateLastPeriodEndDate(DateTime newEnd)
+    {
+      return await _periodDataAccess.UpdateLastPeriodEndDate(newEnd);
+    }
+
     private async Task<ActionResult> LoadData()
     {
       return await _persistor.Restore();

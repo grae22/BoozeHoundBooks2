@@ -165,5 +165,20 @@ namespace bhb2core.Accounting.Managers
         return ActionResult.CreateFailure($"Unhandled error: \"{ex.Message}\".");
       }
     }
+
+    public async Task<ActionResult> UpdatePeriodEndDate(UpdatePeriodEndDateDto updatePeriodEndDate)
+    {
+      try
+      {
+        return await _periodManager.UpdatePeriodEndDate(updatePeriodEndDate);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError("Unhandled exception.", ex);
+
+        return ActionResult.CreateFailure($"Unhandled error: \"{ex.Message}\".");
+      }
+
+    }
   }
 }

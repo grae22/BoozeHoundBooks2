@@ -44,5 +44,15 @@ namespace bhb2core.Accounting.Managers.SubManagers
 
       return await _accountingEngine.AddPeriod(period);
     }
+
+    public async Task<ActionResult> UpdatePeriodEndDate(UpdatePeriodEndDateDto updatePeriodEndDateDto)
+    {
+      _logger.LogInformation($"Call received with: {updatePeriodEndDateDto}");
+
+      UpdatePeriodEndDate updatePeriodEndDate =
+        _mapper.Map<UpdatePeriodEndDateDto, UpdatePeriodEndDate>(updatePeriodEndDateDto);
+
+      return await _accountingEngine.UpdatePeriodEndDate(updatePeriodEndDate);
+    }
   }
 }

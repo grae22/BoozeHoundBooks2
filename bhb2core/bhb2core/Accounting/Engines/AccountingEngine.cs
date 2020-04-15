@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using bhb2core.Accounting.DataAccess.ActionResults;
 using bhb2core.Accounting.Engines.Interfaces;
@@ -85,6 +84,11 @@ namespace bhb2core.Accounting.Engines
     public async Task<ActionResult> AddPeriod(Period period)
     {
       return await _periodEngine.AddPeriod(period);
+    }
+
+    public async Task<ActionResult> UpdatePeriodEndDate(UpdatePeriodEndDate updatePeriodEndDate)
+    {
+      return await _periodEngine.UpdatePeriodEndDate(updatePeriodEndDate);
     }
   }
 }

@@ -47,17 +47,12 @@ namespace bhb2core.Accounting.Engines.SubEngines
 
       if (!getLastPeriodResult.IsSuccess)
       {
-        return ActionResult.CreateFailure(getLastPeriodResult.FailureMessage);
-      }
-
-      Period lastPeriod = getLastPeriodResult.Result;
-
-      if (lastPeriod == null)
-      {
-        _logger.LogInformation("No periods found, adding period as first period.");
+        _logger.LogInformation("No periods found, adding period as the first period.");
 
         return await _accountingDataAccess.AddPeriod(period);
       }
+
+      Period lastPeriod = getLastPeriodResult.Result;
 
       DateTime expectedNewPeriodStartDate = lastPeriod.End.AddDays(1);
 

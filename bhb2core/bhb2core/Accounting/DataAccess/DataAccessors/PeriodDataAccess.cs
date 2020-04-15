@@ -34,6 +34,12 @@ namespace bhb2core.Accounting.DataAccess.DataAccessors
 
     public async Task<GetResult<Period>> GetLastPeriod()
     {
+      if (_periods.Count == 0)
+      {
+        return await Task.FromResult(
+          GetResult<Period>.CreateFailure("No periods found"));
+      }
+
       Period period = _periods
         .OrderBy(p => p.Start)
         .LastOrDefault();

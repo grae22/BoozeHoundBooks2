@@ -26,7 +26,7 @@ namespace bhb2coreTests.Accounting
 
       accountingDataAccess
         .GetLastPeriod()
-        .Returns(GetResult<Period>.CreateSuccess(null));
+        .Returns(GetResult<Period>.CreateFailure("No periods found"));
 
       accountingDataAccess
         .AddPeriod(Arg.Any<Period>())

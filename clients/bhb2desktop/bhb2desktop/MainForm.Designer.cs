@@ -15,6 +15,7 @@ namespace bhb2desktop
     private ToolStripMenuItem _addAccountMenuItem;
     private ToolStripMenuItem _periodsMenuItem;
     private ToolStripMenuItem _changeLastPeriodEndDateMenuItem;
+    private ToolStripMenuItem _addPeriodMenuItem;
     private ToolStripMenuItem _newTransactionMenuItem;
     private Panel _mainPanel;
     private SplitContainer _mainSplitContainer;
@@ -73,6 +74,13 @@ namespace bhb2desktop
         Text = "Periods"
       };
 
+      _addPeriodMenuItem = new ToolStripMenuItem
+      {
+        Text = "Add period"
+      };
+
+      _addPeriodMenuItem.Click += AddPeriod_OnClick;
+
       _changeLastPeriodEndDateMenuItem = new ToolStripMenuItem
       {
         Text = "Change last period end date"
@@ -80,6 +88,7 @@ namespace bhb2desktop
 
       _changeLastPeriodEndDateMenuItem.Click += ChangeLastPeriodEndDate_OnClick;
 
+      _periodsMenuItem.DropDownItems.Add(_addPeriodMenuItem);
       _periodsMenuItem.DropDownItems.Add(_changeLastPeriodEndDateMenuItem);
 
       _newTransactionMenuItem = new ToolStripMenuItem

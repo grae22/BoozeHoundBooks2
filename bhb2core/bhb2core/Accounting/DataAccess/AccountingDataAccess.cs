@@ -113,6 +113,11 @@ namespace bhb2core.Accounting.DataAccess
       return await _periodDataAccess.AddPeriod(period);
     }
 
+    public async Task<GetResult<IEnumerable<Period>>> GetAllPeriods()
+    {
+      return await _periodDataAccess.GetAllPeriods();
+    }
+
     public async Task<GetResult<Period>> GetLastPeriod()
     {
       return await _periodDataAccess.GetLastPeriod();

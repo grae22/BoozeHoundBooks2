@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using bhb2core.Accounting.Dto;
 using bhb2core.Common.ActionResults;
@@ -11,6 +12,8 @@ namespace bhb2core.Accounting.Managers.Interfaces
 
     Task<ActionResult> AddPeriod(PeriodDto period);
 
-    Task<ActionResult> UpdatePeriodEndDate(UpdatePeriodEndDateDto updatePeriodEndDate);
+    Task<GetResult<IEnumerable<PeriodDto>>> GetAllPeriods();
+
+    Task<ActionResult> UpdateLastPeriodEndDate(UpdateLastPeriodEndDateDto updatePeriodEndDate);
   }
 }

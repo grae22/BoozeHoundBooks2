@@ -2,9 +2,9 @@
 {
   public struct GetResult<T>
   {
-    public static GetResult<T> CreateSuccess(in T account)
+    public static GetResult<T> CreateSuccess(in T result)
     {
-      return new GetResult<T>(true, null, account);
+      return new GetResult<T>(true, null, result);
     }
 
     public static GetResult<T> CreateFailure(in string failureMessage)

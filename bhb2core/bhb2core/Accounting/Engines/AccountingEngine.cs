@@ -91,9 +91,9 @@ namespace bhb2core.Accounting.Engines
       return await _periodEngine.AddPeriod(period);
     }
 
-    public async Task<ActionResult> UpdatePeriodEndDate(UpdatePeriodEndDate updatePeriodEndDate)
+    public async Task<ActionResult> UpdateLastPeriodEndDate(UpdateLastPeriodEndDate updatePeriodEndDate)
     {
-      return await _periodEngine.UpdatePeriodEndDate(updatePeriodEndDate);
+      return await _periodEngine.UpdateLastPeriodEndDate(updatePeriodEndDate);
     }
   }
 }

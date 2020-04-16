@@ -44,6 +44,7 @@ namespace bhb2core.Accounting.Managers
         logger);
 
       _periodManager = new PeriodManager(
+        accountingDataAccess,
         accountingEngine,
         mapper,
         logger);
@@ -177,11 +178,25 @@ namespace bhb2core.Accounting.Managers
       }
     }
 
-    public async Task<ActionResult> UpdatePeriodEndDate(UpdatePeriodEndDateDto updatePeriodEndDate)
+    public async Task<GetResult<IEnumerable<PeriodDto>>> GetAllPeriods()
     {
       try
       {
-        return await _periodManager.UpdatePeriodEndDate(updatePeriodEndDate);
+        return await _periodManager.GetAllPeriods();
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError("Unhandled exception.", ex);
+
+        return GetResult<IEnumerable<PeriodDto>>.CreateFailure($"Unhandled error: \"{ex.Message}\".");
+      }
+    }
+
+    public async Task<ActionResult> UpdateLastPeriodEndDate(UpdateLastPeriodEndDateDto updatePeriodEndDate)
+    {
+      try
+      {
+        return await _periodManager.UpdateLastPeriodEndDate(updatePeriodEndDate);
       }
       catch (Exception ex)
       {
@@ -189,7 +204,6 @@ namespace bhb2core.Accounting.Managers
 
         return ActionResult.CreateFailure($"Unhandled error: \"{ex.Message}\".");
       }
-
     }
   }
 }

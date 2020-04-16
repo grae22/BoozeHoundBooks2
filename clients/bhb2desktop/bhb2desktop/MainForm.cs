@@ -193,6 +193,13 @@ namespace bhb2desktop
       });
     }
 
+    private void ChangeLastPeriodEndDate_OnClick(object sender, EventArgs args)
+    {
+      using var dlg = new ChangeLastPeriodEndDateDialog(_accountingManager);
+
+      dlg.ShowDialog(this);
+    }
+
     private void NewTransaction_OnClick(object sender, EventArgs args)
     {
       using var dlg = new TransactionPropertiesDialog(_accountingManager);

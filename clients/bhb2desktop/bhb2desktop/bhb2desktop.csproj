@@ -10,4 +10,10 @@
     <PackageReference Include="bhb2core" Version="0.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="ChangeLastPeriodEndDateDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>

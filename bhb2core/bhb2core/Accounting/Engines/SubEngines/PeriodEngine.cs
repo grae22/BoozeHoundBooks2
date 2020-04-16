@@ -97,7 +97,7 @@ namespace bhb2core.Accounting.Engines.SubEngines
       return await _accountingDataAccess.AddPeriod(period);
     }
 
-    public async Task<ActionResult> UpdatePeriodEndDate(UpdatePeriodEndDate updatePeriodEndDate)
+    public async Task<ActionResult> UpdateLastPeriodEndDate(UpdateLastPeriodEndDate updatePeriodEndDate)
     {
       _logger.LogInformation($"Attempting to update period end date: {updatePeriodEndDate}");
 
@@ -113,16 +113,6 @@ namespace bhb2core.Accounting.Engines.SubEngines
       }
 
       Period lastPeriod = getLastPeriodResult.Result;
-
-      if (lastPeriod.Start > updatePeriodEndDate.DateInPeriod ||
-          lastPeriod.End < updatePeriodEndDate.DateInPeriod)
-      {
-        var message = "Update failed, only the last period's end-date can be changed.";
-
-        _logger.LogError(message);
-
-        return ActionResult.CreateFailure(message);
-      }
 
       if (lastPeriod.Start > updatePeriodEndDate.NewEnd)
       {

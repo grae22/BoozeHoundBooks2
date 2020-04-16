@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using bhb2core.Accounting.Dto;
@@ -128,81 +130,17 @@ namespace bhb2coreTests.Accounting
         .GetLastPeriod()
         .Returns(GetResult<Period>.CreateSuccess(period));
 
-      var updateEndDate = new UpdatePeriodEndDateDto(
-        period.Start,
-        period.End.AddDays(1));
+      var updateEndDate = new UpdateLastPeriodEndDateDto(period.End.AddDays(1));
 
       accountingDataAccess
         .UpdateLastPeriodEndDate(updateEndDate.NewEnd)
         .Returns(ActionResult.CreateSuccess());
 
       // Act.
-      ActionResult result = await testObject.UpdatePeriodEndDate(updateEndDate);
+      ActionResult result = await testObject.UpdateLastPeriodEndDate(updateEndDate);
 
       // Assert.
       Assert.IsTrue(result.IsSuccess);
-    }
-
-    [Test]
-    public async Task Given_ExistingPeriodWhichIsLastPeriod_When_EndDateUpdatedWithDateNotInLastPeriod_Then_ResultIsFailure()
-    {
-      // Arrange.
-      var period = new Period(
-        new DateTime(2020, 1, 1),
-        new DateTime(2020, 1, 31));
-
-      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
-
-      accountingDataAccess
-        .GetLastPeriod()
-        .Returns(GetResult<Period>.CreateSuccess(period));
-
-      var updateEndDate = new UpdatePeriodEndDateDto(
-        period.Start.AddDays(-1),
-        period.End.AddDays(1));
-
-      accountingDataAccess
-        .UpdateLastPeriodEndDate(updateEndDate.NewEnd)
-        .Returns(ActionResult.CreateSuccess());
-
-      // Act.
-      ActionResult result = await testObject.UpdatePeriodEndDate(updateEndDate);
-
-      // Assert.
-      Assert.IsFalse(result.IsSuccess);
-    }
-
-    [Test]
-    public async Task Given_ExistingPeriodWhichIsNotLastPeriod_When_EndDateUpdated_Then_ResultIsFailure()
-    {
-      // Arrange.
-      var period = new Period(
-        new DateTime(2020, 1, 1),
-        new DateTime(2020, 1, 31));
-
-      var lastPeriod = new Period(
-        new DateTime(2020, 2, 1),
-        new DateTime(2020, 2, 29));
-
-      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
-
-      accountingDataAccess
-        .GetLastPeriod()
-        .Returns(GetResult<Period>.CreateSuccess(lastPeriod));
-
-      var updateEndDate = new UpdatePeriodEndDateDto(
-        period.Start,
-        period.End.AddDays(1));
-
-      accountingDataAccess
-        .UpdateLastPeriodEndDate(updateEndDate.NewEnd)
-        .Returns(ActionResult.CreateSuccess());
-
-      // Act.
-      ActionResult result = await testObject.UpdatePeriodEndDate(updateEndDate);
-
-      // Assert.
-      Assert.IsFalse(result.IsSuccess);
     }
 
     [Test]
@@ -219,19 +157,66 @@ namespace bhb2coreTests.Accounting
         .GetLastPeriod()
         .Returns(GetResult<Period>.CreateSuccess(lastPeriod));
 
-      var updateEndDate = new UpdatePeriodEndDateDto(
-        lastPeriod.Start,
-        lastPeriod.Start.AddDays(-1));
+      var updateEndDate = new UpdateLastPeriodEndDateDto(lastPeriod.Start.AddDays(-1));
 
       accountingDataAccess
         .UpdateLastPeriodEndDate(updateEndDate.NewEnd)
         .Returns(ActionResult.CreateSuccess());
 
       // Act.
-      ActionResult result = await testObject.UpdatePeriodEndDate(updateEndDate);
+      ActionResult result = await testObject.UpdateLastPeriodEndDate(updateEndDate);
 
       // Assert.
       Assert.IsFalse(result.IsSuccess);
+    }
+
+    [Test]
+    public async Task Given_ExistingPeriods_When_Retrieved_Then_AllPeriodsArePresent()
+    {
+      // Arrange.
+      var period1 = new Period(
+        new DateTime(2020, 2, 1),
+        new DateTime(2020, 2, 29));
+
+      var period2 = new Period(
+        new DateTime(2020, 3, 1),
+        new DateTime(2020, 3, 31));
+
+      AccountingManager testObject = AccountingManagerFactory.Create(out IAccountingDataAccess accountingDataAccess);
+
+      accountingDataAccess
+        .GetLastPeriod()
+        .Returns(GetResult<Period>.CreateSuccess(period1));
+
+      accountingDataAccess
+        .GetAllPeriods()
+        .Returns(GetResult<IEnumerable<Period>>.CreateSuccess(new[]
+        {
+          period1,
+          period2
+        }));
+
+      // Act.
+      GetResult<IEnumerable<PeriodDto>> result = await testObject.GetAllPeriods();
+
+      // Assert.
+      Assert.IsTrue(result.IsSuccess);
+
+      IEnumerable<PeriodDto> periods = result.Result;
+
+      Assert.AreEqual(2, periods.Count());
+
+      Assert.IsNotNull(
+        periods
+          .SingleOrDefault(p =>
+            p.Start == period1.Start &&
+            p.End == period1.End));
+
+      Assert.IsNotNull(
+        periods
+          .SingleOrDefault(p =>
+            p.Start == period2.Start &&
+            p.End == period2.End));
     }
   }
 }

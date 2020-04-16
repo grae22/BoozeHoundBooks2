@@ -15,6 +15,6 @@ namespace bhb2core.Accounting.Engines.Interfaces
 
     Task<ActionResult> AddPeriod(Period period);
 
-    Task<ActionResult> UpdatePeriodEndDate(UpdatePeriodEndDate updatePeriodEndDate);
+    Task<ActionResult> UpdateLastPeriodEndDate(UpdateLastPeriodEndDate updatePeriodEndDate);
   }
 }

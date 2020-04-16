@@ -32,6 +32,12 @@ namespace bhb2core.Accounting.DataAccess.DataAccessors
       return await _persistor.Persist();
     }
 
+    public async Task<GetResult<IEnumerable<Period>>> GetAllPeriods()
+    {
+      return await Task.FromResult(
+        GetResult<IEnumerable<Period>>.CreateSuccess(_periods));
+    }
+
     public async Task<GetResult<Period>> GetLastPeriod()
     {
       if (_periods.Count == 0)
